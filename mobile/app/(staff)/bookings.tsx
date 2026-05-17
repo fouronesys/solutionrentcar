@@ -20,6 +20,8 @@ export default function StaffBookingsList() {
   const [err, setErr] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<number | "">("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
   const load = useCallback(async () => {
     setErr(null);
@@ -27,6 +29,8 @@ export default function StaffBookingsList() {
       const r = await api.get<{ bookings: Booking[] }>("/bookings", {
         q: q || undefined,
         status: status === "" ? undefined : status,
+        from: from || undefined,
+        to: to || undefined,
         limit: 100,
       });
       setItems(r.bookings ?? []);
@@ -36,7 +40,7 @@ export default function StaffBookingsList() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [q, status]);
+  }, [q, status, from, to]);
 
   useEffect(() => { load(); }, [load]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -54,6 +58,28 @@ export default function StaffBookingsList() {
           returnKeyType="search"
           onSubmitEditing={() => load()}
         />
+        <View style={{ flexDirection: "row" }}>
+          <View style={{ flex: 1, marginRight: 6 }}>
+            <Input
+              placeholder={`${t("common.from")} (YYYY-MM-DD)`}
+              value={from}
+              onChangeText={setFrom}
+              autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={() => load()}
+            />
+          </View>
+          <View style={{ flex: 1, marginLeft: 6 }}>
+            <Input
+              placeholder={`${t("common.to")} (YYYY-MM-DD)`}
+              value={to}
+              onChangeText={setTo}
+              autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={() => load()}
+            />
+          </View>
+        </View>
         <View style={styles.filters}>
           {[
             { v: "", label: "Todas" },

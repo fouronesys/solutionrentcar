@@ -33,9 +33,21 @@ export async function getTokens(): Promise<Tokens | null> {
     return null;
   }
 }
+const authResetListeners = new Set<() => void>();
+export function onAuthReset(cb: () => void): () => void {
+  authResetListeners.add(cb);
+  return () => authResetListeners.delete(cb);
+}
+function emitAuthReset() {
+  authResetListeners.forEach((cb) => {
+    try { cb(); } catch { /* ignore */ }
+  });
+}
+
 export async function clearTokens() {
   await delItem(TOKEN_KEY);
   await delItem(PROFILE_KEY);
+  emitAuthReset();
 }
 
 export async function saveProfile(role: Role, profile: Profile) {

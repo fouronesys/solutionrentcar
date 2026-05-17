@@ -4,6 +4,7 @@ import {
   clearTokens,
   getProfile,
   getTokens,
+  onAuthReset,
   saveProfile,
   saveTokens,
 } from "@/auth/storage";
@@ -39,6 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setBootstrapped(true);
     })();
+  }, []);
+
+  useEffect(() => {
+    // When the API layer wipes tokens (e.g. refresh failure), drop in-memory
+    // auth so the route gate immediately bounces the user back to "/".
+    return onAuthReset(() => {
+      setRole(null);
+      setUserState(null);
+    });
   }, []);
 
   const finalize = useCallback(async (res: LoginResult) => {

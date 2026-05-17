@@ -41,6 +41,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       if (!mounted || !token) return;
       tokenRef.current = token;
       await registerTokenWithServer(token);
+
+      // Handle a notification tapped while the app was fully terminated:
+      // the tap that launched the app is available here exactly once.
+      const last = await Notifications.getLastNotificationResponseAsync();
+      if (last && mounted) {
+        const data = last.notification.request.content.data as Record<string, unknown> | undefined;
+        handleTap(data, role);
+      }
     })();
 
     const recv = Notifications.addNotificationReceivedListener(() => {
