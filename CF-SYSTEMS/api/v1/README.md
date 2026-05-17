@@ -16,6 +16,25 @@ Authentication uses **JWT Bearer tokens** (HS256). Pass the token in
 The API is self-bootstrapping: required tables (`device_token`,
 `refresh_token`, and the notification tables) are created on first hit.
 
+### `device_token` schema (created by ApiSchema::ensure)
+
+| column         | type             | notes                                        |
+|----------------|------------------|----------------------------------------------|
+| id             | BIGINT PK        | auto-increment                               |
+| recipient_type | ENUM('user','client') | who owns the token                      |
+| recipient_id   | INT              | id in the `user` or `person` table           |
+| token          | VARCHAR(255)     | Expo / FCM / APNs token (unique)             |
+| platform       | VARCHAR(20)      | `ios`, `android`, etc.                       |
+| app_version    | VARCHAR(40)      | optional, sent by the client                 |
+| device_info    | VARCHAR(255)     | optional, free-form                          |
+| created_at     | DATETIME         | first registration                           |
+| updated_at     | DATETIME         | **acts as `last_seen`** — refreshed on every `POST /push/register` |
+
+Note: earlier drafts of the task spec called this column `last_seen`.
+The implementation uses MySQL's `ON UPDATE CURRENT_TIMESTAMP` on
+`updated_at` to provide the same semantics — every re-registration of
+the same token bumps `updated_at`.
+
 ---
 
 ## Auth
@@ -262,8 +281,9 @@ curl -X POST -H "Content-Type: application/json" \
 
 - `JWT_SECRET` — environment variable for signing tokens (must be ≥32
   chars). If unset, a random 64-char secret is generated on first hit and
-  stored at `CF-SYSTEMS/storage/.jwt_secret` (mode 0600, git-ignored).
-  Delete that file to rotate all sessions.
+  stored at `CF-SYSTEMS/storage/runtime/jwt_secret` (mode 0600,
+  git-ignored, and HTTP-blocked via an `.htaccess` deny rule in the
+  `runtime/` directory). Delete that file to rotate all sessions.
 - Push delivery uses the **Expo Push API** (`https://exp.host/--/api/v2/push/send`)
   with no auth required for standard Expo tokens. Tokens that respond with
   `DeviceNotRegistered` are removed automatically.
