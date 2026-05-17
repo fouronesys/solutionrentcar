@@ -440,7 +440,7 @@ body{
             <div class="car-img" style="background-image:url('<?php echo $image; ?>');">
 
               <div class="car-status">
-                Available
+                <?php echo __('available'); ?>
               </div>
 
             </div>
@@ -482,7 +482,7 @@ body{
 
                     <div class="car-price">
                       RD$ <?php echo number_format(floatval($price), 2); ?>
-                      <span>Per Day</span>
+                      <span><?php echo __('per_day2'); ?></span>
                     </div>
 
                   </div>
@@ -492,7 +492,7 @@ body{
                     <div class="car-date-field">
 
                       <label>
-                        Desde
+                        <?php echo __('from_label'); ?>
                       </label>
 
                       <input 
@@ -507,7 +507,7 @@ body{
                     <div class="car-date-field">
 
                       <label>
-                        Hasta
+                        <?php echo __('to_label'); ?>
                       </label>
 
                       <input 
@@ -525,7 +525,7 @@ body{
                     class="validate-date-btn" 
                     data-car="<?php echo $car_id; ?>"
                   >
-                    Validar Disponibilidad
+                    <?php echo __('check_avail'); ?>
                   </button>
 
                   <div 
@@ -538,7 +538,7 @@ body{
                     id="reserve-btn-<?php echo $car_id; ?>" 
                     class="reserve-final-btn"
                   >
-                    Reservar Ahora
+                    <?php echo __('book_now'); ?>
                   </a>
 
                 </div>
@@ -562,11 +562,11 @@ body{
           <i class="fa fa-car-side"></i>
 
           <h3>
-            No cars available
+            <?php echo __('no_cars_avail'); ?>
           </h3>
 
           <p>
-            There are no rental vehicles available at this moment.
+            <?php echo __('no_cars_msg'); ?>
           </p>
 
         </div>
@@ -639,13 +639,13 @@ document.addEventListener("DOMContentLoaded", function(){
             reserveBtn.href = "#";
 
             if(from === "" || to === ""){
-                msgBox.innerHTML = "Seleccione fecha desde y fecha hasta.";
+                msgBox.innerHTML = "<?php echo addslashes(__('js_select_dates')); ?>";
                 msgBox.style.color = "red";
                 return;
             }
 
             if(to < from){
-                msgBox.innerHTML = "La fecha final no puede ser menor que la inicial.";
+                msgBox.innerHTML = "<?php echo addslashes(__('js_date_order')); ?>";
                 msgBox.style.color = "red";
                 return;
             }
@@ -656,12 +656,12 @@ document.addEventListener("DOMContentLoaded", function(){
                 toInput.value = minTo;
                 toInput.min = minTo;
 
-                msgBox.innerHTML = "La reserva mínima es de 3 días. La fecha hasta debe ser mínimo: " + minTo;
+                msgBox.innerHTML = "<?php echo addslashes(__('js_min_days')); ?> " + minTo;
                 msgBox.style.color = "red";
                 return;
             }
 
-            msgBox.innerHTML = "Validando disponibilidad...";
+            msgBox.innerHTML = "...";
             msgBox.style.color = "#111827";
 
             let formData = new FormData();

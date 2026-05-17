@@ -49,8 +49,7 @@ $version = "1.0";
           </div>
 
           <p class="footer-text">
-            Premium car rental service designed for comfort, luxury and confidence.
-            We provide modern vehicles, professional support and a smooth rental experience for every journey.
+            <?php echo __('footer_text'); ?>
           </p>
 
           <div class="footer-social">
@@ -76,15 +75,15 @@ $version = "1.0";
         <div class="col-lg-2 col-md-6 mb-5 mb-lg-0">
 
           <h4 class="footer-title">
-            Company
+            <?php echo __('footer_company'); ?>
           </h4>
 
           <ul class="footer-links">
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>">Home</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php">Cars</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>about.php">About Us</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>services.php">Services</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>contact.php">Contact</a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>"><?php echo __('footer_home'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php"><?php echo __('footer_cars'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>about.php"><?php echo __('footer_about'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>services.php"><?php echo __('footer_services'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>contact.php"><?php echo __('footer_contact'); ?></a></li>
           </ul>
 
         </div>
@@ -92,15 +91,15 @@ $version = "1.0";
         <div class="col-lg-2 col-md-6 mb-5 mb-lg-0">
 
           <h4 class="footer-title">
-            Services
+            <?php echo __('footer_services'); ?>
           </h4>
 
           <ul class="footer-links">
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php">Luxury Rental</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>services.php">Airport Pickup</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php">Daily Rental</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php">Weekly Rental</a></li>
-            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php">Long Term Rental</a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php"><?php echo __('footer_luxury'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>services.php"><?php echo __('footer_airport'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php"><?php echo __('footer_daily'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php"><?php echo __('footer_weekly'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>cars.php"><?php echo __('footer_longterm'); ?></a></li>
           </ul>
 
         </div>
@@ -108,7 +107,7 @@ $version = "1.0";
         <div class="col-lg-3">
 
           <h4 class="footer-title">
-            Contact
+            <?php echo __('footer_contact'); ?>
           </h4>
 
           <ul class="footer-contact">
@@ -150,7 +149,7 @@ $version = "1.0";
     <div class="rent-footer-bottom">
 
       <p>
-        © <?php echo date("Y"); ?> <?php echo $footerTitleSafe; ?>. All rights reserved.
+        © <?php echo date("Y"); ?> <?php echo $footerTitleSafe; ?>. <?php echo __('all_rights'); ?>
       </p>
 
     </div>

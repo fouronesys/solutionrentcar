@@ -181,10 +181,10 @@ body{
 
 <section class="about-hero">
   <div class="container">
-    <span class="section-mini">About Us</span>
+    <span class="section-mini"><?php echo __('about_mini'); ?></span>
     <h1><?php echo isset($title) ? htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8') : 'Rent Car'; ?></h1>
     <p>
-      We provide modern vehicles, professional service and a smooth rental experience for every client.
+      <?php echo $LANG === 'es' ? 'Ofrecemos vehículos modernos, servicio profesional y una experiencia de alquiler fluida para cada cliente.' : 'We provide modern vehicles, professional service and a smooth rental experience for every client.'; ?>
     </p>
   </div>
 </section>
@@ -211,24 +211,22 @@ body{
 
       <div class="col-lg-6 pl-lg-5">
 
-        <span class="section-mini">Who We Are</span>
+        <span class="section-mini"><?php echo __('about_who'); ?></span>
 
         <h2 class="section-title">
-          Your Trusted Rent Car Company
+          <?php echo __('about_title'); ?>
         </h2>
 
         <p class="about-text">
-          At <?php echo $title; ?>, we believe renting a vehicle should be simple, elegant and reliable.
-          Our goal is to offer every client a premium experience from the moment they choose a vehicle until the end of their trip.
+          <?php echo str_replace('[nombre]', $title, __('about_p1')); ?>
         </p>
 
         <p class="about-text">
-          Whether you need a car for business, vacation, personal use or a special occasion, we provide comfortable,
-          clean and well-maintained vehicles ready for the road.
+          <?php echo __('about_p2'); ?>
         </p>
 
         <p class="about-text">
-          We focus on quality service, transparency and customer satisfaction, making every rental experience smooth and professional.
+          <?php echo __('about_p3'); ?>
         </p>
 
       </div>
@@ -246,30 +244,24 @@ body{
       <div class="col-lg-4 mb-4">
         <div class="about-card">
           <i class="fa fa-car-side"></i>
-          <h3>Premium Fleet</h3>
-          <p>
-            Modern vehicles selected to offer comfort, performance and style for every type of trip.
-          </p>
+          <h3><?php echo __('fleet_title'); ?></h3>
+          <p><?php echo __('fleet_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 mb-4">
         <div class="about-card">
           <i class="fa fa-shield-alt"></i>
-          <h3>Safe & Reliable</h3>
-          <p>
-            Vehicles inspected and maintained to provide confidence, safety and peace of mind.
-          </p>
+          <h3><?php echo __('safe_title'); ?></h3>
+          <p><?php echo __('safe_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 mb-4">
         <div class="about-card">
           <i class="fa fa-headset"></i>
-          <h3>Professional Support</h3>
-          <p>
-            Friendly assistance and clear communication before, during and after your rental.
-          </p>
+          <h3><?php echo __('support_title'); ?></h3>
+          <p><?php echo __('support_desc'); ?></p>
         </div>
       </div>
 
@@ -288,28 +280,28 @@ body{
         <div class="col-md-3 col-6 mb-4 mb-md-0">
           <div class="stat-box">
             <h2>100%</h2>
-            <p>Service Quality</p>
+            <p><?php echo __('quality'); ?></p>
           </div>
         </div>
 
         <div class="col-md-3 col-6 mb-4 mb-md-0">
           <div class="stat-box">
             <h2>24/7</h2>
-            <p>Support</p>
+            <p><?php echo __('support'); ?></p>
           </div>
         </div>
 
         <div class="col-md-3 col-6">
           <div class="stat-box">
-            <h2>Clean</h2>
-            <p>Vehicles</p>
+            <h2><?php echo __('clean'); ?></h2>
+            <p><?php echo __('vehicles'); ?></p>
           </div>
         </div>
 
         <div class="col-md-3 col-6">
           <div class="stat-box">
-            <h2>Fast</h2>
-            <p>Booking</p>
+            <h2><?php echo __('fast'); ?></h2>
+            <p><?php echo __('booking_stat'); ?></p>
           </div>
         </div>
 
@@ -325,14 +317,12 @@ body{
 
     <div class="cta-box">
 
-      <h2>Ready To Book Your Car?</h2>
+      <h2><?php echo __('cta_title'); ?></h2>
 
-      <p>
-        Choose your vehicle today and enjoy a premium rental experience with comfort, confidence and professional service.
-      </p>
+      <p><?php echo __('cta_sub'); ?></p>
 
       <a href="<?php echo $base_url_safe; ?>cars.php" class="cta-btn">
-        View Our Cars
+        <?php echo __('view_cars'); ?>
       </a>
 
     </div>

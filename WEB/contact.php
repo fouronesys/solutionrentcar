@@ -124,11 +124,9 @@ textarea.form-control{
 
     <div class="container">
 
-        <h1 style="color:white;">Contact Us</h1>
+        <h1 style="color:white;"><?php echo __('contact_title'); ?></h1>
 
-        <p>
-            We are here to help you with your next rental experience.
-        </p>
+        <p><?php echo __('contact_sub'); ?></p>
 
     </div>
 
@@ -145,11 +143,11 @@ textarea.form-control{
 <div class="contact-card">
 
 <h2 class="contact-title">
-Send Us A Message
+<?php echo __('send_message'); ?>
 </h2>
 
 <p class="contact-subtitle">
-Fill out the form below and our team will contact you shortly.
+<?php echo __('send_sub'); ?>
 </p>
 
 <form method="post">
@@ -157,28 +155,28 @@ Fill out the form below and our team will contact you shortly.
 <div class="row">
 
 <div class="col-md-6 mb-4">
-<input type="text" class="form-control" placeholder="Full Name" required>
+<input type="text" class="form-control" placeholder="<?php echo __('full_name'); ?>" required>
 </div>
 
 <div class="col-md-6 mb-4">
-<input type="email" class="form-control" placeholder="Email Address" required>
+<input type="email" class="form-control" placeholder="<?php echo __('email_addr'); ?>" required>
 </div>
 
 <div class="col-md-6 mb-4">
-<input type="text" class="form-control" placeholder="Phone Number">
+<input type="text" class="form-control" placeholder="<?php echo __('phone_num'); ?>">
 </div>
 
 <div class="col-md-6 mb-4">
-<input type="text" class="form-control" placeholder="Subject">
+<input type="text" class="form-control" placeholder="<?php echo __('subject'); ?>">
 </div>
 
 <div class="col-12 mb-4">
-<textarea class="form-control" placeholder="Message"></textarea>
+<textarea class="form-control" placeholder="<?php echo __('message'); ?>"></textarea>
 </div>
 
 <div class="col-12">
 <button type="submit" class="contact-btn">
-Send Message
+<?php echo __('send_btn'); ?>
 </button>
 </div>
 
@@ -195,27 +193,27 @@ Send Message
 <div class="contact-info">
 
 <h3>
-Contact Information
+<?php echo __('contact_info'); ?>
 </h3>
 
 <div class="contact-info-item">
-<strong>Address</strong>
+<strong><?php echo __('address'); ?></strong>
 <?php echo isset($footerAddressSafe) ? $footerAddressSafe : 'Dominican Republic'; ?>
 </div>
 
 <div class="contact-info-item">
-<strong>Email</strong>
+<strong><?php echo __('email'); ?></strong>
 <?php echo isset($footerEmailSafe) ? $footerEmailSafe : 'info@email.com'; ?>
 </div>
 
 <div class="contact-info-item">
-<strong>Phone</strong>
+<strong><?php echo __('phone'); ?></strong>
 <?php echo isset($footerPhoneSafe) ? $footerPhoneSafe : '(000) 000-0000'; ?>
 </div>
 
 <div class="contact-info-item">
-<strong>Business Hours</strong>
-Monday - Saturday<br>
+<strong><?php echo __('hours'); ?></strong>
+<?php echo __('hours_val'); ?><br>
 8:00 AM - 6:00 PM
 </div>
 

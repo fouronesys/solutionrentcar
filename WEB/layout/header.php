@@ -6,6 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+include_once __DIR__ . "/../lang.php";
+
 /* ================= INCLUDES SEGUROS PHP 8.4 ================= */
 include_once __DIR__ . "/../../core/controller/Core.php";
 include_once __DIR__ . "/../../core/controller/Database.php";
@@ -109,7 +111,7 @@ $version = time();
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo $LANG; ?>">
 <head>
 
 <title><?php echo $title_safe; ?></title>
@@ -321,6 +323,52 @@ body{
     font-weight:normal !important;
 }
 
+/* ================= LANG SWITCHER ================= */
+
+.lang-switcher{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-left:10px;
+}
+
+.lang-btn{
+    display:inline-flex !important;
+    align-items:center;
+    gap:4px;
+    padding:8px 14px !important;
+    border-radius:999px !important;
+    font-size:13px !important;
+    font-weight:800 !important;
+    color:#111827 !important;
+    background:rgba(0,0,0,0.05) !important;
+    text-decoration:none;
+    transition:.25s;
+    border:1.5px solid transparent;
+}
+
+.lang-btn:hover{
+    background:rgba(<?php echo $mainColor; ?>,0.12) !important;
+    color:var(--main-color) !important;
+    border-color:rgba(<?php echo $mainColor; ?>,0.20);
+}
+
+.lang-btn.lang-active{
+    background:var(--main-color) !important;
+    color:#fff !important;
+    border-color:var(--main-color);
+}
+
+@media(max-width:991px){
+
+    .lang-switcher{
+        margin-left:0;
+        margin-top:8px;
+        justify-content:center;
+    }
+
+}
+
 @media(max-width:991px){
 
     body{
@@ -403,34 +451,50 @@ body{
 
 <li class="nav-item active">
     <a href="<?php echo $base_url_safe; ?>" class="nav-link">
-        HOME
+        <?php echo __('nav_home'); ?>
     </a>
 </li>
 
 <li class="nav-item">
     <a href="<?php echo $base_url_safe; ?>cars.php" class="nav-link">
-        CARS
+        <?php echo __('nav_cars'); ?>
     </a>
 </li>
 
 <li class="nav-item">
     <a href="<?php echo $base_url_safe; ?>about.php" class="nav-link">
-        ABOUT
+        <?php echo __('nav_about'); ?>
     </a>
 </li>
 
 <li class="nav-item">
     <a href="<?php echo $base_url_safe; ?>services.php" class="nav-link">
-        SERVICES
+        <?php echo __('nav_services'); ?>
     </a>
 </li>
 
 <li class="nav-item">
     <a href="<?php echo $base_url_safe; ?>contact.php" class="nav-link">
-        CONTACT
+        <?php echo __('nav_contact'); ?>
     </a>
 </li>
 
+<li class="nav-item lang-switcher">
+    <?php
+    $current_page = basename($_SERVER['PHP_SELF']);
+    $query = $_GET;
+    $query['lang'] = 'es';
+    $qs_es = http_build_query($query);
+    $query['lang'] = 'en';
+    $qs_en = http_build_query($query);
+    ?>
+    <a href="?<?php echo $qs_es; ?>" class="lang-btn <?php echo ($LANG === 'es') ? 'lang-active' : ''; ?>">
+        🇩🇴 ES
+    </a>
+    <a href="?<?php echo $qs_en; ?>" class="lang-btn <?php echo ($LANG === 'en') ? 'lang-active' : ''; ?>">
+        🇺🇸 EN
+    </a>
+</li>
 
 </ul>
 

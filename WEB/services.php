@@ -171,11 +171,9 @@ body{background:#fff;color:#111827;}
 
 <section class="services-hero">
   <div class="container">
-    <span class="section-mini">Our Services</span>
-    <h1>Premium Rental Services</h1>
-    <p>
-      We offer flexible car rental solutions for daily trips, business travel, airport pickup and special occasions.
-    </p>
+    <span class="section-mini"><?php echo __('services_mini'); ?></span>
+    <h1><?php echo __('services_title'); ?></h1>
+    <p><?php echo __('services_sub'); ?></p>
   </div>
 </section>
 
@@ -184,8 +182,8 @@ body{background:#fff;color:#111827;}
 
     <div class="row justify-content-center mb-5">
       <div class="col-lg-8 text-center">
-        <span class="section-mini">What We Offer</span>
-        <h2 class="section-title">Services Built For Comfort</h2>
+        <span class="section-mini"><?php echo __('what_we_offer'); ?></span>
+        <h2 class="section-title"><?php echo __('services_built'); ?></h2>
       </div>
     </div>
 
@@ -193,73 +191,49 @@ body{background:#fff;color:#111827;}
 
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="service-card">
-          <div class="service-icon">
-            <i class="fa fa-car-side"></i>
-          </div>
-          <h3>Daily Car Rental</h3>
-          <p>
-            Rent a vehicle for one day or multiple days with a fast, simple and professional process.
-          </p>
+          <div class="service-icon"><i class="fa fa-car-side"></i></div>
+          <h3><?php echo __('daily_title'); ?></h3>
+          <p><?php echo __('daily_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="service-card">
-          <div class="service-icon">
-            <i class="fa fa-calendar-alt"></i>
-          </div>
-          <h3>Weekly Rental</h3>
-          <p>
-            Flexible weekly rental plans designed for clients who need comfort and better pricing.
-          </p>
+          <div class="service-icon"><i class="fa fa-calendar-alt"></i></div>
+          <h3><?php echo __('weekly_title'); ?></h3>
+          <p><?php echo __('weekly_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="service-card">
-          <div class="service-icon">
-            <i class="fa fa-clock"></i>
-          </div>
-          <h3>Long Term Rental</h3>
-          <p>
-            Monthly or long-term rental options for businesses, personal use and extended stays.
-          </p>
+          <div class="service-icon"><i class="fa fa-clock"></i></div>
+          <h3><?php echo __('longterm_title'); ?></h3>
+          <p><?php echo __('longterm_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="service-card">
-          <div class="service-icon">
-            <i class="fa fa-plane-arrival"></i>
-          </div>
-          <h3>Airport Pickup</h3>
-          <p>
-            Vehicle delivery and pickup service for travelers who need a smooth arrival experience.
-          </p>
+          <div class="service-icon"><i class="fa fa-plane-arrival"></i></div>
+          <h3><?php echo __('airport_title'); ?></h3>
+          <p><?php echo __('airport_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="service-card">
-          <div class="service-icon">
-            <i class="fa fa-shield-alt"></i>
-          </div>
-          <h3>Safe Vehicles</h3>
-          <p>
-            Clean, inspected and well-maintained vehicles prepared to give you safety and confidence.
-          </p>
+          <div class="service-icon"><i class="fa fa-shield-alt"></i></div>
+          <h3><?php echo __('safeveh_title'); ?></h3>
+          <p><?php echo __('safeveh_desc'); ?></p>
         </div>
       </div>
 
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="service-card">
-          <div class="service-icon">
-            <i class="fa fa-headset"></i>
-          </div>
-          <h3>Customer Support</h3>
-          <p>
-            Professional support before, during and after your rental to make your experience better.
-          </p>
+          <div class="service-icon"><i class="fa fa-headset"></i></div>
+          <h3><?php echo __('support2_title'); ?></h3>
+          <p><?php echo __('support2_desc'); ?></p>
         </div>
       </div>
 
@@ -275,8 +249,8 @@ body{background:#fff;color:#111827;}
 
       <div class="row justify-content-center mb-5">
         <div class="col-lg-8 text-center">
-          <span class="section-mini">How It Works</span>
-          <h2 style="font-size:52px; font-weight:900; color:#fff; letter-spacing:-2px;">Easy Rental Process</h2>
+          <span class="section-mini"><?php echo __('how_it_works'); ?></span>
+          <h2 style="font-size:52px; font-weight:900; color:#fff; letter-spacing:-2px;"><?php echo __('easy_process'); ?></h2>
         </div>
       </div>
 
@@ -285,32 +259,32 @@ body{background:#fff;color:#111827;}
         <div class="col-lg-3 col-md-6 mb-4">
           <div class="process-card">
             <div class="process-number">1</div>
-            <h3>Choose Car</h3>
-            <p>Select the vehicle that fits your trip, style and budget.</p>
+            <h3><?php echo __('step1_title'); ?></h3>
+            <p><?php echo __('step1_desc'); ?></p>
           </div>
         </div>
 
         <div class="col-lg-3 col-md-6 mb-4">
           <div class="process-card">
             <div class="process-number">2</div>
-            <h3>Send Request</h3>
-            <p>Contact us or make your reservation request quickly online.</p>
+            <h3><?php echo __('step2_title'); ?></h3>
+            <p><?php echo __('step2_desc'); ?></p>
           </div>
         </div>
 
         <div class="col-lg-3 col-md-6 mb-4">
           <div class="process-card">
             <div class="process-number">3</div>
-            <h3>Confirm Details</h3>
-            <p>We confirm dates, pickup location, documents and rental terms.</p>
+            <h3><?php echo __('step3_title'); ?></h3>
+            <p><?php echo __('step3_desc'); ?></p>
           </div>
         </div>
 
         <div class="col-lg-3 col-md-6 mb-4">
           <div class="process-card">
             <div class="process-number">4</div>
-            <h3>Enjoy Driving</h3>
-            <p>Receive your vehicle and enjoy a safe, comfortable rental experience.</p>
+            <h3><?php echo __('step4_title'); ?></h3>
+            <p><?php echo __('step4_desc'); ?></p>
           </div>
         </div>
 
@@ -325,13 +299,10 @@ body{background:#fff;color:#111827;}
   <div class="container">
 
     <div class="cta-box">
-      <h2>Need A Vehicle Today?</h2>
-      <p>
-        Explore our available fleet and book the right car for your next trip with premium service and full confidence.
-      </p>
-
+      <h2><?php echo __('need_vehicle'); ?></h2>
+      <p><?php echo __('need_sub'); ?></p>
       <a href="<?php echo $base_url_safe; ?>cars.php" class="cta-btn">
-        View Cars
+        <?php echo __('view_cars2'); ?>
       </a>
     </div>
 

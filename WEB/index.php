@@ -527,11 +527,11 @@ body{
               margin-bottom:25px;
               ">
 
-           Experience Premium
+           <?php echo __('hero_title_1'); ?> <?php echo __('hero_title_2'); ?>
 <span style="color:var(--main-color);">
-Car Rentals
+<?php echo __('hero_title_3'); ?>
 </span>
-Built For Every Journey
+<?php echo __('hero_title_4'); ?>
 
           </h1>
 
@@ -544,8 +544,7 @@ Built For Every Journey
              max-width:620px;
              ">
 
-            Luxury vehicles, premium service and unforgettable driving experiences.
-            Book your ideal car today with the most trusted rent car company.
+            <?php echo __('hero_sub'); ?>
 
           </p>
 
@@ -557,11 +556,11 @@ Built For Every Journey
                ">
 
             <a href="#cars" class="hero-btn">
-              Book A Car
+              <?php echo __('book_a_car'); ?>
             </a>
 
             <a href="#about" class="hero-btn-outline">
-              Learn More
+              <?php echo __('learn_more'); ?>
             </a>
 
           </div>
@@ -599,11 +598,11 @@ $cars_to_show = [];
 
 if(strtotime($av_from) === false || strtotime($av_to) === false){
 
-    $av_error = "Fechas inválidas.";
+    $av_error = __('invalid_dates');
 
 }elseif(strtotime($av_from) > strtotime($av_to)){
 
-    $av_error = "La Fecha Desde no puede ser mayor que la Fecha Hasta.";
+    $av_error = __('date_order_err');
 
 }else{
 
@@ -794,17 +793,17 @@ if(strtotime($av_from) === false || strtotime($av_to) === false){
 <div class="row">
 
 <div class="col-12 col-md-5 mb-3">
-<label>Fecha desde:</label>
+<label><?php echo __('date_from'); ?></label>
 <input type="date" name="av_from" class="form-control" value="<?php echo htmlspecialchars($av_from, ENT_QUOTES, 'UTF-8'); ?>">
 </div>
 
 <div class="col-12 col-md-5 mb-3">
-<label>Fecha hasta:</label>
+<label><?php echo __('date_to'); ?></label>
 <input type="date" name="av_to" class="form-control" value="<?php echo htmlspecialchars($av_to, ENT_QUOTES, 'UTF-8'); ?>">
 </div>
 
 <div class="col-12 col-md-2 mb-3">
-<label>Buscar:</label>
+<label><?php echo __('search'); ?></label>
 <button type="submit" class="btn-av">
 <i class="fa fa-search"></i>
 </button>
@@ -831,12 +830,12 @@ if(strtotime($av_from) === false || strtotime($av_to) === false){
 
 <div class="col-lg-8 text-center" style="display:block !important;visibility:visible !important;opacity:1 !important;">
 
-<span class="section-mini">Premium Fleet</span>
+<span class="section-mini"><?php echo __('premium_fleet'); ?></span>
 
-<h2 class="section-title">Explore Our Luxury Cars</h2>
+<h2 class="section-title"><?php echo __('explore_cars'); ?></h2>
 
 <p class="section-subtitle">
-Choose from our exclusive collection of premium vehicles designed for comfort, luxury and performance.
+<?php echo __('explore_sub'); ?>
 </p>
 
 </div>
@@ -936,7 +935,7 @@ foreach($cars_to_show as $r){
 
 <div class="car-badge">
   <i class="fa fa-car"></i>
-  Disponible Ahora
+  <?php echo __('available_now'); ?>
 </div>
 
 <h3 class="car-title">
@@ -944,7 +943,7 @@ foreach($cars_to_show as $r){
 </h3>
 
 <p class="car-description">
-  Vehículo premium con comodidad, rendimiento y una experiencia exclusiva de conducción.
+  <?php echo __('car_desc_default'); ?>
 </p>
 
 <div class="car-date-range">
@@ -956,13 +955,13 @@ foreach($cars_to_show as $r){
 
 <div class="car-price">
   RD$ <?php echo number_format($car_price,2); ?>
-  <span>/ Día</span>
+  <span><?php echo __('per_day'); ?></span>
 </div>
 
 </div>
 
 <a href="<?php echo $base_url_safe; ?>car-single.php?car_id=<?php echo $car_id; ?>&from=<?php echo urlencode($av_from); ?>&to=<?php echo urlencode($av_to); ?>" class="car-btn">
-  Rent Now
+  <?php echo __('rent_now'); ?>
 </a>
 
 </div>
@@ -981,7 +980,7 @@ foreach($cars_to_show as $r){
 
 <div class="col-12 text-center">
   <h3 style="font-weight:900;color:#111827;">
-    No hay vehículos disponibles para este rango de fechas.
+    <?php echo __('no_cars'); ?>
   </h3>
 </div>
 
