@@ -1,0 +1,71 @@
+
+<!-- saved from url=(0084)http://allfridge.sytes.net/cbsport/temp/document_00001_AJNFB_2022_11_21_10_20_39.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>Balance Actual</title>
+  
+  <link rel="stylesheet" href="./Balance Actual 21-11-22_files/print.css" type="text/css" media="print">
+  <style> 
+   body {font-family:"Courier New"; font-size:12px;} 
+   h1 {font-family:"Times New Roman"; font-size:16px;text-align:center} 
+   h2 {font-family:"Times New Roman"; font-size:14px;text-align:center} 
+   h3 {font-family:"Times New Roman"; font-size:12px;text-align:center} 
+   tr.total {font-family:"Courier New"; font-size:12px;font-weight:bold;background-color:#C0C0C0} 
+   tr.subtotal {font-family:"Courier New"; font-size:12px;font-weight:bold;background-color:#E1E1E1} 
+   th {background-color:#aaaaaa;font-weight:bold;} 
+   td {font-family:"Courier New"; font-size:12px;} 
+   .total	{background-color:#cccccc;} 
+   .textinblock {text-align:justify;margin-left:50px;margin-right:50px}
+  </style> 
+ </head>
+ <body>
+<table align="center" width="98%" border="0px">
+ <tbody><tr><td><h2>Consorcio Bancas SPORT</h2></td></tr>
+ <tr><td><h3>Santiago</h3></td></tr>
+ <tr><td><h3>809-000-000</h3></td></tr>
+</tbody></table>
+<table align="center" width="98%" border="0px">
+ <tbody><tr><td><h2>Balance Actual</h2></td></tr>
+</tbody></table>
+<hr width="95%">
+<table align="center" width="98%" style="border-collapse:collapse;" border="1px">
+<tbody><tr><th width="20%" alig="center">Entidad</th><th width="10%" alig="center">Tipo</th><th width="10%" alig="center">Limite</th><th width="10%" alig="center">Saldo Actual</th><th width="10%" alig="center">Venta</th><th width="10%" alig="center">Saldo Disp.</th><th width="10%" alig="center">Venta Dia</th></tr>
+<tr><td align="left">1 - BANCA SPORT 01</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">-5.23</td><td align="right">0.00</td><td align="right">50,005.23</td><td align="right">0.00</td></tr>
+<tr><td align="left">2 - BANCA SPORT 02</td><td align="center">Banca (POS)</td><td align="right">75,000.00</td><td align="right">16,634.33</td><td align="right">0.00</td><td align="right">58,365.67</td><td align="right">1,485.00</td></tr>
+<tr><td align="left">3 - BANCA SPORT 03</td><td align="center">Banca (POS)</td><td align="right">70,000.00</td><td align="right">3,325.00</td><td align="right">0.00</td><td align="right">66,675.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">4 - BANCA SPORT 04</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">50,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">5 - BANCA SPORT 05</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">11,064.00</td><td align="right">0.00</td><td align="right">38,936.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">6 - BANCA SPORT 06</td><td align="center">Banca (POS)</td><td align="right">70,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">70,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">7 - BANCA SPORT 07</td><td align="center">Banca (POS)</td><td align="right">70,000.00</td><td align="right">-2,913.06</td><td align="right">0.00</td><td align="right">72,913.06</td><td align="right">235.00</td></tr>
+<tr><td align="left">8 - BANCA SPORT 08</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">50,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">9 - BANCA SPORT 09</td><td align="center">Banca (POS)</td><td align="right">100,000.00</td><td align="right">-90,260.95</td><td align="right">0.00</td><td align="right">190,260.95</td><td align="right">0.00</td></tr>
+<tr><td align="left">10 - BANCA SPORT 10</td><td align="center">Banca (POS)</td><td align="right">60,000.00</td><td align="right">-3,023.05</td><td align="right">0.00</td><td align="right">63,023.05</td><td align="right">0.00</td></tr>
+<tr><td align="left">11 - BANCA SPORT 11</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">4,847.04</td><td align="right">0.00</td><td align="right">45,152.96</td><td align="right">70.00</td></tr>
+<tr><td align="left">12 - BANCA SPORT 12</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">5,982.50</td><td align="right">0.00</td><td align="right">44,017.50</td><td align="right">0.00</td></tr>
+<tr><td align="left">13 - BANCA SPORT 13</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">30,655.00</td><td align="right">0.00</td><td align="right">19,345.00</td><td align="right">1,910.00</td></tr>
+<tr><td align="left">14 - BANCA SPORT 14</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">50,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">15 - BANCA SPORT 15</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">355.00</td><td align="right">0.00</td><td align="right">49,645.00</td><td align="right">50.00</td></tr>
+<tr><td align="left">16 - BANCA SPORT N 01</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">2,910.58</td><td align="right">0.00</td><td align="right">47,089.42</td><td align="right">0.00</td></tr>
+<tr><td align="left">17 - BANCA SPORT 16</td><td align="center">Banca (POS)</td><td align="right">100,000.00</td><td align="right">705.00</td><td align="right">0.00</td><td align="right">99,295.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">18 - BANCA SPORT 17</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">50,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">19 - BANCA SPORT 18</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">8,351.35</td><td align="right">0.00</td><td align="right">41,648.65</td><td align="right">1,875.00</td></tr>
+<tr><td align="left">20 - BANCA SPORT 19</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">10,961.98</td><td align="right">0.00</td><td align="right">39,038.02</td><td align="right">330.00</td></tr>
+<tr><td align="left">21 - BANCA SPORT 20</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">4,421.04</td><td align="right">0.00</td><td align="right">45,578.96</td><td align="right">525.00</td></tr>
+<tr><td align="left">22 - BANCA SPORT 21</td><td align="center">Banca (POS)</td><td align="right">16,000.00</td><td align="right">12,147.02</td><td align="right">0.00</td><td align="right">3,852.98</td><td align="right">0.00</td></tr>
+<tr><td align="left">23 - BANCA SPORT 22</td><td align="center">Banca (POS)</td><td align="right">30,000.00</td><td align="right">6,750.40</td><td align="right">0.00</td><td align="right">23,249.60</td><td align="right">595.00</td></tr>
+<tr><td align="left">24 - BANCA SPORT 23</td><td align="center">Banca (POS)</td><td align="right">45,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">45,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">25 - BANCA SPORT 24</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">1,974.66</td><td align="right">0.00</td><td align="right">48,025.34</td><td align="right">0.00</td></tr>
+<tr><td align="left">26 - BANCA SPORT 25</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">3,574.45</td><td align="right">0.00</td><td align="right">46,425.55</td><td align="right">0.00</td></tr>
+<tr><td align="left">27 - BANCA SPORT 26</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">0.00</td><td align="right">0.00</td><td align="right">50,000.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">28 - BANCA SPORT 27</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">757.18</td><td align="right">0.00</td><td align="right">49,242.82</td><td align="right">935.00</td></tr>
+<tr><td align="left">29 - BANCA SPORT 28</td><td align="center">Banca (POS)</td><td align="right">200,000.00</td><td align="right">8,423.50</td><td align="right">0.00</td><td align="right">191,576.50</td><td align="right">0.00</td></tr>
+<tr><td align="left">30 - BANCA SPORT 29</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">6,134.90</td><td align="right">0.00</td><td align="right">43,865.10</td><td align="right">0.00</td></tr>
+<tr><td align="left">31 - BANCA SPORT 30</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">130.00</td><td align="right">0.00</td><td align="right">49,870.00</td><td align="right">0.00</td></tr>
+<tr><td align="left">32 - BANCA SPORT 31</td><td align="center">Banca (POS)</td><td align="right">50,000.00</td><td align="right">1,171.80</td><td align="right">0.00</td><td align="right">48,828.20</td><td align="right">0.00</td></tr>
+<tr class="total"><td align="left"></td><td align="center"></td><td align="right"></td><td align="right">45,074.44</td><td align="right">0.00</td><td align="right">1,840,925.56</td><td align="right">8,010.00</td></tr>
+</tbody></table>
+<hr width="95%">
+   <div align="center">Impreso: 21/11/2022 10:20:39.012</div>
+
+ 
+
+<iframe src="./Balance Actual 21-11-22_files/globalstorage.html" style="position: absolute; width: 1px; height: 1px; left: -9999px;"></iframe></body></html>
