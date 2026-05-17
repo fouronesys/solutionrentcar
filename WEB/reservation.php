@@ -256,10 +256,30 @@ if(isset($_POST["save_web_reservation"]) && $_POST["save_web_reservation"] == "1
         $user->plane = 0;
         $user->status = 0;
 
-        $user->add();
+        $_notif_resvRes = $user->add();
 
         $id_speds = BookingData::getAllByID();
-        $spends = isset($id_speds[0]->id) && $id_speds[0]->id != null ? intval($id_speds[0]->id) : 0;
+        $spends = (is_array($_notif_resvRes) && isset($_notif_resvRes[1]) && intval($_notif_resvRes[1]) > 0)
+            ? intval($_notif_resvRes[1])
+            : (isset($id_speds[0]->id) && $id_speds[0]->id != null ? intval($id_speds[0]->id) : 0);
+
+        if(!class_exists('NotificationService')){
+            @include_once __DIR__ . "/../core/app/model/NotificationData.php";
+            @include_once __DIR__ . "/../core/app/model/NotificationPreferenceData.php";
+            @include_once __DIR__ . "/../core/controller/NotificationService.php";
+        }
+        if(class_exists('NotificationService') && $spends > 0){
+            $_wn_person = PersonData::getById($id_person);
+            $_wn_name = isset($_wn_person->name) ? $_wn_person->name : '';
+            NotificationService::notifyStockUsers(intval($stock_id), NotificationService::EVENT_BOOKING_WEB,
+                'Nueva reserva desde la web', 'Cliente: '.htmlspecialchars($_wn_name).' — Reserva #'.$spends,
+                ['booking_id' => $spends, 'url' => './?view=booking&opt=earring']);
+            if(intval($id_person) > 0){
+                NotificationService::notify('client', intval($id_person), NotificationService::EVENT_BOOKING_WEB,
+                    'Recibimos tu solicitud de reserva', 'Hemos recibido tu solicitud #'.$spends.'. Te contactaremos pronto.',
+                    ['booking_id' => $spends, 'stock_id' => intval($stock_id)]);
+            }
+        }
 
         echo json_encode([
             "status" => "success",

@@ -496,6 +496,24 @@ body{
     </a>
 </li>
 
+<?php if(isset($_SESSION['client_id']) && intval($_SESSION['client_id']) > 0):
+    if(!class_exists('NotificationData')){
+        @include_once __DIR__ . "/../../core/app/model/NotificationData.php";
+        @include_once __DIR__ . "/../../core/app/model/NotificationPreferenceData.php";
+        @include_once __DIR__ . "/../../core/controller/NotificationService.php";
+    }
+    $__cli_unread = class_exists('NotificationData') ? NotificationData::countUnread('client', intval($_SESSION['client_id'])) : 0;
+?>
+<li class="nav-item">
+    <a href="notifications.php" class="nav-link" style="position:relative;" title="<?php echo __('notif_title'); ?>">
+        <i class="fa fa-bell"></i>
+        <?php if($__cli_unread > 0): ?>
+        <span style="position:absolute;top:6px;right:-2px;background:#e11d48;color:#fff;border-radius:50%;padding:0 6px;font-size:11px;font-weight:bold;line-height:16px;min-width:16px;text-align:center;display:inline-block;"><?php echo $__cli_unread; ?></span>
+        <?php endif; ?>
+    </a>
+</li>
+<?php endif; ?>
+
 <li class="nav-item lang-switcher">
     <?php
     $current_page = basename($_SERVER['PHP_SELF']);

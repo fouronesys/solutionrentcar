@@ -418,9 +418,20 @@ endif;
     $user->plane   = $_POST["plane"];
     $user->status  = 0;
 
-    $user->add();
+    $_notif_addRes1 = $user->add();
 
-	
+	$_notif_bookingId = (is_array($_notif_addRes1) && isset($_notif_addRes1[1])) ? intval($_notif_addRes1[1]) : 0;
+	$_notif_stockId = intval(StockData::getPrincipal()->id);
+	$_notif_personObj = PersonData::getById($id_person);
+	$_notif_pname = isset($_notif_personObj->name) ? $_notif_personObj->name : '';
+	NotificationService::notifyStockUsers($_notif_stockId, NotificationService::EVENT_BOOKING_CREATED,
+		'Nueva reserva creada', 'Cliente: '.htmlspecialchars($_notif_pname).' — Reserva #'.$_notif_bookingId,
+		['booking_id' => $_notif_bookingId, 'url' => './?view=booking&opt=modal&id='.$_notif_bookingId]);
+	if(intval($id_person) > 0){
+		NotificationService::notify('client', intval($id_person), NotificationService::EVENT_BOOKING_CREATED,
+			'Tu reserva fue creada', 'Hemos registrado tu reserva #'.$_notif_bookingId.'. Gracias por confiar en nosotros.',
+			['booking_id' => $_notif_bookingId, 'stock_id' => $_notif_stockId]);
+	}
 	$persxn = PersonData::getById($id_person);
 	
     $kmx = CarsData::getById($car_id);
@@ -725,11 +736,24 @@ foreach ($imagenes as $campo => $atributo) {
     $user->plane   = $_POST["plane"];
     $user->status  = 0;
 
-    $user->add();
+    $_notif_addRes2 = $user->add();
+
+	$_notif_bookingId2 = (is_array($_notif_addRes2) && isset($_notif_addRes2[1])) ? intval($_notif_addRes2[1]) : 0;
+	$_notif_stockId2 = intval(StockData::getPrincipal()->id);
+	$_notif_personObj2 = PersonData::getById($id_person);
+	$_notif_pname2 = isset($_notif_personObj2->name) ? $_notif_personObj2->name : '';
+	NotificationService::notifyStockUsers($_notif_stockId2, NotificationService::EVENT_BOOKING_CREATED,
+		'Nueva reserva creada', 'Cliente: '.htmlspecialchars($_notif_pname2).' — Reserva #'.$_notif_bookingId2,
+		['booking_id' => $_notif_bookingId2, 'url' => './?view=booking&opt=modal&id='.$_notif_bookingId2]);
+	if(intval($id_person) > 0){
+		NotificationService::notify('client', intval($id_person), NotificationService::EVENT_BOOKING_CREATED,
+			'Tu reserva fue creada', 'Hemos registrado tu reserva #'.$_notif_bookingId2.'. Gracias.',
+			['booking_id' => $_notif_bookingId2, 'stock_id' => $_notif_stockId2]);
+	}
 
 	$persxn = PersonData::getById($id_person);
 	
-    $kmx = CarsData::getById($_POST["car_id"]);
+	$kmx = CarsData::getById($_POST["car_id"]);
 	$kmx->status = 1;
 	$kmx->update_status();
 
@@ -1174,6 +1198,17 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="delivery"):
 	$kmx = CarsData::getById($bkg->car_id);
 	$kmx->status = 2;
 	$kmx->update_status();
+
+	$_notif_bp = PersonData::getById($bkg->person_id);
+	$_notif_bn = isset($_notif_bp->name) ? $_notif_bp->name : '';
+	NotificationService::notifyStockUsers(intval($bkg->stock_id), NotificationService::EVENT_BOOKING_DELIVERED,
+		'Vehículo entregado', 'Reserva #'.intval($bkg->id).' entregada a '.htmlspecialchars($_notif_bn),
+		['booking_id' => intval($bkg->id), 'url' => './?view=booking&opt=modal&id='.intval($bkg->id)]);
+	if(intval($bkg->person_id) > 0){
+		NotificationService::notify('client', intval($bkg->person_id), NotificationService::EVENT_BOOKING_DELIVERED,
+			'Tu vehículo fue entregado', 'Tu reserva #'.intval($bkg->id).' está activa. ¡Disfruta tu viaje!',
+			['booking_id' => intval($bkg->id), 'stock_id' => intval($bkg->stock_id)]);
+	}
 	
 
 error_reporting(E_ALL);

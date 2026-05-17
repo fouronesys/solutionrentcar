@@ -20,5 +20,8 @@ include "controller/class.phpmailer.php";
 include "controller/class.smtp.php";
 include "controller/class.pop3.php";
 
+// notification service
+include "controller/NotificationService.php";
+
 
 ?>

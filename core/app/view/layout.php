@@ -230,6 +230,56 @@ endforeach;
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
+      <!-- Notifications Bell -->
+      <?php $__notif_unread = NotificationData::countUnread('user', intval($_SESSION['user_id'])); ?>
+      <li class="nav-item dropdown" id="notifBellLi">
+        <a class="nav-link" data-toggle="dropdown" href="#" id="notifBellLink">
+          <i class="fa fa-bell"></i>
+          <span class="badge badge-danger navbar-badge" id="notifBellBadge" <?php if($__notif_unread<=0) echo 'style="display:none;"'; ?>><?php echo $__notif_unread; ?></span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          <span class="dropdown-item dropdown-header"><h6><i class="fa fa-bell"></i> Notificaciones</h6></span>
+          <div class="dropdown-divider"></div>
+          <div id="notifBellList" style="max-height:320px;overflow-y:auto;">
+            <div class="dropdown-item text-muted" style="text-align:center;">Cargando...</div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a href="./?view=notifications&opt=all" class="dropdown-item dropdown-footer"><i class="fa fa-inbox"></i> Ver todas</a>
+          <a href="./?view=notifications&opt=preferences" class="dropdown-item dropdown-footer"><i class="fa fa-cog"></i> Preferencias</a>
+        </div>
+      </li>
+      <script>
+      (function(){
+        function notifEsc(s){ return $('<div>').text(s||'').html(); }
+        function notifLoad(){
+          $.get('./?action=notification&opt=list&limit=8', function(r){
+            if(!r||!r.ok) return;
+            var b=$('#notifBellBadge');
+            if(r.unread>0){ b.text(r.unread).show(); } else { b.hide(); }
+            var $l=$('#notifBellList'); $l.empty();
+            if(!r.items||r.items.length===0){
+              $l.append('<div class="dropdown-item text-muted" style="text-align:center;">Sin notificaciones</div>'); return;
+            }
+            r.items.forEach(function(it){
+              var bg=it.read?'':'background:#3a2f00;color:#fff;';
+              var html='<a class="dropdown-item" href="'+(it.url||'./?view=notifications&opt=all')+'" data-id="'+it.id+'" style="white-space:normal;'+bg+'">'
+                +'<div><b>'+notifEsc(it.title)+'</b></div>'
+                +'<div style="font-size:12px;">'+notifEsc((it.body||'').replace(/<[^>]+>/g,'').substring(0,80))+'</div>'
+                +'<div style="font-size:11px;color:#aaa;">'+notifEsc(it.created)+'</div></a>';
+              $l.append(html);
+            });
+            $l.find('a').on('click', function(){
+              var id=$(this).data('id'); if(id){ $.post('./?action=notification&opt=mark_read', {id:id}); }
+            });
+          }, 'json');
+        }
+        $(document).ready(function(){
+          notifLoad();
+          setInterval(notifLoad, 60000);
+          $('#notifBellLink').on('click', function(){ notifLoad(); });
+        });
+      })();
+      </script>
       <!-- Navbar Search -->
 
       <li class="nav-item dropdown">
