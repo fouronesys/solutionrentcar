@@ -12,7 +12,7 @@ class Database {
     public function __construct(){
         $this->user = "u144787244_solutionsrent";
         $this->pass = "PSsolutions99";
-        $this->host = "31.220.16.1";
+        $this->host = "srv500.hstgr.io";
         $this->ddbb = "u144787244_solutionsrent";
         $this->socket = "";
     }
