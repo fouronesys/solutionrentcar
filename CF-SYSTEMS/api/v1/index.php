@@ -40,6 +40,7 @@ $handlers = [
     'bookings'      => 'handlers/bookings.php',
     'agenda'        => 'handlers/agenda.php',
     'notifications' => 'handlers/notifications.php',
+    'preferences'   => 'handlers/preferences.php',
     'payments'      => 'handlers/payments.php',
     'push'          => 'handlers/push.php',
     'catalog'       => 'handlers/catalog.php',

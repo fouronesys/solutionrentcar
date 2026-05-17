@@ -25,22 +25,25 @@ if ($method === 'POST') {
         ApiResponse::err('forbidden', 'Reserva fuera de tu sucursal', 403);
     }
 
+    // PaymentData::add() / add_payment() hardcode payment_type_id, so we
+    // INSERT directly to honor the caller's value end-to-end.
     $con = Database::getCon();
-    $pay = new PaymentData();
-    $pay->user_id         = intval($auth['id']);
-    $pay->stock_id        = intval($b->stock_id);
-    $pay->person_id       = intval($b->person_id);
-    $pay->sell_id         = intval($b->id);   // model uses $sell_id as booking_id column
-    $pay->val             = $val;
-    $pay->is_stock        = 0;
-    $pay->payment_type_id = $payment_type_id;
-    $pay->add();
+    $uid = intval($auth['id']);
+    $sid = intval($b->stock_id);
+    $pid = intval($b->person_id);
+    $bid = intval($b->id);
+    $valEsc = floatval($val);
+    $ptid   = intval($payment_type_id);
+    if ($ptid <= 0) $ptid = 1;
+    $ok = @$con->query("INSERT INTO payment
+            (user_id, stock_id, person_id, booking_id, val, is_stock, payment_type_id, created_at)
+          VALUES ($uid, $sid, $pid, $bid, $valEsc, 0, $ptid, NOW())");
+    if (!$ok) ApiResponse::err('server_error', 'No se pudo registrar el pago', 500);
     $newId = intval($con->insert_id);
 
     // Update booking running totals
-    $bid = intval($b->id);
     @$con->query("UPDATE booking
-                  SET payment = COALESCE(payment,0) + $val
+                  SET payment = COALESCE(payment,0) + $valEsc
                   WHERE id=$bid");
 
     if (class_exists('NotificationService') && intval($b->person_id) > 0) {
@@ -57,10 +60,10 @@ if ($method === 'POST') {
         'payment' => [
             'id'              => $newId,
             'booking_id'      => $bid,
-            'person_id'       => intval($b->person_id),
-            'stock_id'        => intval($b->stock_id),
-            'val'             => $val,
-            'payment_type_id' => $payment_type_id,
+            'person_id'       => $pid,
+            'stock_id'        => $sid,
+            'val'             => $valEsc,
+            'payment_type_id' => $ptid,
         ],
     ], 201);
 }

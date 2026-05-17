@@ -177,6 +177,20 @@ notified.
 
 ---
 
+## Preferences
+
+### GET /preferences
+List notification preferences (per event_type × channel) for the
+authenticated principal.
+
+### PUT /preferences  (POST/PATCH also accepted)
+```json
+{ "event_type": "booking_created", "channel": "push", "enabled": true }
+```
+Upserts the row and returns the saved preference.
+
+---
+
 ## Push (Expo)
 
 ### POST /push/register
