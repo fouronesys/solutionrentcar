@@ -52,7 +52,107 @@ class NotificationService {
             }
         }
 
+        // Push channel (Expo) — defaults ON when preference row not set
+        if(NotificationPreferenceData::isEnabled($recipientType, $recipientId, $eventType, 'push')){
+            self::sendPush($recipientType, $recipientId, $eventType, $title, $body, $data, $nid ?? 0);
+        }
+
         return true;
+    }
+
+    /**
+     * Dispatches the notification to every Expo device token registered for the
+     * recipient. Cleans up tokens reported as DeviceNotRegistered.
+     */
+    private static function sendPush($recipientType, $recipientId, $eventType, $title, $body, $data, $notificationId){
+        try {
+            self::sendPushInner($recipientType, $recipientId, $eventType, $title, $body, $data, $notificationId);
+        } catch(\Throwable $e){
+            error_log("[NotificationService] push error: ".$e->getMessage());
+            @NotificationData::logDelivery($notificationId, 'push', 'failed', 'exception: '.$e->getMessage());
+        }
+    }
+
+    private static function sendPushInner($recipientType, $recipientId, $eventType, $title, $body, $data, $notificationId){
+        if(!function_exists('curl_init')) return; // cURL not available; skip silently
+        $sub = function_exists('mb_substr') ? 'mb_substr' : 'substr';
+        $con = Database::getCon();
+        if(!$con) return;
+        $rt = $con->real_escape_string((string)$recipientType);
+        $rid = intval($recipientId);
+
+        // Bail quietly if device_token table doesn't exist yet
+        $check = @$con->query("SHOW TABLES LIKE 'device_token'");
+        if(!$check || $check->num_rows === 0) return;
+
+        $r = @$con->query("SELECT id, token FROM device_token WHERE recipient_type='$rt' AND recipient_id=$rid");
+        if(!$r || $r->num_rows === 0) return;
+
+        $tokens = [];
+        while($row = $r->fetch_assoc()){
+            $tokens[intval($row['id'])] = (string)$row['token'];
+        }
+        if(!$tokens) return;
+
+        // Expo accepts batches of up to 100 messages
+        $messages = [];
+        foreach($tokens as $tok){
+            $messages[] = [
+                'to'    => $tok,
+                'sound' => 'default',
+                'title' => $sub((string)$title, 0, 100),
+                'body'  => $sub(strip_tags((string)$body), 0, 200),
+                'data'  => array_merge(['event_type' => $eventType], is_array($data) ? $data : []),
+            ];
+        }
+
+        $payload = json_encode($messages, JSON_UNESCAPED_UNICODE);
+        $ch = curl_init('https://exp.host/--/api/v2/push/send');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Accept: application/json',
+                'Accept-Encoding: gzip, deflate',
+            ],
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_TIMEOUT        => 8,
+        ]);
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err = curl_error($ch);
+        curl_close($ch);
+
+        if($resp === false){
+            NotificationData::logDelivery($notificationId, 'push', 'failed', 'curl: '.$err);
+            return;
+        }
+
+        $decoded = json_decode($resp, true);
+        $okCount = 0; $failCount = 0;
+        $tokenIds = array_keys($tokens);
+        $tokenValues = array_values($tokens);
+
+        if(isset($decoded['data']) && is_array($decoded['data'])){
+            foreach($decoded['data'] as $i => $ticket){
+                $status = $ticket['status'] ?? '';
+                if($status === 'ok'){
+                    $okCount++;
+                } else {
+                    $failCount++;
+                    $errType = $ticket['details']['error'] ?? '';
+                    if($errType === 'DeviceNotRegistered' && isset($tokenIds[$i])){
+                        $delId = intval($tokenIds[$i]);
+                        @$con->query("DELETE FROM device_token WHERE id=$delId");
+                    }
+                }
+            }
+            $detail = "sent=$okCount failed=$failCount http=$httpCode";
+            NotificationData::logDelivery($notificationId, 'push', $failCount === 0 ? 'sent' : 'partial', $detail);
+        } else {
+            NotificationData::logDelivery($notificationId, 'push', 'failed', "http=$httpCode body=".substr((string)$resp, 0, 200));
+        }
     }
 
     public static function notifyMany($recipientType, $recipientIds, $eventType, $title, $body, $data = []){
