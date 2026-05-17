@@ -531,7 +531,8 @@ body{
               box.innerHTML='';
               items.forEach(function(it){
                   var bg=it.read?'#fff':'#fef3c7';
-                  var html='<a href="notifications.php" data-id="'+it.id+'" class="cli-notif-it" style="display:block;padding:10px 14px;border-bottom:1px solid #f3f4f6;text-decoration:none;color:#111;background:'+bg+';">'
+                  var href = it.url && String(it.url).length > 0 ? it.url : 'notifications.php';
+                  var html='<a href="'+cliEsc(href)+'" data-id="'+it.id+'" data-read="'+(it.read?1:0)+'" class="cli-notif-it" style="display:block;padding:10px 14px;border-bottom:1px solid #f3f4f6;text-decoration:none;color:#111;background:'+bg+';">'
                       +'<div style="font-weight:600;font-size:13px;">'+cliEsc(it.title)+'</div>'
                       +'<div style="font-size:12px;color:#555;margin-top:2px;">'+cliEsc((it.body||'').replace(/<[^>]+>/g,'').substring(0,90))+'</div>'
                       +'<div style="font-size:11px;color:#9ca3af;margin-top:2px;">'+cliEsc(it.created)+'</div></a>';
@@ -555,6 +556,18 @@ body{
               });
               document.addEventListener('click', function(e){
                   if(!document.getElementById('cliNotifBellLi').contains(e.target)) menu.style.display='none';
+              });
+              document.getElementById('cliNotifBellList').addEventListener('click', function(e){
+                  var a = e.target.closest('a.cli-notif-it');
+                  if(!a) return;
+                  var id = a.getAttribute('data-id');
+                  var alreadyRead = a.getAttribute('data-read') === '1';
+                  if(id && !alreadyRead){
+                      try{
+                          var fd = new FormData(); fd.append('id', id);
+                          fetch('notification-action.php?opt=mark_read', {method:'POST', body:fd, credentials:'same-origin', keepalive:true});
+                      }catch(err){}
+                  }
               });
           });
       })();

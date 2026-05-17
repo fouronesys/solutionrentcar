@@ -940,6 +940,33 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="earring"):
     $user->accion = "Procesó reserva web pendiente #".$spends;
     $user->add();
 
+
+    // Notify: booking approved (web reservation processed by admin)
+    if(class_exists('NotificationService')){
+        $__a_pname = '';
+        if($person_id > 0){
+            $__a_p = PersonData::getById($person_id);
+            if($__a_p && isset($__a_p->name)) $__a_pname = $__a_p->name;
+        }
+        NotificationService::notifyStockUsers(intval(StockData::getPrincipal()->id), NotificationService::EVENT_BOOKING_CREATED,
+            'Reserva aprobada', 'Reserva #'.$spends.' aprobada — Cliente: '.htmlspecialchars($__a_pname),
+            ['booking_id' => $spends, 'url' => './?view=booking&opt=modal&id='.$spends]);
+        if($person_id > 0){
+            NotificationService::notify('client', $person_id, NotificationService::EVENT_BOOKING_CREATED,
+                'Tu reserva fue aprobada', 'Tu reserva #'.$spends.' ha sido aprobada. ¡Te esperamos!',
+                ['booking_id' => $spends]);
+        }
+        if($payment_val > 0){
+            NotificationService::notifyStockUsers(intval(StockData::getPrincipal()->id), NotificationService::EVENT_PAYMENT_RECEIVED,
+                'Pago recibido', 'Pago de '.number_format($payment_val, 2).' registrado en reserva #'.$spends,
+                ['booking_id' => $spends, 'amount' => $payment_val, 'url' => './?view=booking&opt=modal&id='.$spends]);
+            if($person_id > 0){
+                NotificationService::notify('client', $person_id, NotificationService::EVENT_PAYMENT_RECEIVED,
+                    'Recibimos tu pago', 'Hemos registrado un pago de '.number_format($payment_val, 2).' para tu reserva #'.$spends.'. ¡Gracias!',
+                    ['booking_id' => $spends, 'amount' => $payment_val]);
+            }
+        }
+    }
     header('location:./?view=booking&opt=modal&id='.$spends);
     exit;
   

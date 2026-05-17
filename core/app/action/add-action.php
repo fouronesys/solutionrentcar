@@ -1,4 +1,24 @@
-<?php if(isset($_GET["opt"]) && $_GET["opt"]=="payment"):
+<?php
+  @include_once __DIR__ . '/../../controller/NotificationService.php';
+  function __addact_notify_payment($sell_id, $client_id, $val){
+      if(!class_exists('NotificationService')) return;
+      $sid = intval($sell_id); $cid = intval($client_id); $amt = floatval($val);
+      if($sid <= 0 || $amt <= 0) return;
+      $bkg = BookingData::getById($sid);
+      if(!$bkg) return;
+      NotificationService::notifyStockUsers(intval($bkg->stock_id ?? (StockData::getPrincipal()->id ?? 0)),
+          NotificationService::EVENT_PAYMENT_RECEIVED,
+          'Pago recibido',
+          'Pago de '.number_format($amt, 2).' registrado para reserva #'.$sid,
+          ['booking_id' => $sid, 'amount' => $amt, 'url' => './?view=booking&opt=modal&id='.$sid]);
+      if($cid > 0){
+          NotificationService::notify('client', $cid, NotificationService::EVENT_PAYMENT_RECEIVED,
+              'Recibimos tu pago',
+              'Hemos registrado un pago de '.number_format($amt, 2).' para tu reserva #'.$sid.'. ¡Gracias!',
+              ['booking_id' => $sid, 'amount' => $amt]);
+      }
+  }
+  if(isset($_GET["opt"]) && $_GET["opt"]=="payment"):
 
 $payment2 = new PaymentData();
  	$payment2->val = -1*$_POST["val"];
@@ -9,6 +29,7 @@ $payment2 = new PaymentData();
  	$payment2->f_id = $_POST["f_id"];
 	$payment2->is_stock = 0;
  	$payment2->add_payment();
+	__addact_notify_payment($_POST["sell_id"] ?? 0, $_POST["client_id"] ?? 0, $_POST["val"] ?? 0);
  	
  	$user = new ACData();
           $user->user_id = $_SESSION["user_id"];
@@ -28,6 +49,7 @@ $payment2 = new PaymentData();
  	$payment2->f_id = $_POST["f_id"];
  	$payment2->is_stock = 0;
  	$payment2->add_payment();
+	__addact_notify_payment($_POST["sell_id"] ?? 0, $_POST["client_id"] ?? 0, $_POST["val"] ?? 0);
 	// code...
 
 
@@ -56,6 +78,7 @@ $payment2 = new PaymentData();
  	$payment2->f_id = $_POST["f_id"];
 	$payment2->is_stock = 0;
  	$payment2->add_payment();
+	__addact_notify_payment($_POST["sell_id"] ?? 0, $_POST["client_id"] ?? 0, $_POST["val"] ?? 0);
 	// code...
 
 
@@ -86,6 +109,7 @@ $payment2 = new PaymentData();
                 $payment->stock_id = StockData::getPrincipal()->id;
 			 	$payment->person_id= $_POST["client_id"];
 			 	$payment->add();
+	__addact_notify_payment($_POST["sell_id"] ?? 0, $_POST["client_id"] ?? 0, $_POST["val"] ?? 0);
 
  	$bk = BookingData::getById($_POST["sell_id"]);
  	$bk->end_at = date("Y-m-d H:i:s",strtotime($bk->end_at."+".$bk->day." day")); 
@@ -111,6 +135,7 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="paymentstock"):
  	$payment2->f_id = $_POST["f_id"];
 	$payment2->is_stock = 1;
  	$payment2->add_payment();
+	__addact_notify_payment($_POST["sell_id"] ?? 0, $_POST["client_id"] ?? 0, $_POST["val"] ?? 0);
 	
 $user = new SpendData();
 $user->person_id = $_POST["client_id"];
