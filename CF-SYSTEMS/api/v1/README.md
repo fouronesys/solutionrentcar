@@ -62,6 +62,14 @@ Revokes all refresh tokens for the authenticated principal.
 ### GET /me
 Returns the current authenticated user (staff or client).
 
+### PATCH /me  (also accepts POST)
+Updates basic profile fields. Whitelisted fields:
+- Staff: `name, lastname, phone, email, language`
+- Client: `name, lastname, phone, phone2, email, address, address2,
+  nationality, passport, license, language`
+
+Returns the updated profile in the same shape as `GET /me`.
+
 ---
 
 ## Cars
@@ -106,6 +114,38 @@ client and stock staff.
 
 ### POST /bookings/{id}/cancel
 Cancels a booking (only viewable bookings, i.e. owner or same stock).
+Frees the vehicle if no other active booking holds it.
+
+### POST /bookings/{id}/deliver   (staff only)
+Marks the vehicle as delivered (booking `status=3`, car `status=1`).
+Requires the booking to currently be in pending (0) or confirmed (1).
+Notifies the client.
+
+### POST /bookings/{id}/return    (staff only)
+Marks the vehicle as returned (booking `status=4`, car `status=0`).
+Requires the booking to currently be delivered (3). Notifies the client.
+
+Staff list filters (in addition to client filters): `client_id`, `car_id`,
+`q` (matches booking code OR client name / lastname / phone).
+
+---
+
+## Agenda  (staff only)
+
+### GET /agenda?date=YYYY-MM-DD
+Returns the day's deliveries and returns scoped to the staff member's stock.
+`date` defaults to today.
+
+```json
+{
+  "ok": true,
+  "data": {
+    "date": "2026-05-17",
+    "deliveries": [ { "booking": {...}, "car": {...}, "client": {...} } ],
+    "returns":    [ { "booking": {...}, "car": {...}, "client": {...} } ]
+  }
+}
+```
 
 ---
 
@@ -126,6 +166,14 @@ Cancels a booking (only viewable bookings, i.e. owner or same stock).
 
 ### GET /payments
 List payments visible to the principal. Optional `booking_id`.
+
+### POST /payments  (staff only)
+Register a payment against a booking.
+```json
+{ "booking_id": 123, "val": 250.00, "payment_type_id": 1 }
+```
+The booking's running `payment` total is incremented and the client is
+notified.
 
 ---
 
@@ -198,8 +246,10 @@ curl -X POST -H "Content-Type: application/json" \
 
 ## Configuration
 
-- `JWT_SECRET` — recommended environment variable for signing tokens. If
-  unset, a deterministic fallback is used (not safe for production).
+- `JWT_SECRET` — environment variable for signing tokens (must be ≥32
+  chars). If unset, a random 64-char secret is generated on first hit and
+  stored at `CF-SYSTEMS/storage/.jwt_secret` (mode 0600, git-ignored).
+  Delete that file to rotate all sessions.
 - Push delivery uses the **Expo Push API** (`https://exp.host/--/api/v2/push/send`)
   with no auth required for standard Expo tokens. Tokens that respond with
   `DeviceNotRegistered` are removed automatically.

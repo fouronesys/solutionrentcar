@@ -11,7 +11,7 @@ class Jwt {
         // Per-install persistent secret. Generated on first call and stored in
         // CF-SYSTEMS/storage/.jwt_secret (mode 0600). NEVER use a hardcoded
         // fallback — that would make tokens forgeable.
-        $path = dirname(__DIR__, 3) . '/storage/.jwt_secret';
+        $path = dirname(__DIR__, 3) . '/storage/runtime/jwt_secret';
         if (is_readable($path)) {
             $s = trim((string)@file_get_contents($path));
             if (strlen($s) >= 32) return $s;

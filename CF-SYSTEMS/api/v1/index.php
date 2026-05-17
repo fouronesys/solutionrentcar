@@ -38,6 +38,7 @@ $handlers = [
     'me'            => 'handlers/me.php',
     'cars'          => 'handlers/cars.php',
     'bookings'      => 'handlers/bookings.php',
+    'agenda'        => 'handlers/agenda.php',
     'notifications' => 'handlers/notifications.php',
     'payments'      => 'handlers/payments.php',
     'push'          => 'handlers/push.php',

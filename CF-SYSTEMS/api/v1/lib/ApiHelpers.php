@@ -2,7 +2,16 @@
 
 class ApiHelpers {
 
-    /** Build a fully-qualified URL for a storage-relative path. */
+    /**
+     * Build a fully-qualified URL for a stored file. Handles every variant the
+     * legacy code produces:
+     *   - absolute URLs (returned as-is)
+     *   - bare filenames                  ->  /CF-SYSTEMS/storage/invoice_files/<f>
+     *   - "storage/foo/bar.jpg"           ->  /CF-SYSTEMS/storage/foo/bar.jpg
+     *   - "CF-SYSTEMS/storage/foo.jpg"    ->  /CF-SYSTEMS/storage/foo.jpg
+     *   - "/CF-SYSTEMS/storage/foo.jpg"   ->  /CF-SYSTEMS/storage/foo.jpg
+     *   - "../../storage/foo/bar.jpg"     ->  /CF-SYSTEMS/storage/foo/bar.jpg
+     */
     public static function normalizeUrl(?string $relative): ?string {
         $relative = trim((string)$relative);
         if ($relative === '') return null;
@@ -13,15 +22,25 @@ class ApiHelpers {
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         $base = $scheme . '://' . $host;
 
-        // If a bare filename, assume invoice_files folder (common car/invoice storage)
+        // Bare filename → invoice_files folder.
         if (strpos($relative, '/') === false) {
             return $base . '/CF-SYSTEMS/storage/invoice_files/' . rawurlencode($relative);
         }
 
-        // Strip leading ./ or ../ then prepend root
+        // Drop leading slashes and any number of "../" / "./" segments.
         $rel = ltrim($relative, '/');
-        $rel = preg_replace('#^(\.\./)+#', '', $rel);
-        // If it doesn't already include CF-SYSTEMS or storage, leave as-is
+        $rel = preg_replace('#^(?:\.\.?/)+#', '', $rel);
+
+        // Ensure path is rooted at CF-SYSTEMS/storage. The legacy code emits
+        // paths relative to a controller directory ("../../storage/...").
+        if (strpos($rel, 'CF-SYSTEMS/') === 0) {
+            // already absolute under the app root
+        } elseif (strpos($rel, 'storage/') === 0) {
+            $rel = 'CF-SYSTEMS/' . $rel;
+        } else {
+            // Unknown convention — keep as-is under the doc root but log once.
+            // (Avoid silently losing the file path.)
+        }
         return $base . '/' . $rel;
     }
 

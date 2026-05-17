@@ -46,6 +46,19 @@ if ($method === 'GET' && $id === 0) {
         $t = $con->real_escape_string((string)$_GET['to']);
         $where[] = "date(created_at) <= '$t'";
     }
+    // Staff-only filters
+    if ($auth['type'] === 'user') {
+        if (!empty($_GET['client_id'])) {
+            $where[] = "person_id=" . intval($_GET['client_id']);
+        }
+        if (!empty($_GET['car_id'])) {
+            $where[] = "car_id=" . intval($_GET['car_id']);
+        }
+        if (!empty($_GET['q'])) {
+            $q = $con->real_escape_string((string)$_GET['q']);
+            $where[] = "(code LIKE '%$q%' OR person_id IN (SELECT id FROM person WHERE name LIKE '%$q%' OR lastname LIKE '%$q%' OR phone LIKE '%$q%'))";
+        }
+    }
     $limit  = max(1, min(200, intval($_GET['limit'] ?? 50)));
     $offset = max(0, intval($_GET['offset'] ?? 0));
     $sqlExtra = ($where ? 'WHERE ' . implode(' AND ', $where) : '')
@@ -58,6 +71,52 @@ if ($method === 'GET' && $id === 0) {
         'offset'   => $offset,
         'count'    => count($out),
     ]);
+}
+
+// Staff: mark vehicle delivered (status 3) / returned (status 4)
+if ($method === 'POST' && $id > 0 && ($sub === 'deliver' || $sub === 'return')) {
+    if ($auth['type'] !== 'user') ApiResponse::err('forbidden', 'Solo staff', 403);
+    $b = BookingData::getById($id);
+    if (!_booking_can_view($auth, $b)) ApiResponse::err('not_found', 'Reserva no encontrada', 404);
+    $current = intval($b->status);
+
+    if ($sub === 'deliver') {
+        if (!in_array($current, [0, 1], true)) {
+            ApiResponse::err('conflict', 'La reserva no está en estado entregable', 409);
+        }
+        $b->status = 3;
+        $b->update_status();
+        if ($b->car_id) {
+            $car = CarsData::getById(intval($b->car_id));
+            if ($car && $car->id) { $car->status = 1; $car->update_status(); }
+        }
+        $title = 'Vehículo entregado';
+        $msg   = 'Tu reserva #'.$b->id.' ha sido entregada. ¡Buen viaje!';
+        $evt   = defined('NotificationService::EVENT_BOOKING_DELIVERED')
+                 ? NotificationService::EVENT_BOOKING_DELIVERED
+                 : 'booking_delivered';
+    } else {
+        if ($current !== 3) {
+            ApiResponse::err('conflict', 'La reserva no está entregada', 409);
+        }
+        $b->status = 4;
+        $b->update_status();
+        if ($b->car_id) {
+            $car = CarsData::getById(intval($b->car_id));
+            if ($car && $car->id) { $car->status = 0; $car->update_status(); }
+        }
+        $title = 'Vehículo devuelto';
+        $msg   = 'Hemos recibido el vehículo de tu reserva #'.$b->id.'. Gracias.';
+        $evt   = defined('NotificationService::EVENT_BOOKING_RETURNED')
+                 ? NotificationService::EVENT_BOOKING_RETURNED
+                 : 'booking_returned';
+    }
+
+    if (class_exists('NotificationService') && intval($b->person_id) > 0) {
+        NotificationService::notify('client', intval($b->person_id), $evt, $title, $msg,
+            ['booking_id' => intval($b->id), 'stock_id' => intval($b->stock_id)]);
+    }
+    ApiResponse::ok(['booking' => ApiHelpers::bookingToArray(BookingData::getById($id))]);
 }
 
 if ($method === 'POST' && $id > 0 && $sub === 'cancel') {
