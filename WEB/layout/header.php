@@ -69,6 +69,13 @@ $stocks = StockData::getAllBySQL("
     LIMIT 1
 ");
 
+if (empty($stocks)) {
+    $stocks = StockData::getAllBySQL("ORDER BY id ASC LIMIT 1");
+}
+
+$phone = "";
+$color = array(220, 38, 38);
+
 if (!empty($stocks)) {
 
     $s = $stocks[0];
@@ -420,19 +427,29 @@ body{
 <a class="navbar-brand" href="<?php echo $base_url_safe; ?>">
 
     <div class="logo-box">
+        <?php if (!empty($ticket_image)): ?>
         <img 
-        src="../../CF-SYSTEMS/storage/configuration/<?php echo $ticket_image_safe; ?>?v=<?php echo $version; ?>"
-        onerror="this.onerror=null; this.src='img/default.jpg';"
+        src="<?php echo $base_url_safe; ?>../CF-SYSTEMS/storage/configuration/<?php echo $ticket_image_safe; ?>?v=<?php echo $version; ?>"
+        onerror="this.onerror=null; this.src='<?php echo $base_url_safe; ?>img/car-1.jpg';"
         alt="<?php echo $title_safe; ?>"
         loading="lazy"
         decoding="async"
         >
+        <?php else: ?>
+        <i class="fa fa-car" style="font-size:24px;color:var(--main-color);"></i>
+        <?php endif; ?>
     </div>
 
     <div>
+        <?php if (!empty(trim($phone))): ?>
         <span class="brand-mini">
-           <?php echo "PHONE: ".$phone; ?>
+           <?php echo "PHONE: ".htmlspecialchars($phone, ENT_QUOTES, 'UTF-8'); ?>
         </span>
+        <?php else: ?>
+        <span class="brand-mini">
+           <?php echo __('rent_a_car'); ?>
+        </span>
+        <?php endif; ?>
 
         <?php echo strtoupper($title_safe); ?>
     </div>

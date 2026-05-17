@@ -141,6 +141,7 @@ $translations = [
         'premium_fleet2'  => 'Flota Premium de Alquiler',
         'available'       => 'Disponible',
         'per_day2'        => 'Por Día',
+        'rent_a_car'      => 'ALQUILER DE AUTOS',
     ],
     'en' => [
         'nav_home'        => 'HOME',
@@ -269,6 +270,7 @@ $translations = [
         'premium_fleet2'  => 'Premium Rental Fleet',
         'available'       => 'Available',
         'per_day2'        => 'Per Day',
+        'rent_a_car'      => 'RENT A CAR',
     ],
 ];
 
