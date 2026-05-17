@@ -11,10 +11,10 @@ class Database {
 
     public function __construct(){
         $this->user = "u144787244_solutionsrent";
-        $this->pass = "SolutionRentCar01";
-        $this->host = "localhost";
+        $this->pass = "PSsolutions99";
+        $this->host = "31.220.16.1";
         $this->ddbb = "u144787244_solutionsrent";
-        $this->socket = "/tmp/mysql.sock";
+        $this->socket = "";
     }
 
     public function connect(){
@@ -23,8 +23,7 @@ class Database {
             $this->user,
             $this->pass,
             $this->ddbb,
-            null,
-            $this->socket
+            3306
         );
 
         if ($con->connect_errno) {
