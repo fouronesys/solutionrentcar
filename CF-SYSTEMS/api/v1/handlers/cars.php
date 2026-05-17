@@ -28,6 +28,14 @@ if (!empty($_GET['q'])) {
 $from = trim((string)($_GET['available_from'] ?? ''));
 $to   = trim((string)($_GET['available_to'] ?? ''));
 if ($from !== '' && $to !== '') {
+    $dateRe = '/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}(:\d{2})?)?$/';
+    if (!preg_match($dateRe, $from) || !preg_match($dateRe, $to)) {
+        ApiResponse::err('invalid_request',
+            'available_from y available_to deben ser YYYY-MM-DD o YYYY-MM-DD HH:MM[:SS]', 400);
+    }
+    if (strtotime($from) === false || strtotime($to) === false) {
+        ApiResponse::err('invalid_request', 'available_from/available_to no son fechas válidas', 400);
+    }
     $f = $con->real_escape_string($from);
     $t = $con->real_escape_string($to);
     // Exclude cars with overlapping active bookings (status 0,1,3)

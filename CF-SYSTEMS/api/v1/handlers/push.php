@@ -27,7 +27,9 @@ if ($action === 'register' && $method === 'POST') {
             VALUES ('$rt',$rid,'$tk','$pl','$av','$di',NOW(),NOW())
             ON DUPLICATE KEY UPDATE recipient_type='$rt', recipient_id=$rid, platform='$pl',
                                     app_version='$av', device_info='$di', updated_at=NOW()";
-    @$con->query($sql);
+    if (!$con->query($sql)) {
+        ApiResponse::err('server_error', 'No se pudo registrar el token', 500);
+    }
     ApiResponse::ok(['registered' => true]);
 }
 
@@ -42,7 +44,9 @@ if ($action === 'token' && $method === 'DELETE') {
     $tk = $con->real_escape_string($token);
     $rid = intval($auth['id']);
     $rt = $con->real_escape_string($auth['type']);
-    @$con->query("DELETE FROM device_token WHERE token='$tk' AND recipient_type='$rt' AND recipient_id=$rid");
+    if (!$con->query("DELETE FROM device_token WHERE token='$tk' AND recipient_type='$rt' AND recipient_id=$rid")) {
+        ApiResponse::err('server_error', 'No se pudo eliminar el token', 500);
+    }
     ApiResponse::ok(['deleted' => true]);
 }
 

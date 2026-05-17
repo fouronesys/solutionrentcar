@@ -35,10 +35,12 @@ if ($method === 'PUT' || $method === 'POST' || $method === 'PATCH') {
     $rtE = $con->real_escape_string($rt);
     $ev  = $con->real_escape_string($event);
     $ch  = $con->real_escape_string($channel);
-    @$con->query("INSERT INTO notification_preference
+    if (!$con->query("INSERT INTO notification_preference
                     (recipient_type, recipient_id, event_type, channel, enabled, updated_at)
                   VALUES ('$rtE', $rid, '$ev', '$ch', $enabled, NOW())
-                  ON DUPLICATE KEY UPDATE enabled=VALUES(enabled), updated_at=NOW()");
+                  ON DUPLICATE KEY UPDATE enabled=VALUES(enabled), updated_at=NOW()")) {
+        ApiResponse::err('server_error', 'No se pudo guardar la preferencia', 500);
+    }
 
     ApiResponse::ok(['preference' => [
         'event_type' => $event,

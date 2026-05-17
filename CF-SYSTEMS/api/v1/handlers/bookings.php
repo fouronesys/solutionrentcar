@@ -38,12 +38,21 @@ if ($method === 'GET' && $id === 0) {
         if ($sid > 0) $where[] = "stock_id=$sid";
     }
     if (isset($_GET['status']) && $_GET['status'] !== '') $where[] = "status=" . intval($_GET['status']);
+    $dateOnlyRe = '/^\d{4}-\d{2}-\d{2}$/';
     if (!empty($_GET['from'])) {
-        $f = $con->real_escape_string((string)$_GET['from']);
+        $fromV = (string)$_GET['from'];
+        if (!preg_match($dateOnlyRe, $fromV)) {
+            ApiResponse::err('invalid_request', 'from debe ser YYYY-MM-DD', 400);
+        }
+        $f = $con->real_escape_string($fromV);
         $where[] = "date(created_at) >= '$f'";
     }
     if (!empty($_GET['to'])) {
-        $t = $con->real_escape_string((string)$_GET['to']);
+        $toV = (string)$_GET['to'];
+        if (!preg_match($dateOnlyRe, $toV)) {
+            ApiResponse::err('invalid_request', 'to debe ser YYYY-MM-DD', 400);
+        }
+        $t = $con->real_escape_string($toV);
         $where[] = "date(created_at) <= '$t'";
     }
     // Staff-only filters
@@ -182,7 +191,18 @@ if ($method === 'POST' && $id === 0) {
     } else {
         $person_id = intval($body['person_id'] ?? 0);
         if ($person_id <= 0) ApiResponse::err('invalid_request', 'person_id requerido', 400);
-        $stock_id  = intval($body['stock_id'] ?? $auth['stock_id'] ?? $car->stock_id);
+        $authStock = intval($auth['stock_id'] ?? 0);
+        $stock_id  = intval($body['stock_id'] ?? $authStock ?? $car->stock_id);
+        // Stock-scoped staff: enforce that both the booking stock and the
+        // chosen vehicle belong to the staff member's stock.
+        if ($authStock > 0) {
+            if ($stock_id !== $authStock) {
+                ApiResponse::err('forbidden', 'No puedes crear reservas fuera de tu sucursal', 403);
+            }
+            if (intval($car->stock_id) !== $authStock) {
+                ApiResponse::err('forbidden', 'El vehículo pertenece a otra sucursal', 403);
+            }
+        }
         $user_id   = intval($auth['id']);
     }
 
