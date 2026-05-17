@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.env
+.env.*
+!.env.example
+google-service-account.json
+GoogleService-Info.plist
+google-services.json
+.DS_Store

@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "Solutions Rent Car",
+    "slug": "solutions-rent-car",
+    "scheme": "solutionsrentcar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E2A47"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.solutionsrent.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Necesitamos la cámara para capturar fotos del vehículo y firmas.",
+        "NSPhotoLibraryUsageDescription": "Para adjuntar fotos a las reservas y firmas.",
+        "NSUserNotificationsUsageDescription": "Para enviarte avisos sobre tus reservas y pagos."
+      }
+    },
+    "android": {
+      "package": "com.solutionsrent.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E2A47"
+      },
+      "permissions": [
+        "NOTIFICATIONS",
+        "POST_NOTIFICATIONS",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#0E2A47"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://u.expo.dev/REPLACE_WITH_EAS_PROJECT_ID",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "router": { "origin": false },
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      },
+      "apiBaseUrl": "https://REPLACE_WITH_DOMAIN/CF-SYSTEMS/api/v1"
+    },
+    "owner": "REPLACE_WITH_EXPO_USERNAME"
+  }
+}
