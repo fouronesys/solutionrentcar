@@ -780,6 +780,21 @@ foreach ($imagenes as $campo => $atributo) {
 				 	$payment2->add_payment();			 	
 endif;			 	
 
+		// Notify: payment received (admin booking create flow)
+		if(class_exists('NotificationService') && isset($_notif_bookingId2) && $_notif_bookingId2 > 0){
+			$__pay_amt = floatval($_POST["payment"] ?? 0);
+			if($__pay_amt > 0){
+				NotificationService::notifyStockUsers(intval(StockData::getPrincipal()->id), NotificationService::EVENT_PAYMENT_RECEIVED,
+					'Pago recibido', 'Pago de '.number_format($__pay_amt, 2).' registrado para reserva #'.$_notif_bookingId2,
+					['booking_id' => $_notif_bookingId2, 'amount' => $__pay_amt, 'url' => './?view=booking&opt=modal&id='.$_notif_bookingId2]);
+				if(intval($id_person) > 0){
+					NotificationService::notify('client', intval($id_person), NotificationService::EVENT_PAYMENT_RECEIVED,
+						'Recibimos tu pago', 'Hemos registrado un pago de '.number_format($__pay_amt, 2).' para tu reserva #'.$_notif_bookingId2.'. ¡Gracias!',
+						['booking_id' => $_notif_bookingId2, 'amount' => $__pay_amt]);
+				}
+			}
+		}
+
 
 header('location:./?view=booking&opt=modal&id='.$spends);    
 
@@ -1381,6 +1396,23 @@ endif;
 foreach(PaymentData::getAllBySQL("where booking_id=".$_GET["id"]) as $payment):
 $payment->del();
 endforeach;
+
+// Notify: booking cancelled (before deletion)
+if(class_exists('NotificationService') && $q){
+	$__c_pname = '';
+	if(intval($q->person_id) > 0){
+		$__c_p = PersonData::getById(intval($q->person_id));
+		if($__c_p && isset($__c_p->name)) $__c_pname = $__c_p->name;
+	}
+	NotificationService::notifyStockUsers(intval($q->stock_id), NotificationService::EVENT_BOOKING_CANCELED,
+		'Reserva cancelada', 'Reserva #'.intval($q->id).' cancelada — Cliente: '.htmlspecialchars($__c_pname),
+		['booking_id' => intval($q->id)]);
+	if(intval($q->person_id) > 0){
+		NotificationService::notify('client', intval($q->person_id), NotificationService::EVENT_BOOKING_CANCELED,
+			'Tu reserva fue cancelada', 'Tu reserva #'.intval($q->id).' ha sido cancelada. Si tienes preguntas, contáctanos.',
+			['booking_id' => intval($q->id), 'stock_id' => intval($q->stock_id)]);
+	}
+}
 
 $q->del();
 

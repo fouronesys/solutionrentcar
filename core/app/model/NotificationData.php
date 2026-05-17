@@ -167,5 +167,56 @@ class NotificationData {
                 VALUES ($nid,'$ch','$st','$dt',NOW())";
         @Executor::doit($sql);
     }
-}
-?>
+      public static function getFiltered($recipientType, $recipientId, $filter = 'all', $eventType = '', $dateFrom = '', $dateTo = '', $page = 1, $perPage = 20){
+          self::ensureSchema();
+          $con = Database::getCon();
+          $rt = $con->real_escape_string((string)$recipientType);
+          $rid = intval($recipientId);
+          $where = "recipient_type='$rt' AND recipient_id=$rid";
+          if($filter === 'unread') $where .= " AND read_at IS NULL";
+          if($filter === 'read') $where .= " AND read_at IS NOT NULL";
+          if($eventType !== ''){
+              $et = $con->real_escape_string((string)$eventType);
+              $where .= " AND type='$et'";
+          }
+          if($dateFrom !== ''){
+              $df = $con->real_escape_string((string)$dateFrom);
+              $where .= " AND created_at >= '$df 00:00:00'";
+          }
+          if($dateTo !== ''){
+              $dt = $con->real_escape_string((string)$dateTo);
+              $where .= " AND created_at <= '$dt 23:59:59'";
+          }
+          $page = max(1, intval($page));
+          $perPage = max(1, min(100, intval($perPage)));
+          $offset = ($page - 1) * $perPage;
+          $countR = Executor::doit("SELECT COUNT(*) AS c FROM ".self::$tablename." WHERE $where");
+          $total = 0;
+          if($countR[0]){ $row = $countR[0]->fetch_assoc(); $total = intval($row['c'] ?? 0); }
+          $r = Executor::doit("SELECT * FROM ".self::$tablename." WHERE $where ORDER BY id DESC LIMIT $offset,$perPage");
+          return ['total' => $total, 'page' => $page, 'perPage' => $perPage, 'rows' => Model::many($r[0], new NotificationData())];
+      }
+
+      public static function getLogs($status = '', $limit = 100){
+          self::ensureSchema();
+          $con = Database::getCon();
+          $where = '1=1';
+          if($status !== ''){
+              $st = $con->real_escape_string((string)$status);
+              $where .= " AND l.status='$st'";
+          }
+          $limit = max(1, min(500, intval($limit)));
+          $sql = "SELECT l.id, l.notification_id, l.channel, l.status, l.detail, l.created_at,
+                         n.recipient_type, n.recipient_id, n.type AS event_type, n.title
+                  FROM notification_log l
+                  LEFT JOIN notification n ON n.id = l.notification_id
+                  WHERE $where
+                  ORDER BY l.id DESC LIMIT $limit";
+          $r = Executor::doit($sql);
+          $rows = [];
+          if($r[0]){ while($row = $r[0]->fetch_assoc()){ $rows[] = $row; } }
+          return $rows;
+      }
+  }
+  ?>
+  

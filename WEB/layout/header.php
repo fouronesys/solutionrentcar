@@ -504,14 +504,62 @@ body{
     }
     $__cli_unread = class_exists('NotificationData') ? NotificationData::countUnread('client', intval($_SESSION['client_id'])) : 0;
 ?>
-<li class="nav-item">
-    <a href="notifications.php" class="nav-link" style="position:relative;" title="<?php echo __('notif_title'); ?>">
-        <i class="fa fa-bell"></i>
-        <?php if($__cli_unread > 0): ?>
-        <span style="position:absolute;top:6px;right:-2px;background:#e11d48;color:#fff;border-radius:50%;padding:0 6px;font-size:11px;font-weight:bold;line-height:16px;min-width:16px;text-align:center;display:inline-block;"><?php echo $__cli_unread; ?></span>
-        <?php endif; ?>
-    </a>
-</li>
+<li class="nav-item dropdown" id="cliNotifBellLi" style="position:relative;">
+      <a href="#" class="nav-link" id="cliNotifBellLink" style="position:relative;" title="<?php echo __('notif_title'); ?>">
+          <i class="fa fa-bell"></i>
+          <span id="cliNotifBellBadge" style="position:absolute;top:6px;right:-2px;background:#e11d48;color:#fff;border-radius:50%;padding:0 6px;font-size:11px;font-weight:bold;line-height:16px;min-width:16px;text-align:center;<?php echo $__cli_unread > 0 ? '' : 'display:none;'; ?>"><?php echo intval($__cli_unread); ?></span>
+      </a>
+      <div id="cliNotifBellMenu" style="display:none;position:absolute;right:0;top:100%;width:340px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.15);z-index:9999;">
+          <div style="padding:10px 14px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#111;"><?php echo __('notif_title'); ?></div>
+          <div id="cliNotifBellList" style="max-height:340px;overflow-y:auto;color:#111;">
+              <div style="padding:14px;text-align:center;color:#888;">…</div>
+          </div>
+          <div style="padding:8px 14px;border-top:1px solid #e5e7eb;text-align:center;">
+              <a href="notifications.php" style="color:#1d4ed8;font-size:13px;"><?php echo __('notif_title'); ?></a>
+              &nbsp;·&nbsp;
+              <a href="notifications-preferences.php" style="color:#6b7280;font-size:13px;"><?php echo __('notif_preferences'); ?></a>
+          </div>
+      </div>
+      <script>
+      (function(){
+          function cliEsc(s){ var d=document.createElement('div'); d.innerText=s||''; return d.innerHTML; }
+          function cliRender(items, unread){
+              var badge=document.getElementById('cliNotifBellBadge');
+              if(unread>0){ badge.innerText=unread; badge.style.display='inline-block'; } else { badge.style.display='none'; }
+              var box=document.getElementById('cliNotifBellList');
+              if(!items||items.length===0){ box.innerHTML='<div style="padding:14px;text-align:center;color:#888;"><?php echo __('notif_empty'); ?></div>'; return; }
+              box.innerHTML='';
+              items.forEach(function(it){
+                  var bg=it.read?'#fff':'#fef3c7';
+                  var html='<a href="notifications.php" data-id="'+it.id+'" class="cli-notif-it" style="display:block;padding:10px 14px;border-bottom:1px solid #f3f4f6;text-decoration:none;color:#111;background:'+bg+';">'
+                      +'<div style="font-weight:600;font-size:13px;">'+cliEsc(it.title)+'</div>'
+                      +'<div style="font-size:12px;color:#555;margin-top:2px;">'+cliEsc((it.body||'').replace(/<[^>]+>/g,'').substring(0,90))+'</div>'
+                      +'<div style="font-size:11px;color:#9ca3af;margin-top:2px;">'+cliEsc(it.created)+'</div></a>';
+                  box.insertAdjacentHTML('beforeend', html);
+              });
+          }
+          function cliLoad(){
+              fetch('notification-action.php?opt=list&limit=8',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){
+                  if(j&&j.ok) cliRender(j.items||[], j.unread||0);
+              }).catch(function(){});
+          }
+          document.addEventListener('DOMContentLoaded', function(){
+              cliLoad();
+              setInterval(cliLoad, 60000);
+              var link=document.getElementById('cliNotifBellLink');
+              var menu=document.getElementById('cliNotifBellMenu');
+              link.addEventListener('click', function(e){
+                  e.preventDefault(); e.stopPropagation();
+                  menu.style.display = (menu.style.display==='none' || !menu.style.display) ? 'block' : 'none';
+                  if(menu.style.display==='block') cliLoad();
+              });
+              document.addEventListener('click', function(e){
+                  if(!document.getElementById('cliNotifBellLi').contains(e.target)) menu.style.display='none';
+              });
+          });
+      })();
+      </script>
+  </li>
 <?php endif; ?>
 
 <li class="nav-item lang-switcher">

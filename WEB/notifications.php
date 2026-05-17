@@ -34,7 +34,7 @@ $rows = NotificationData::getForRecipient('client', $rid, 100, false);
             <h5 class="mb-1"><?php if(!$isRead): ?><span class="badge badge-warning"><?php echo __('notif_new'); ?></span> <?php endif; ?><?php echo htmlspecialchars($n->title); ?></h5>
             <small class="text-muted"><?php echo htmlspecialchars($n->created_at); ?></small>
           </div>
-          <p class="mb-1"><?php echo $n->body; ?></p>
+          <p class="mb-1"><?php echo nl2br(htmlspecialchars((string)$n->body, ENT_QUOTES, 'UTF-8')); ?></p>
           <?php if(!$isRead): ?>
             <button type="button" class="btn btn-sm btn-success cli-notif-mark" data-id="<?php echo intval($n->id); ?>"><?php echo __('notif_mark_read'); ?></button>
           <?php endif; ?>
