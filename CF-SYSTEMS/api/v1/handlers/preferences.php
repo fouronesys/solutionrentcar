@@ -15,19 +15,11 @@ $rt   = ($auth['type'] === 'user') ? 'user' : 'client';
 $rid  = intval($auth['id']);
 
 if ($method === 'GET') {
-    $rows = [];
-    if (class_exists('NotificationPreferenceData')
-        && method_exists('NotificationPreferenceData', 'getAllForRecipient')) {
-        $rows = NotificationPreferenceData::getAllForRecipient($rt, $rid);
-    } else {
-        $con = Database::getCon();
-        $r = @$con->query("SELECT event_type, channel, enabled
-                           FROM notification_preference
-                           WHERE recipient_type='".$con->real_escape_string($rt)."'
-                             AND recipient_id=$rid");
-        if ($r) while ($row = $r->fetch_assoc()) $rows[] = $row;
-    }
-    ApiResponse::ok(['preferences' => $rows]);
+    // Mirror /notifications/preferences exactly so consumers see one shape.
+    $prefs = class_exists('NotificationPreferenceData')
+        ? NotificationPreferenceData::getAllFor($rt, $rid)
+        : new \stdClass();
+    ApiResponse::ok(['preferences' => $prefs]);
 }
 
 if ($method === 'PUT' || $method === 'POST' || $method === 'PATCH') {

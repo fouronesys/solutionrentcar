@@ -47,9 +47,9 @@ if ($method === 'POST') {
                   WHERE id=$bid");
 
     if (class_exists('NotificationService') && intval($b->person_id) > 0) {
-        $evt = defined('NotificationService::EVENT_PAYMENT_CREATED')
-               ? NotificationService::EVENT_PAYMENT_CREATED
-               : 'payment_created';
+        $evt = defined('NotificationService::EVENT_PAYMENT_RECEIVED')
+               ? NotificationService::EVENT_PAYMENT_RECEIVED
+               : 'payment_received';
         NotificationService::notify('client', intval($b->person_id), $evt,
             'Pago registrado',
             'Recibimos un pago de '.number_format($val, 2).' para tu reserva #'.$bid.'.',

@@ -94,64 +94,74 @@ class NotificationService {
         }
         if(!$tokens) return;
 
-        // Expo accepts batches of up to 100 messages
-        $messages = [];
-        foreach($tokens as $tok){
-            $messages[] = [
-                'to'    => $tok,
-                'sound' => 'default',
-                'title' => $sub((string)$title, 0, 100),
-                'body'  => $sub(strip_tags((string)$body), 0, 200),
-                'data'  => array_merge(['event_type' => $eventType], is_array($data) ? $data : []),
-            ];
-        }
-
-        $payload = json_encode($messages, JSON_UNESCAPED_UNICODE);
-        $ch = curl_init('https://exp.host/--/api/v2/push/send');
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST           => true,
-            CURLOPT_HTTPHEADER     => [
-                'Content-Type: application/json',
-                'Accept: application/json',
-                'Accept-Encoding: gzip, deflate',
-            ],
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_TIMEOUT        => 8,
-        ]);
-        $resp = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err = curl_error($ch);
-        curl_close($ch);
-
-        if($resp === false){
-            NotificationData::logDelivery($notificationId, 'push', 'failed', 'curl: '.$err);
-            return;
-        }
-
-        $decoded = json_decode($resp, true);
-        $okCount = 0; $failCount = 0;
+        // Expo accepts batches of up to 100 messages per request.
         $tokenIds = array_keys($tokens);
         $tokenValues = array_values($tokens);
+        $okTotal = 0; $failTotal = 0; $lastHttp = 0; $lastErr = '';
+        $chunks = array_chunk($tokenValues, 100, true);
+        $idChunks = array_chunk($tokenIds, 100, true);
 
-        if(isset($decoded['data']) && is_array($decoded['data'])){
+        foreach($chunks as $ci => $chunk){
+            $messages = [];
+            foreach($chunk as $tok){
+                $messages[] = [
+                    'to'    => $tok,
+                    'sound' => 'default',
+                    'title' => $sub((string)$title, 0, 100),
+                    'body'  => $sub(strip_tags((string)$body), 0, 200),
+                    'data'  => array_merge(['event_type' => $eventType], is_array($data) ? $data : []),
+                ];
+            }
+
+            $payload = json_encode($messages, JSON_UNESCAPED_UNICODE);
+            $ch = curl_init('https://exp.host/--/api/v2/push/send');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    'Accept-Encoding: gzip, deflate',
+                ],
+                CURLOPT_POSTFIELDS     => $payload,
+                CURLOPT_TIMEOUT        => 8,
+            ]);
+            $resp = curl_exec($ch);
+            $lastHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $lastErr  = curl_error($ch);
+            curl_close($ch);
+
+            if($resp === false){
+                $failTotal += count($chunk);
+                continue;
+            }
+            $decoded = json_decode($resp, true);
+            if(!isset($decoded['data']) || !is_array($decoded['data'])){
+                $failTotal += count($chunk);
+                continue;
+            }
+            $batchIds = array_values($idChunks[$ci]);
             foreach($decoded['data'] as $i => $ticket){
-                $status = $ticket['status'] ?? '';
-                if($status === 'ok'){
-                    $okCount++;
+                if(($ticket['status'] ?? '') === 'ok'){
+                    $okTotal++;
                 } else {
-                    $failCount++;
+                    $failTotal++;
                     $errType = $ticket['details']['error'] ?? '';
-                    if($errType === 'DeviceNotRegistered' && isset($tokenIds[$i])){
-                        $delId = intval($tokenIds[$i]);
+                    if($errType === 'DeviceNotRegistered' && isset($batchIds[$i])){
+                        $delId = intval($batchIds[$i]);
                         @$con->query("DELETE FROM device_token WHERE id=$delId");
                     }
                 }
             }
-            $detail = "sent=$okCount failed=$failCount http=$httpCode";
-            NotificationData::logDelivery($notificationId, 'push', $failCount === 0 ? 'sent' : 'partial', $detail);
+        }
+
+        if($okTotal === 0 && $failTotal > 0){
+            NotificationData::logDelivery($notificationId, 'push', 'failed',
+                "sent=0 failed=$failTotal http=$lastHttp err=".substr($lastErr, 0, 120));
         } else {
-            NotificationData::logDelivery($notificationId, 'push', 'failed', "http=$httpCode body=".substr((string)$resp, 0, 200));
+            NotificationData::logDelivery($notificationId, 'push',
+                $failTotal === 0 ? 'sent' : 'partial',
+                "sent=$okTotal failed=$failTotal");
         }
     }
 
