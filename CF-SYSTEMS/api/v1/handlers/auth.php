@@ -115,8 +115,8 @@ if ($action === 'refresh') {
 }
 
 if ($action === 'logout') {
-    $auth = ApiAuth::tryAuth();
-    if ($auth) ApiAuth::revokeAllFor($auth['type'], $auth['id']);
+    $auth = ApiAuth::require();
+    ApiAuth::revokeAllFor($auth['type'], $auth['id']);
     ApiResponse::ok(['logged_out' => true]);
 }
 
