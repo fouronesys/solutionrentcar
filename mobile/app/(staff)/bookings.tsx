@@ -87,17 +87,13 @@ export default function StaffBookingsList() {
           return (
             <Card onPress={() => router.push({ pathname: "/(staff)/booking/[id]", params: { id: String(item.id) } })}>
               <View style={styles.row}>
-                <Text style={styles.title}>
-                  #{item.code ?? item.id} · {item.car?.brand ?? ""} {item.car?.name ?? item.car?.model ?? ""}
-                </Text>
+                <Text style={styles.title}>#{item.code ?? item.id}</Text>
                 {s ? <Badge label={s[i18n.locale === "en" ? "en" : "es"]} color={s.color} /> : null}
               </View>
               <Text style={styles.meta}>
-                {item.client?.name} {item.client?.lastname ?? ""} · {item.client?.phone ?? ""}
+                {shortDate(item.start_at)} → {shortDate(item.end_at)}
               </Text>
-              <Text style={styles.meta}>
-                {shortDate(item.start_at)} → {shortDate(item.end_at)} · {money(item.total)}
-              </Text>
+              <Text style={styles.total}>{money(item.total)}</Text>
             </Card>
           );
         }}
@@ -125,5 +121,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { fontSize: 15, fontWeight: "700", color: colors.text, flexShrink: 1, marginRight: 8 },
   meta: { color: colors.textMuted, fontSize: 13, marginTop: 4 },
+  total: { color: colors.primary, fontWeight: "700", fontSize: 16, marginTop: 6 },
   err: { color: colors.danger, padding: 12, textAlign: "center" },
 });

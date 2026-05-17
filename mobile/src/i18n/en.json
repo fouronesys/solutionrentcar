@@ -61,6 +61,7 @@
     "placeStart": "Pick-up place",
     "placeEnd": "Return place",
     "comment": "Comment (flight, notes…)",
+    "extras": "Extras / coverage",
     "submit": "Confirm booking",
     "summary": "Summary",
     "days": "Days",

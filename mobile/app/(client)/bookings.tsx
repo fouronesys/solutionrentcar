@@ -31,9 +31,7 @@ export default function BookingsList() {
     }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   if (loading) return <Loading />;
@@ -54,10 +52,7 @@ export default function BookingsList() {
           return (
             <Card onPress={() => router.push({ pathname: "/(client)/booking/[id]", params: { id: String(item.id) } })}>
               <View style={styles.row}>
-                <Text style={styles.title}>
-                  {item.car?.brand ? `${item.car.brand} ` : ""}
-                  {item.car?.name ?? item.car?.model ?? `#${item.id}`}
-                </Text>
+                <Text style={styles.title}>#{item.code ?? item.id}</Text>
                 {s ? <Badge label={s[i18n.locale === "en" ? "en" : "es"]} color={s.color} /> : null}
               </View>
               <Text style={styles.meta}>

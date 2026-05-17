@@ -39,14 +39,18 @@ export type Car = {
   year?: string | number;
   plate?: string;
   color?: string;
+  seat?: string | number;
   transmission?: string;
+  transmission_id?: number;
   fuel?: string;
+  fuel_id?: number;
   category?: string;
+  category_id?: number;
   price?: number | string;
   price_day?: number | string;
   status?: number;
   stock_id?: number;
-  image?: string;
+  image?: string | null;
   images?: string[];
   description?: string;
 };
@@ -60,6 +64,7 @@ export type Booking = {
   stock_id?: number;
   start_at?: string;
   end_at?: string;
+  day?: string | number;
   days?: number;
   price?: number | string;
   total?: number | string;
@@ -70,8 +75,12 @@ export type Booking = {
   comment?: string;
   signature?: string;
   created_at?: string;
-  car?: Car;
-  client?: Profile;
+};
+
+export type BookingDetail = {
+  booking: Booking;
+  car: Car | null;
+  client: Profile | null;
 };
 
 export type Payment = {
@@ -103,8 +112,14 @@ export type Preference = {
 
 export type AgendaItem = {
   booking: Booking;
-  car: Car;
-  client: Profile;
+  car: Car | null;
+  client: Profile | null;
+};
+
+export type Insurance = {
+  id: number;
+  name: string;
+  price?: number | string;
 };
 
 export type Agenda = {

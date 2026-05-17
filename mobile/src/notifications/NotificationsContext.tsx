@@ -21,8 +21,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const refreshUnread = useCallback(async () => {
     if (!role) return;
     try {
-      const r = await api.get<{ count: number }>("/notifications/unread_count");
-      setUnread(r.count ?? 0);
+      const r = await api.get<{ unread: number }>("/notifications/unread_count");
+      setUnread(r.unread ?? 0);
     } catch {
       /* ignore */
     }

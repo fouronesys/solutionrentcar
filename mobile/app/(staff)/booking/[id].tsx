@@ -6,7 +6,7 @@ import { Card } from "@/components/Card";
 import { Loading } from "@/components/Loading";
 import { Badge } from "@/components/Badge";
 import { api, ApiError } from "@/api/client";
-import type { Booking, Payment } from "@/api/types";
+import type { BookingDetail, Payment } from "@/api/types";
 import { bookingStatus, colors } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { dateTime, money } from "@/utils/format";
@@ -14,7 +14,7 @@ import { dateTime, money } from "@/utils/format";
 export default function StaffBookingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [booking, setBooking] = useState<Booking | null>(null);
+  const [detail, setDetail] = useState<BookingDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [acting, setActing] = useState(false);
@@ -22,8 +22,8 @@ export default function StaffBookingDetail() {
   const load = useCallback(async () => {
     setErr(null);
     try {
-      const b = await api.get<{ booking: Booking }>(`/bookings/${id}`);
-      setBooking(b.booking);
+      const b = await api.get<BookingDetail>(`/bookings/${id}`);
+      setDetail(b);
       const p = await api.get<{ payments: Payment[] }>("/payments", { booking_id: id });
       setPayments(p.payments ?? []);
     } catch (e) {
@@ -33,7 +33,7 @@ export default function StaffBookingDetail() {
 
   useEffect(() => { load(); }, [load]);
 
-  const confirmAndCall = (msg: string, action: () => Promise<void>) => {
+  const confirmAndCall = (msg: string, action: () => Promise<unknown>) => {
     Alert.alert(msg, undefined, [
       { text: t("common.cancel"), style: "cancel" },
       {
@@ -54,8 +54,9 @@ export default function StaffBookingDetail() {
         <Text style={{ color: colors.danger, textAlign: "center" }}>{err}</Text>
       </View>
     );
-  if (!booking) return <Loading />;
+  if (!detail) return <Loading />;
 
+  const { booking, car, client } = detail;
   const s = bookingStatus[Number(booking.status ?? 0)];
   const total = Number(booking.total ?? 0);
   const paid = Number(booking.payment ?? 0);
@@ -69,19 +70,19 @@ export default function StaffBookingDetail() {
         <Card>
           <View style={styles.row}>
             <Text style={styles.title}>
-              {booking.car?.brand ? `${booking.car.brand} ` : ""}
-              {booking.car?.name ?? booking.car?.model ?? `#${booking.id}`}
+              {car?.brand ? `${car.brand} ` : ""}
+              {car?.name ?? car?.model ?? `#${booking.id}`}
             </Text>
             {s ? <Badge label={s[i18n.locale === "en" ? "en" : "es"]} color={s.color} /> : null}
           </View>
-          {booking.car?.image ? <Image source={{ uri: booking.car.image }} style={styles.img} /> : null}
-          <Row label={t("booking.client")} value={`${booking.client?.name ?? ""} ${booking.client?.lastname ?? ""}`.trim()} />
-          <Row label={t("profile.phone")} value={booking.client?.phone} />
+          {car?.image ? <Image source={{ uri: car.image }} style={styles.img} /> : null}
+          <Row label={t("booking.client")} value={`${client?.name ?? ""} ${client?.lastname ?? ""}`.trim()} />
+          <Row label={t("profile.phone")} value={client?.phone} />
           <Row label={t("common.from")} value={dateTime(booking.start_at)} />
           <Row label={t("common.to")} value={dateTime(booking.end_at)} />
           <Row label={t("booking.placeStart")} value={booking.place_start} />
           <Row label={t("booking.placeEnd")} value={booking.place_end} />
-          <Row label={t("booking.days")} value={String(booking.days ?? "")} />
+          <Row label={t("booking.days")} value={booking.day ? String(booking.day) : undefined} />
           <Row label={t("booking.total")} value={money(total)} bold />
           <Row label={t("booking.paid")} value={money(paid)} />
           <Row label={t("booking.balance")} value={money(balance)} bold />

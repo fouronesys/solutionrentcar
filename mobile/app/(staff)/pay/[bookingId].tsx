@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Button } from "@/components/Button";
@@ -9,27 +9,19 @@ import { t } from "@/i18n";
 
 type PaymentType = { id: number; name: string };
 
+const DEFAULT_PAYMENT_TYPES: PaymentType[] = [
+  { id: 1, name: "Efectivo / Cash" },
+  { id: 2, name: "Tarjeta / Card" },
+  { id: 3, name: "Transferencia / Transfer" },
+];
+
 export default function PaymentScreen() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const router = useRouter();
   const [val, setVal] = useState("");
-  const [typeId, setTypeId] = useState<number>(1);
-  const [types, setTypes] = useState<PaymentType[]>([]);
+  const [typeId, setTypeId] = useState<number>(DEFAULT_PAYMENT_TYPES[0].id);
+  const [types] = useState<PaymentType[]>(DEFAULT_PAYMENT_TYPES);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await api.get<{ items: PaymentType[] }>("/catalog/payment_types");
-        if (r.items?.length) {
-          setTypes(r.items);
-          setTypeId(r.items[0].id);
-        }
-      } catch {
-        /* keep default */
-      }
-    })();
-  }, []);
 
   const submit = async () => {
     const amount = Number(val);
