@@ -192,7 +192,15 @@ if ($method === 'POST' && $id === 0) {
         $person_id = intval($body['person_id'] ?? 0);
         if ($person_id <= 0) ApiResponse::err('invalid_request', 'person_id requerido', 400);
         $authStock = intval($auth['stock_id'] ?? 0);
-        $stock_id  = intval($body['stock_id'] ?? $authStock ?? $car->stock_id);
+        if (array_key_exists('stock_id', $body) && $body['stock_id'] !== '' && $body['stock_id'] !== null) {
+            $stock_id = intval($body['stock_id']);
+        } elseif ($authStock > 0) {
+            $stock_id = $authStock;
+        } else {
+            // Admin (auth.stock_id=0) with no explicit stock_id → inherit
+            // from the chosen vehicle so the booking is correctly scoped.
+            $stock_id = intval($car->stock_id);
+        }
         // Stock-scoped staff: enforce that both the booking stock and the
         // chosen vehicle belong to the staff member's stock.
         if ($authStock > 0) {
