@@ -2000,6 +2000,18 @@ if(UserPermissionsData::getAllBySQL("where permits_id=23 and user_id=".$_SESSION
    
       <?php endif;?><!-- AdminLTE App -->
 <script src="CF-SYSTEMS/dist/js/adminlte.js"></script>
+<script>
+/* Guard: AdminLTE IFrame plugin reads localStorage["AdminLTE:IFrame:Options"]
+   at window.load and crashes when the value is missing/null. */
+(function () {
+  try {
+    var k = "AdminLTE:IFrame:Options";
+    var v = localStorage.getItem(k);
+    if (v === null || v === "null" || v === "") { localStorage.setItem(k, "{}"); }
+  } catch (e) { /* storage unavailable — ignore */ }
+})();
+</script>
+
 
 <!-- PAGE PLUGINS -->
 <script src="CF-SYSTEMS/plugins/dropzone/min/dropzone.min.js"></script>
@@ -2207,16 +2219,19 @@ $(window).on("load resize", function() {
       $(this).bootstrapSwitch('state', $(this).prop('checked'));
     })
 
-  // BS-Stepper Init
+  // BS-Stepper Init (guarded: only init when a stepper exists on the page)
   document.addEventListener('DOMContentLoaded', function () {
-    window.stepper = new Stepper(document.querySelector('.bs-stepper'))
+    var stepperEl = document.querySelector('.bs-stepper');
+    if (stepperEl && typeof Stepper !== 'undefined') {
+      window.stepper = new Stepper(stepperEl);
+    }
   })
 
-  // DropzoneJS Demo Code Start
-  Dropzone.autoDiscover = false
+  // DropzoneJS Demo Code Start (guarded: only init when the #template node exists)
+  if (typeof Dropzone !== 'undefined') { Dropzone.autoDiscover = false; }
 
-  // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
-  var previewNode = document.querySelector("#template")
+  var previewNode = document.querySelector("#template");
+  if (previewNode && typeof Dropzone !== 'undefined') {
   previewNode.id = ""
   var previewTemplate = previewNode.parentNode.innerHTML
   previewNode.parentNode.removeChild(previewNode)
@@ -2264,6 +2279,7 @@ $(window).on("load resize", function() {
     myDropzone.removeAllFiles(true)
   }
   // DropzoneJS Demo Code End
+  } // end if(previewNode)
 </script>
   
 </html>
