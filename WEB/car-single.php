@@ -246,7 +246,7 @@ echo $car_description != ""
 </p>
 
 <div class="car-price">
-    RD$ <?php echo number_format($car_price,2); ?>
+    US$ <?php echo number_format($car_price,2); ?>
     <span>/ por día</span>
 </div>
 

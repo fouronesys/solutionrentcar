@@ -954,7 +954,7 @@ foreach($cars_to_show as $r){
 <div class="car-footer">
 
 <div class="car-price">
-  RD$ <?php echo number_format($car_price,2); ?>
+  US$ <?php echo number_format($car_price,2); ?>
   <span><?php echo __('per_day'); ?></span>
 </div>
 

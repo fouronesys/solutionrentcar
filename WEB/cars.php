@@ -481,7 +481,7 @@ body{
                   <div class="car-price-box">
 
                     <div class="car-price">
-                      RD$ <?php echo number_format(floatval($price), 2); ?>
+                      US$ <?php echo number_format(floatval($price), 2); ?>
                       <span><?php echo __('per_day2'); ?></span>
                     </div>
 
