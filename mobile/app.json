@@ -57,20 +57,12 @@
     "experiments": {
       "typedRoutes": true
     },
-    "updates": {
-      "url": "https://u.expo.dev/REPLACE_WITH_EAS_PROJECT_ID",
-      "fallbackToCacheTimeout": 0
-    },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "extra": {
       "router": { "origin": false },
-      "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
-      },
-      "apiBaseUrl": "https://REPLACE_WITH_DOMAIN/CF-SYSTEMS/api/v1"
-    },
-    "owner": "REPLACE_WITH_EXPO_USERNAME"
+      "apiBaseUrl": "https://solutionsrentcar.com/CF-SYSTEMS/api/v1"
+    }
   }
 }
