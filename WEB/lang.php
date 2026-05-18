@@ -32,6 +32,7 @@ if (!isset($_SESSION['lang']) || !in_array($_SESSION['lang'], $AVAILABLE_LANGS, 
 }
 
 $LANG = $_SESSION['lang'];
+$GLOBALS['LANG'] = $LANG;
 
 $translations = [
     'es' => [
@@ -330,19 +331,58 @@ $translations = [
     ],
 ];
 
-function __($key) {
-    global $translations, $LANG;
-    if (!is_array($translations)) {
+// Expose the dictionary as a real global so callers in any scope (including
+// pages routed through Lb::start(), which includes layouts from inside a
+// method scope) can read it without re-loading this file.
+$GLOBALS['translations'] = $translations;
+
+if (!function_exists('__')) {
+    /**
+     * Translate a key into the active language.
+     *
+     * IMPORTANT: this function is intentionally scope-independent. The site
+     * is routed through Lb::start(), so lang.php is included from inside a
+     * method — which means $translations declared at the top of lang.php is
+     * a *local* of that method, not a global. Earlier versions of __() used
+     * `global $translations;` and therefore returned the raw key
+     * ("nav_home", "hero_title_1", "book_a_car", ...) on every public page.
+     *
+     * To make this resilient, we keep our own static dictionary inside the
+     * function and lazily re-load lang.php at file scope (so $translations
+     * lands in $GLOBALS) the very first time __() is called in a request
+     * where the globals are missing.
+     */
+    function __($key) {
+        static $dict = null;
+        static $lang = null;
+
+        if ($dict === null) {
+            if (isset($GLOBALS['translations']) && is_array($GLOBALS['translations'])) {
+                $dict = $GLOBALS['translations'];
+            } else {
+                // Last-resort lazy load — re-execute lang.php so it can
+                // populate $GLOBALS['translations'] from a top-level scope.
+                include __FILE__;
+                $dict = isset($GLOBALS['translations']) && is_array($GLOBALS['translations'])
+                    ? $GLOBALS['translations']
+                    : [];
+            }
+            $lang = isset($GLOBALS['LANG']) && is_string($GLOBALS['LANG'])
+                ? $GLOBALS['LANG']
+                : (isset($_SESSION['lang']) ? strtolower((string)$_SESSION['lang']) : 'es');
+            if (!isset($dict[$lang])) {
+                $lang = 'es';
+            }
+        }
+
+        if (isset($dict[$lang][$key])) {
+            return $dict[$lang][$key];
+        }
+        // Fall back to Spanish so the user sees a real label instead of the raw key.
+        if (isset($dict['es'][$key])) {
+            return $dict['es'][$key];
+        }
         return $key;
     }
-    $L = (is_string($LANG) && isset($translations[$LANG])) ? $LANG : 'es';
-    if (isset($translations[$L][$key])) {
-        return $translations[$L][$key];
-    }
-    // Fall back to Spanish so the user sees a real label instead of the raw key.
-    if (isset($translations['es'][$key])) {
-        return $translations['es'][$key];
-    }
-    return $key;
 }
 ?>
