@@ -3,12 +3,32 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
-    $_SESSION['lang'] = $_GET['lang'];
+/* ----------------------------------------------------------------------
+ * Language selection
+ * --------------------------------------------------------------------
+ * Accept the override from ?lang= case-insensitively. Some other parts
+ * of the system (admin panel) write Core::$user->language as 'ES' / 'EN'
+ * which, before this normalization, could leak into $_SESSION['lang']
+ * and cause every __() call to fall through to the bare key (since the
+ * translation arrays are keyed lowercase). We now always normalize and
+ * always validate against the available languages so __() can never end
+ * up returning "nav_home" instead of the translated label.
+ * -------------------------------------------------------------------- */
+$AVAILABLE_LANGS = ['es', 'en'];
+$DEFAULT_LANG    = 'es';
+
+if (isset($_GET['lang'])) {
+    $g = strtolower(trim((string)$_GET['lang']));
+    if (in_array($g, $AVAILABLE_LANGS, true)) {
+        $_SESSION['lang'] = $g;
+    }
 }
 
-if (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'es';
+if (isset($_SESSION['lang']) && is_string($_SESSION['lang'])) {
+    $_SESSION['lang'] = strtolower(trim($_SESSION['lang']));
+}
+if (!isset($_SESSION['lang']) || !in_array($_SESSION['lang'], $AVAILABLE_LANGS, true)) {
+    $_SESSION['lang'] = $DEFAULT_LANG;
 }
 
 $LANG = $_SESSION['lang'];
@@ -312,6 +332,17 @@ $translations = [
 
 function __($key) {
     global $translations, $LANG;
-    return isset($translations[$LANG][$key]) ? $translations[$LANG][$key] : $key;
+    if (!is_array($translations)) {
+        return $key;
+    }
+    $L = (is_string($LANG) && isset($translations[$LANG])) ? $LANG : 'es';
+    if (isset($translations[$L][$key])) {
+        return $translations[$L][$key];
+    }
+    // Fall back to Spanish so the user sees a real label instead of the raw key.
+    if (isset($translations['es'][$key])) {
+        return $translations['es'][$key];
+    }
+    return $key;
 }
 ?>

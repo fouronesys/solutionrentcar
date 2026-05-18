@@ -2,6 +2,10 @@ node_modules/
 .expo/
 dist/
 web-build/
+
+# Native dirs are generated on-demand by `expo prebuild`; never commit them.
+ios/
+android/
 *.log
 .env
 .env.*

@@ -51,6 +51,10 @@ npx expo start
 
 > Push notifications only work on a physical device, not in simulators.
 
+> **Looking for CI / Xcode / signing details?** See
+> [`BUILD.md`](./BUILD.md) — it documents the GitHub Actions workflows
+> (push → APK / IPA), required secrets, and the local Xcode flow.
+
 ## 3. Build for stores (EAS Build)
 
 You need a free Expo account. From `mobile/`:
