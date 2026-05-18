@@ -6,6 +6,21 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+/* --------------------------------------------------------------------
+ * Aggressive no-cache headers
+ * ------------------------------------------------------------------
+ * Mobile Safari and Chrome are particularly aggressive at caching
+ * back-navigation HTML, which has caused users to keep seeing stale
+ * pages (raw i18n keys like "nav_home") long after we shipped the fix
+ * server-side. These headers — combined with the meta tags in <head> —
+ * make sure every request gets a fresh render.
+ * ------------------------------------------------------------------ */
+if (!headers_sent()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+}
+
 include_once __DIR__ . "/../lang.php";
 
 /* ================= INCLUDES SEGUROS PHP 8.4 ================= */
@@ -125,6 +140,9 @@ $version = time();
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <link href="../../CF-SYSTEMS/storage/configuration/<?php echo $ticket_image_safe; ?>?v=<?php echo $version; ?>" rel="shortcut icon">
