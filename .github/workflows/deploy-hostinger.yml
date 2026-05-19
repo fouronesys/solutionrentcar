@@ -39,6 +39,7 @@ jobs:
             **/replit.md
             **/.env
             **/.env.*
+            **/config.local.php
             **/*.md
             **/start.sh
             **/.gitignore
