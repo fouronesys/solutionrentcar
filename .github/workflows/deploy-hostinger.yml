@@ -20,17 +20,6 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y lftp
 
-      - name: Debug secret shapes
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        run: |
-          fp(){ python3 -c "import sys,hashlib;s=sys.argv[1];print(f'len={len(s)} first={s[:1]!r} last={s[-1:]!r} sha={hashlib.sha256(s.encode()).hexdigest()[:8]}')" "$1"; }
-          echo "HOST: $(fp "$FTP_HOST")"
-          echo "USER: $(fp "$FTP_USER")"
-          echo "PASS: $(fp "$FTP_PASSWORD")"
-
       - name: Mirror to Hostinger via FTP
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -61,6 +50,7 @@ jobs:
               --exclude-glob .editorconfig \
               --exclude-glob tests/ \
               --exclude-glob test/ \
-              ./ /home/u144787244/domains/solutionsrentcar.do/public_html/
+              --exclude-glob home/ \
+              ./ /
             bye
           LFTP_EOF
