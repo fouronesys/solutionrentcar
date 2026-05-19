@@ -11,41 +11,12 @@ class Database {
     public int    $port;
 
     public function __construct(){
-        self::loadLocalConfig();
-        $this->host   = self::env('DB_HOST',   'srv500.hstgr.io');
-        $this->user   = self::env('DB_USER',   'u144787244_solutionsrent');
-        $this->pass   = self::env('DB_PASS',   'PSsolutions99');
-        $this->ddbb   = self::env('DB_NAME',   'u144787244_solutionsrent');
-        $this->socket = self::env('DB_SOCKET', '');
-        $this->port   = intval(self::env('DB_PORT', '3306'));
-    }
-
-    /**
-     * Loads /config.local.php if it exists (outside Git). That file should
-     * just set values into $_ENV, e.g.:
-     *   <?php
-     *   $_ENV['DB_PASS'] = 'mi_password_real';
-     *   $_ENV['JWT_SECRET'] = '...';
-     */
-    private static function loadLocalConfig(): void {
-        static $loaded = false;
-        if ($loaded) return;
-        $loaded = true;
-        $candidates = [
-            (defined('ROOT') ? ROOT : dirname(__DIR__, 2)) . '/config.local.php',
-            dirname(__DIR__, 2) . '/config.local.php',
-        ];
-        foreach ($candidates as $path) {
-            if (is_file($path)) { @include_once $path; return; }
-        }
-    }
-
-    private static function env(string $key, string $default): string {
-        $v = getenv($key);
-        if ($v === false || $v === '') {
-            $v = $_ENV[$key] ?? $_SERVER[$key] ?? $default;
-        }
-        return (string)$v;
+        $this->host   = 'srv500.hstgr.io';
+        $this->user   = 'u144787244_solutionsrent';
+        $this->pass   = 'PSsolutions99';
+        $this->ddbb   = 'u144787244_solutionsrent';
+        $this->socket = '';
+        $this->port   = 3306;
     }
 
     public function connect(){

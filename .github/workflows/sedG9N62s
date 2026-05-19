@@ -37,6 +37,8 @@ jobs:
             **/.replit
             **/replit.nix
             **/replit.md
+            **/.env
+            **/.env.*
             **/*.md
             **/start.sh
             **/.gitignore
