@@ -444,15 +444,16 @@ body{
     }
 
     #ftco-navbar > .container{
-        flex-wrap:nowrap;
+        flex-wrap:wrap;
     }
 
     .navbar-brand{
         font-size:15px;
-        flex:1 1 auto;
+        flex:1 1 0;
         min-width:0;
-        max-width:calc(100% - 60px);
+        max-width:calc(100% - 70px);
         overflow:hidden;
+        order:1;
     }
 
     .navbar-brand > div:last-child{
@@ -465,10 +466,23 @@ body{
     .navbar-toggler{
         flex:0 0 auto;
         margin-left:auto;
+        order:2;
     }
 
     .navbar-collapse{
-        flex-basis:100%;
+        order:3;
+        flex:1 1 100% !important;
+        width:100%;
+        max-width:100%;
+    }
+
+    .navbar-collapse:not(.show){
+        display:none !important;
+    }
+
+    .navbar-collapse.show,
+    .navbar-collapse.collapsing{
+        display:block !important;
     }
 
     .logo-box{
