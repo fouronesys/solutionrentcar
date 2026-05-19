@@ -23,9 +23,9 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_REMOTE_DIR || '/public_html/' }}
-          protocol: ${{ secrets.FTP_PROTOCOL || 'ftps' }}
-          port: ${{ secrets.FTP_PORT || 21 }}
+          server-dir: /public_html/
+          protocol: ftps
+          port: 21
           log-level: minimal
           exclude: |
             **/.git*
