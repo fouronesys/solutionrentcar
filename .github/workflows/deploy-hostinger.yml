@@ -27,30 +27,29 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           set +x
-          cat > /tmp/lftp.script <<SCRIPT
-          set ssl:verify-certificate no
-          set ftp:ssl-allow no
-          set net:max-retries 3
-          set net:timeout 20
-          set xfer:clobber on
-          open -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST"
-          mirror --reverse --delete --verbose --parallel=4 \\
-            --exclude-glob .git* \\
-            --exclude-glob .github/ \\
-            --exclude-glob node_modules/ \\
-            --exclude-glob mobile/ \\
-            --exclude-glob .local/ \\
-            --exclude-glob .replit \\
-            --exclude-glob replit.nix \\
-            --exclude-glob replit.md \\
-            --exclude-glob '*.md' \\
-            --exclude-glob start.sh \\
-            --exclude-glob .gitignore \\
-            --exclude-glob .gitattributes \\
-            --exclude-glob .editorconfig \\
-            --exclude-glob tests/ \\
-            --exclude-glob test/ \\
-            ./ /home/u144787244/domains/solutionsrentcar.do/public_html/
-          bye
-          SCRIPT
-          lftp -f /tmp/lftp.script
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" <<'LFTP_EOF'
+            set ssl:verify-certificate no
+            set ftp:ssl-allow no
+            set net:max-retries 3
+            set net:timeout 20
+            set xfer:clobber on
+            mirror --reverse --delete --verbose --parallel=4 \
+              --exclude-glob .git* \
+              --exclude-glob .github/ \
+              --exclude-glob node_modules/ \
+              --exclude-glob mobile/ \
+              --exclude-glob .local/ \
+              --exclude-glob .replit \
+              --exclude-glob replit.nix \
+              --exclude-glob replit.md \
+              --exclude-glob '*.md' \
+              --exclude-glob start.sh \
+              --exclude-glob .gitignore \
+              --exclude-glob .gitattributes \
+              --exclude-glob .editorconfig \
+              --exclude-glob tests/ \
+              --exclude-glob test/ \
+              ./ /home/u144787244/domains/solutionsrentcar.do/public_html/
+            bye
+          LFTP_EOF
