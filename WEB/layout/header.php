@@ -360,6 +360,25 @@ body{
     font-weight:normal !important;
 }
 
+/* Fallback hamburger (3 lineas) si Font Awesome no carga */
+.navbar-toggler .toggler-fallback{
+    display:inline-block;
+    width:22px;
+    height:16px;
+    position:relative;
+}
+.navbar-toggler .toggler-fallback span{
+    position:absolute;
+    left:0;
+    right:0;
+    height:2px;
+    background:#0f172a;
+    border-radius:2px;
+}
+.navbar-toggler .toggler-fallback span:nth-child(1){ top:0; }
+.navbar-toggler .toggler-fallback span:nth-child(2){ top:7px; }
+.navbar-toggler .toggler-fallback span:nth-child(3){ top:14px; }
+
 /* ================= LANG SWITCHER ================= */
 
 .lang-switcher{
@@ -496,7 +515,7 @@ body{
 
 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-label="Menu" aria-controls="ftco-nav" aria-expanded="false">
 
-    <i class="fa fa-bars" aria-hidden="true"></i>
+    <span class="toggler-fallback" aria-hidden="true"><span></span><span></span><span></span></span>
 
 </button>
 
