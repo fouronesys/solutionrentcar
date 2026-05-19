@@ -332,19 +332,31 @@ body{
 /* ================= MOBILE ================= */
 
 .navbar-toggler{
-    width:60px;
-    height:60px;
-    border:none;
-    border-radius:20px;
-    background:#0b132b;
+    width:46px;
+    height:46px;
+    padding:0;
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius:10px;
+    background:#ffffff;
     display:flex;
     align-items:center;
     justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+    transition:background .2s ease, border-color .2s ease;
+}
+
+.navbar-toggler:hover,
+.navbar-toggler:focus{
+    background:#f9fafb;
+    border-color:rgba(0,0,0,0.18);
+    outline:none;
+    box-shadow:0 2px 8px rgba(0,0,0,.10);
 }
 
 .navbar-toggler i{
-    color:#fff;
-    font-size:28px;
+    color:#0f172a;
+    font-size:20px;
+    line-height:1;
     font-weight:normal !important;
 }
 
@@ -397,21 +409,29 @@ body{
 @media(max-width:991px){
 
     body{
-        padding-top:90px !important;
+        padding-top:80px !important;
     }
 
     #ftco-navbar{
-        padding:16px 0;
+        padding:10px 0;
     }
 
     .navbar-brand{
-        font-size:18px;
+        font-size:16px;
+        max-width:calc(100% - 60px);
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
     }
 
     .logo-box{
-        width:45px;
-        height:45px;
-        border-radius:14px;
+        width:42px;
+        height:42px;
+        border-radius:12px;
+    }
+
+    .brand-mini{
+        font-size:11px !important;
     }
 
     .navbar-collapse{
@@ -474,9 +494,9 @@ body{
 
 </a>
 
-<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav">
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-label="Menu" aria-controls="ftco-nav" aria-expanded="false">
 
-    <i class="fa fa-stream"></i>
+    <i class="fa fa-bars" aria-hidden="true"></i>
 
 </button>
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Text, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { colors } from "@/theme/colors";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
@@ -38,6 +39,8 @@ function InboxIcon({ focused }: { focused: boolean }) {
 
 export default function StaffLayout() {
   return (
+    <>
+    <StatusBar style="light" />
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
@@ -76,5 +79,6 @@ export default function StaffLayout() {
       <Tabs.Screen name="booking/[id]" options={{ href: null }} />
       <Tabs.Screen name="pay/[bookingId]" options={{ href: null }} />
     </Tabs>
+    </>
   );
 }

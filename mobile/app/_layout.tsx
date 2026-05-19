@@ -30,7 +30,7 @@ function Gate() {
   }, [bootstrapped, role, segments, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#F5F7FA" } }} />
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#FFFFFF" } }} />
   );
 }
 
@@ -59,7 +59,7 @@ export default function RootLayout() {
         <AuthProvider>
           <NotificationsProvider>
             <UpdatesWatcher />
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
             <Gate />
           </NotificationsProvider>
         </AuthProvider>
