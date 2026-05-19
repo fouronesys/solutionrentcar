@@ -1,17 +1,7 @@
-node_modules/
-.expo/
-dist/
-web-build/
-
-# Native dirs are generated on-demand by `expo prebuild`; never commit them.
-ios/
-android/
-*.log
-.env
-.env.*
-!.env.example
 google-service-account.json
-GoogleService-Info.plist
-google-services.json
-.DS_Store
+google-services-firebase.json
+*.p8
+*.p12
+*.keystore
+*.jks
 CREDENTIALS.md
