@@ -51,6 +51,9 @@ jobs:
               --exclude-glob tests/ \
               --exclude-glob test/ \
               --exclude-glob home/ \
+              --exclude-glob CF-SYSTEMS/storage/ \
+              --exclude-glob firmas/ \
+              --exclude-glob backups/ \
               ./ /
             bye
           LFTP_EOF
