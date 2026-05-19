@@ -84,6 +84,7 @@ $version = "1.0";
             <li><a href="<?php echo $baseUrlFooterSafe; ?>about.php"><?php echo __('footer_about'); ?></a></li>
             <li><a href="<?php echo $baseUrlFooterSafe; ?>services.php"><?php echo __('footer_services'); ?></a></li>
             <li><a href="<?php echo $baseUrlFooterSafe; ?>contact.php"><?php echo __('footer_contact'); ?></a></li>
+            <li><a href="<?php echo $baseUrlFooterSafe; ?>privacy.php"><?php echo __('nav_privacy'); ?></a></li>
           </ul>
 
         </div>

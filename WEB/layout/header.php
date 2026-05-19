@@ -665,6 +665,12 @@ body{
     </a>
 </li>
 
+<li class="nav-item">
+    <a href="<?php echo $base_url_safe; ?>privacy.php" class="nav-link">
+        <?php echo __('nav_privacy'); ?>
+    </a>
+</li>
+
 <?php if(isset($_SESSION['client_id']) && intval($_SESSION['client_id']) > 0):
     if(!class_exists('NotificationData')){
         @include_once __DIR__ . "/../../core/app/model/NotificationData.php";
