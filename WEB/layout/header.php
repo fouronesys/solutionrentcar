@@ -232,6 +232,14 @@ body{
     box-shadow:0 10px 40px rgba(0,0,0,.04);
 }
 
+#ftco-navbar > .container{
+    display:flex !important;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+
 .navbar-brand{
     display:flex !important;
     align-items:center;
@@ -435,12 +443,32 @@ body{
         padding:10px 0;
     }
 
+    #ftco-navbar > .container{
+        flex-wrap:nowrap;
+    }
+
     .navbar-brand{
-        font-size:16px;
+        font-size:15px;
+        flex:1 1 auto;
+        min-width:0;
         max-width:calc(100% - 60px);
-        white-space:nowrap;
+        overflow:hidden;
+    }
+
+    .navbar-brand > div:last-child{
+        min-width:0;
         overflow:hidden;
         text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .navbar-toggler{
+        flex:0 0 auto;
+        margin-left:auto;
+    }
+
+    .navbar-collapse{
+        flex-basis:100%;
     }
 
     .logo-box{
@@ -450,7 +478,10 @@ body{
     }
 
     .brand-mini{
-        font-size:11px !important;
+        font-size:10px !important;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
     }
 
     .navbar-collapse{
