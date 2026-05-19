@@ -33,6 +33,7 @@ jobs:
           set net:max-retries 3
           set net:timeout 20
           set xfer:clobber on
+          open -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST"
           mirror --reverse --delete --verbose --parallel=4 \\
             --exclude-glob .git* \\
             --exclude-glob .github/ \\
@@ -52,4 +53,4 @@ jobs:
             ./ /home/u144787244/domains/solutionsrentcar.do/public_html/
           bye
           SCRIPT
-          lftp -u "$FTP_USER,$FTP_PASSWORD" -f /tmp/lftp.script "$FTP_HOST"
+          lftp -f /tmp/lftp.script
