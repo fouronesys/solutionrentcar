@@ -8,13 +8,23 @@ class Database {
     public string $host;
     public string $ddbb;
     public string $socket;
+    public int    $port;
 
     public function __construct(){
-        $this->user = "u144787244_solutionsrent";
-        $this->pass = "PSsolutions99";
-        $this->host = "srv500.hstgr.io";
-        $this->ddbb = "u144787244_solutionsrent";
-        $this->socket = "";
+        $this->host   = self::env('DB_HOST',   'srv500.hstgr.io');
+        $this->user   = self::env('DB_USER',   'u144787244_solutionsrent');
+        $this->pass   = self::env('DB_PASS',   'PSsolutions99');
+        $this->ddbb   = self::env('DB_NAME',   'u144787244_solutionsrent');
+        $this->socket = self::env('DB_SOCKET', '');
+        $this->port   = intval(self::env('DB_PORT', '3306'));
+    }
+
+    private static function env(string $key, string $default): string {
+        $v = getenv($key);
+        if ($v === false || $v === '') {
+            $v = $_ENV[$key] ?? $_SERVER[$key] ?? $default;
+        }
+        return (string)$v;
     }
 
     public function connect(){
@@ -23,7 +33,7 @@ class Database {
             $this->user,
             $this->pass,
             $this->ddbb,
-            3306
+            $this->port
         );
 
         if ($con->connect_errno) {
