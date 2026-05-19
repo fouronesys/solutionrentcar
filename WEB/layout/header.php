@@ -564,6 +564,40 @@ body{
 
 </button>
 
+<script>
+(function(){
+  function bindToggle(){
+    var btn = document.querySelector('#ftco-navbar .navbar-toggler');
+    var menu = document.getElementById('ftco-nav');
+    if(!btn || !menu || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var open = menu.classList.contains('show');
+      if(open){
+        menu.classList.remove('show');
+        btn.setAttribute('aria-expanded','false');
+      } else {
+        menu.classList.add('show');
+        btn.setAttribute('aria-expanded','true');
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!menu.classList.contains('show')) return;
+      if(menu.contains(e.target) || btn.contains(e.target)) return;
+      menu.classList.remove('show');
+      btn.setAttribute('aria-expanded','false');
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bindToggle);
+  } else {
+    bindToggle();
+  }
+})();
+</script>
+
 <div class="collapse navbar-collapse" id="ftco-nav">
 
 <ul class="navbar-nav ml-auto align-items-lg-center">
