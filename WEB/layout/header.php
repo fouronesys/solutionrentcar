@@ -280,6 +280,25 @@ body{
     text-transform:uppercase;
 }
 
+#ftco-navbar .navbar-nav,
+#ftco-navbar .navbar-nav li{
+    list-style:none !important;
+    padding-left:0 !important;
+    margin:0;
+}
+
+#ftco-navbar .navbar-nav{
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+#ftco-navbar .navbar-nav .nav-link,
+#ftco-navbar .navbar-nav a{
+    text-decoration:none !important;
+}
+
 .navbar-dark .navbar-nav .nav-link{
     color:#111827 !important;
     font-size:15px;
@@ -504,6 +523,20 @@ body{
         padding:18px;
         border-radius:25px;
         box-shadow:0 20px 50px rgba(0,0,0,.08);
+    }
+
+    #ftco-navbar .navbar-nav{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    #ftco-navbar .navbar-nav li{
+        width:100%;
+    }
+
+    #ftco-navbar .navbar-nav .nav-link{
+        display:block;
+        text-align:left;
     }
 
     .navbar-dark .navbar-nav .nav-link{
