@@ -62,7 +62,7 @@
     },
     "extra": {
       "router": { "origin": false },
-      "apiBaseUrl": "https://solutionsrentcar.com/CF-SYSTEMS/api/v1"
+      "apiBaseUrl": "https://4e410b51-416b-41ce-be6c-de365e05bf07-00-2z9m06m2cayzi.worf.replit.dev/CF-SYSTEMS/api/v1"
     }
   }
 }
