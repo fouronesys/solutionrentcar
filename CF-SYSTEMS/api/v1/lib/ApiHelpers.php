@@ -127,6 +127,7 @@ class ApiHelpers {
     }
 
     public static function bookingToArray($b): array {
+        $firma = trim((string)($b->firma ?? ''));
         return [
             'id' => intval($b->id),
             'code' => (string)$b->code,
@@ -145,6 +146,8 @@ class ApiHelpers {
             'fuel' => (string)$b->fuel,
             'comment' => (string)$b->comment,
             'created_at' => (string)$b->created_at,
+            'signature' => $firma !== '' ? self::normalizeUrl($firma) : null,
+            'has_signature' => $firma !== '',
         ];
     }
 
@@ -160,6 +163,12 @@ class ApiHelpers {
             'passport' => (string)$p->passport,
             'license' => (string)$p->license,
             'stock_id' => intval($p->stock_id),
+            'documents' => [
+                'cedula'   => !empty($p->invoice_file)  ? self::normalizeUrl((string)$p->invoice_file)  : null,
+                'passport' => !empty($p->passport_file) ? self::normalizeUrl((string)$p->passport_file) : null,
+                'license'  => !empty($p->license_file)  ? self::normalizeUrl((string)$p->license_file)  : null,
+                'home'     => !empty($p->home_file)     ? self::normalizeUrl((string)$p->home_file)     : null,
+            ],
         ];
     }
 

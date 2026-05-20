@@ -11,6 +11,13 @@ export type Tokens = {
 
 export type Role = "client" | "staff";
 
+export type ClientDocuments = {
+  cedula?: string | null;
+  passport?: string | null;
+  license?: string | null;
+  home?: string | null;
+};
+
 export type Profile = {
   id: number;
   name?: string;
@@ -28,6 +35,7 @@ export type Profile = {
   passport?: string;
   license?: string;
   image?: string;
+  documents?: ClientDocuments;
 };
 
 export type Car = {
@@ -73,7 +81,8 @@ export type Booking = {
   place_start?: string;
   place_end?: string;
   comment?: string;
-  signature?: string;
+  signature?: string | null;
+  has_signature?: boolean;
   created_at?: string;
 };
 

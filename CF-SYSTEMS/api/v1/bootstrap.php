@@ -22,6 +22,10 @@ if (!defined('ROOT')) define('ROOT', $ROOT);
 chdir($ROOT);
 
 require_once $ROOT . '/core/autoload.php';
+// Inner autoloader registers spl_autoload_register so Data models load on demand.
+if (file_exists($ROOT . '/core/app/autoload.php')) {
+    require_once $ROOT . '/core/app/autoload.php';
+}
 
 // Load API libs
 require_once __DIR__ . '/lib/ApiResponse.php';

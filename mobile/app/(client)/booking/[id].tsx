@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View, Image } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Loading } from "@/components/Loading";
@@ -14,6 +14,7 @@ import { useAuth } from "@/auth/AuthContext";
 
 export default function BookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { role } = useAuth();
   const [detail, setDetail] = useState<BookingDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -109,8 +110,18 @@ export default function BookingDetailScreen() {
 
         {booking.signature ? (
           <Card>
-            <Text style={styles.section}>Firma</Text>
+            <Text style={styles.section}>{t("booking.signed")}</Text>
             <Image source={{ uri: booking.signature }} style={styles.sig} resizeMode="contain" />
+          </Card>
+        ) : role === "client" && [0, 1].includes(Number(booking.status)) ? (
+          <Card>
+            <Text style={styles.section}>{t("booking.needsSignature")}</Text>
+            <Button
+              title={t("booking.signNow")}
+              onPress={() =>
+                router.push({ pathname: "/(client)/sign/[id]", params: { id: String(booking.id) } })
+              }
+            />
           </Card>
         ) : null}
 

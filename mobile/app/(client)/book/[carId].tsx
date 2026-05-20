@@ -1,49 +1,115 @@
-import React, { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { api, ApiError } from "@/api/client";
-import type { Insurance } from "@/api/types";
+import type { Car, Insurance } from "@/api/types";
 import { colors } from "@/theme/colors";
-import { t } from "@/i18n";
+import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
 
+type Location = { id: number; name: string };
+
+function parseDbDate(s: string | undefined): Date | null {
+  if (!s) return null;
+  const d = new Date(s.replace(" ", "T"));
+  return isNaN(d.getTime()) ? null : d;
+}
 function defaultStart() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   d.setHours(10, 0, 0, 0);
-  return toDbDateTime(d);
+  return d;
 }
 function defaultEnd() {
   const d = new Date();
   d.setDate(d.getDate() + 4);
   d.setHours(18, 0, 0, 0);
-  return toDbDateTime(d);
+  return d;
+}
+function fmt(d: Date) {
+  return d.toLocaleString(i18n.locale === "en" ? "en-US" : "es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function BookCar() {
-  const { carId } = useLocalSearchParams<{ carId: string }>();
+  const params = useLocalSearchParams<{ carId: string; start?: string; end?: string }>();
   const router = useRouter();
-  const [start, setStart] = useState(defaultStart());
-  const [end, setEnd] = useState(defaultEnd());
+
+  const [car, setCar] = useState<Car | null>(null);
+  const [start, setStart] = useState<Date>(parseDbDate(params.start) ?? defaultStart());
+  const [end, setEnd] = useState<Date>(parseDbDate(params.end) ?? defaultEnd());
+  const [showStart, setShowStart] = useState(false);
+  const [showEnd, setShowEnd] = useState(false);
+
   const [placeStart, setPlaceStart] = useState("");
   const [placeEnd, setPlaceEnd] = useState("");
+  const [locations, setLocations] = useState<Location[]>([]);
   const [comment, setComment] = useState("");
   const [extras, setExtras] = useState<Insurance[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<Set<number>>(new Set());
+  const [paymentMethod, setPaymentMethod] = useState<"cash">("cash");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        const r = await api.get<{ insurances: Insurance[] }>("/catalog/insurances");
-        if (Array.isArray(r.insurances)) setExtras(r.insurances);
+        const r = await api.get<{ car: Car }>(`/cars/${params.carId}`);
+        if (r.car) setCar(r.car);
       } catch {
-        /* optional — extras stay empty if catalog isn't available */
+        /* ignore */
+      }
+      try {
+        const ins = await api.get<{ insurances: Insurance[] }>("/catalog/insurances");
+        if (Array.isArray(ins.insurances)) setExtras(ins.insurances);
+      } catch {
+        /* ignore */
+      }
+      try {
+        const loc = await api.get<{ locations: Location[] }>("/catalog/locations");
+        if (Array.isArray(loc.locations) && loc.locations.length) {
+          setLocations(loc.locations);
+          setPlaceStart(loc.locations[0].name);
+          setPlaceEnd(loc.locations[0].name);
+        }
+      } catch {
+        /* ignore */
       }
     })();
-  }, []);
+  }, [params.carId]);
+
+  const days = useMemo(() => {
+    return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+  }, [start, end]);
+
+  const pricePerDay = Number(car?.price ?? car?.price_day ?? 0);
+  const extrasTotal = useMemo(() => {
+    let sum = 0;
+    extras.forEach((e) => {
+      if (selectedExtras.has(e.id)) sum += Number(e.price ?? 0) * days;
+    });
+    return sum;
+  }, [extras, selectedExtras, days]);
+
+  const subtotal = pricePerDay * days;
+  const total = subtotal + extrasTotal;
 
   const toggleExtra = (id: number) => {
     setSelectedExtras((prev) => {
@@ -55,21 +121,28 @@ export default function BookCar() {
   };
 
   const submit = async () => {
+    if (!placeStart.trim() || !placeEnd.trim()) {
+      Alert.alert(t("booking.placeStart"));
+      return;
+    }
     setLoading(true);
     try {
       const extraIds = Array.from(selectedExtras);
       const r = await api.post<{ booking: { id: number } }>("/bookings", {
-        car_id: Number(carId),
-        start_at: start,
-        end_at: end,
+        car_id: Number(params.carId),
+        start_at: toDbDateTime(start),
+        end_at: toDbDateTime(end),
         place_start: placeStart,
         place_end: placeEnd,
         comment,
         insurance_ids: extraIds,
         extras: extraIds,
+        price: pricePerDay,
+        total,
+        sure: extrasTotal,
+        payment_method: paymentMethod,
       });
-      Alert.alert(t("booking.created"));
-      router.replace({ pathname: "/(client)/booking/[id]", params: { id: String(r.booking.id) } });
+      router.replace({ pathname: "/(client)/sign/[id]", params: { id: String(r.booking.id) } });
     } catch (e) {
       Alert.alert(e instanceof ApiError ? e.message : t("common.error"));
     } finally {
@@ -82,35 +155,159 @@ export default function BookCar() {
       <Stack.Screen options={{ headerShown: true, title: t("booking.title") }} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
-          <Text style={styles.hint}>YYYY-MM-DD HH:MM:SS</Text>
-          <Input label={t("booking.start")} value={start} onChangeText={setStart} autoCapitalize="none" />
-          <Input label={t("booking.end")} value={end} onChangeText={setEnd} autoCapitalize="none" />
-          <Input label={t("booking.placeStart")} value={placeStart} onChangeText={setPlaceStart} />
-          <Input label={t("booking.placeEnd")} value={placeEnd} onChangeText={setPlaceEnd} />
-          <Input label={t("booking.comment")} value={comment} onChangeText={setComment} multiline numberOfLines={3} />
+          {car ? (
+            <Card>
+              <Text style={styles.carTitle}>
+                {car.brand ? `${car.brand} ` : ""}
+                {car.name ?? car.model ?? ""}
+              </Text>
+              <Text style={styles.carMeta}>
+                {car.year ? `${car.year} · ` : ""}
+                {car.transmission ?? ""} {car.fuel ? `· ${car.fuel}` : ""}
+              </Text>
+              <Text style={styles.carPrice}>
+                {money(pricePerDay)} <Text style={styles.per}>{t("cars.perDay")}</Text>
+              </Text>
+            </Card>
+          ) : null}
+
+          <Card>
+            <Text style={styles.label}>{t("booking.start")}</Text>
+            <Pressable style={styles.dateBtn} onPress={() => setShowStart(true)}>
+              <Text style={styles.dateText}>{fmt(start)}</Text>
+            </Pressable>
+            {showStart && (
+              <DateTimePicker
+                value={start}
+                mode="datetime"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                minimumDate={new Date()}
+                onChange={(_: DateTimePickerEvent, d?: Date) => {
+                  setShowStart(Platform.OS === "ios");
+                  if (d) {
+                    setStart(d);
+                    if (d >= end) setEnd(new Date(d.getTime() + 3 * 86400000));
+                  }
+                }}
+              />
+            )}
+
+            <Text style={styles.label}>{t("booking.end")}</Text>
+            <Pressable style={styles.dateBtn} onPress={() => setShowEnd(true)}>
+              <Text style={styles.dateText}>{fmt(end)}</Text>
+            </Pressable>
+            {showEnd && (
+              <DateTimePicker
+                value={end}
+                mode="datetime"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                minimumDate={new Date(start.getTime() + 3600000)}
+                onChange={(_: DateTimePickerEvent, d?: Date) => {
+                  setShowEnd(Platform.OS === "ios");
+                  if (d) setEnd(d);
+                }}
+              />
+            )}
+          </Card>
+
+          <Card>
+            <Text style={styles.label}>{t("booking.placeStart")}</Text>
+            {locations.length > 0 ? (
+              <View style={styles.chipRow}>
+                {locations.map((l) => (
+                  <Pressable
+                    key={`s-${l.id}`}
+                    onPress={() => setPlaceStart(l.name)}
+                    style={[styles.chip, placeStart === l.name && styles.chipActive]}
+                  >
+                    <Text style={[styles.chipText, placeStart === l.name && styles.chipTextActive]}>{l.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <Input value={placeStart} onChangeText={setPlaceStart} />
+            )}
+
+            <Text style={styles.label}>{t("booking.placeEnd")}</Text>
+            {locations.length > 0 ? (
+              <View style={styles.chipRow}>
+                {locations.map((l) => (
+                  <Pressable
+                    key={`e-${l.id}`}
+                    onPress={() => setPlaceEnd(l.name)}
+                    style={[styles.chip, placeEnd === l.name && styles.chipActive]}
+                  >
+                    <Text style={[styles.chipText, placeEnd === l.name && styles.chipTextActive]}>{l.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <Input value={placeEnd} onChangeText={setPlaceEnd} />
+            )}
+
+            <Input label={t("booking.comment")} value={comment} onChangeText={setComment} multiline numberOfLines={3} />
+          </Card>
 
           {extras.length > 0 ? (
-            <View style={{ marginBottom: 16 }}>
+            <Card>
               <Text style={styles.label}>{t("booking.extras")}</Text>
               {extras.map((ex) => {
                 const active = selectedExtras.has(ex.id);
                 return (
-                  <Text
+                  <Pressable
                     key={ex.id}
                     onPress={() => toggleExtra(ex.id)}
-                    style={[styles.row, active && styles.rowActive]}
+                    style={[styles.extraRow, active && styles.extraActive]}
                   >
-                    {active ? "☑  " : "☐  "}
-                    {ex.name}
-                    {ex.price ? `   ·   ${money(ex.price)}` : ""}
-                  </Text>
+                    <Text style={[styles.extraName, active && { color: colors.primary }]}>
+                      {active ? "☑  " : "☐  "}
+                      {ex.name}
+                    </Text>
+                    {ex.price ? <Text style={styles.extraPrice}>{money(ex.price)}/{t("booking.days").toLowerCase()}</Text> : null}
+                  </Pressable>
                 );
               })}
-            </View>
+            </Card>
           ) : null}
 
-          <View style={{ height: 12 }} />
+          <Card>
+            <Text style={styles.label}>{t("booking.paymentMethod")}</Text>
+            <Pressable
+              onPress={() => setPaymentMethod("cash")}
+              style={[styles.extraRow, paymentMethod === "cash" && styles.extraActive]}
+            >
+              <Text style={[styles.extraName, paymentMethod === "cash" && { color: colors.primary }]}>
+                {paymentMethod === "cash" ? "●  " : "○  "}
+                {t("booking.cashOnPickup")}
+              </Text>
+            </Pressable>
+          </Card>
+
+          <Card>
+            <Text style={styles.label}>{t("booking.summary")}</Text>
+            <View style={styles.kv}>
+              <Text style={styles.k}>{t("booking.days")}</Text>
+              <Text style={styles.v}>{days}</Text>
+            </View>
+            <View style={styles.kv}>
+              <Text style={styles.k}>{t("booking.subtotal")}</Text>
+              <Text style={styles.v}>{money(subtotal)}</Text>
+            </View>
+            {extrasTotal > 0 ? (
+              <View style={styles.kv}>
+                <Text style={styles.k}>{t("booking.extrasTotal")}</Text>
+                <Text style={styles.v}>{money(extrasTotal)}</Text>
+              </View>
+            ) : null}
+            <View style={[styles.kv, { marginTop: 6, paddingTop: 6, borderTopWidth: 1, borderTopColor: colors.border }]}>
+              <Text style={[styles.k, { fontWeight: "700", color: colors.text }]}>{t("booking.total")}</Text>
+              <Text style={[styles.v, { fontWeight: "700", fontSize: 18, color: colors.primary }]}>{money(total)}</Text>
+            </View>
+          </Card>
+
+          <View style={{ height: 8 }} />
           <Button title={t("booking.submit")} onPress={submit} loading={loading} />
+          <Text style={styles.hint}>{t("booking.signRequired")}</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -118,19 +315,51 @@ export default function BookCar() {
 }
 
 const styles = StyleSheet.create({
-  hint: { color: colors.textMuted, fontSize: 12, marginBottom: 8 },
-  label: { fontSize: 13, color: colors.textMuted, marginBottom: 6, fontWeight: "500" },
-  row: {
-    paddingVertical: 10,
+  carTitle: { fontSize: 17, fontWeight: "700", color: colors.text },
+  carMeta: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
+  carPrice: { fontSize: 18, color: colors.primary, fontWeight: "700", marginTop: 8 },
+  per: { fontSize: 12, color: colors.textMuted, fontWeight: "400" },
+  label: { fontSize: 13, color: colors.textMuted, marginBottom: 6, marginTop: 6, fontWeight: "500" },
+  dateBtn: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#fff",
+    marginBottom: 4,
+  },
+  dateText: { color: colors.text, fontSize: 14, fontWeight: "600" },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: 4 },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: "#fff",
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  chipActive: { borderColor: colors.primary, backgroundColor: colors.primary + "15" },
+  chipText: { color: colors.text, fontSize: 13 },
+  chipTextActive: { color: colors.primary, fontWeight: "700" },
+  extraRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
     backgroundColor: "#fff",
     marginBottom: 6,
-    color: colors.text,
-    fontSize: 14,
-    overflow: "hidden",
   },
-  rowActive: { borderColor: colors.primary, backgroundColor: colors.primary + "11" },
+  extraActive: { borderColor: colors.primary, backgroundColor: colors.primary + "11" },
+  extraName: { color: colors.text, fontSize: 14, flex: 1 },
+  extraPrice: { color: colors.textMuted, fontSize: 13 },
+  kv: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
+  k: { color: colors.textMuted, fontSize: 13 },
+  v: { color: colors.text, fontSize: 14 },
+  hint: { color: colors.textMuted, fontSize: 12, marginTop: 10, textAlign: "center", fontStyle: "italic" },
 });

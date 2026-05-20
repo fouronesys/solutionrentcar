@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
@@ -10,6 +10,7 @@ import { colors } from "@/theme/colors";
 import { t } from "@/i18n";
 
 export default function ClientLogin() {
+  const router = useRouter();
   const { loginClient } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -52,6 +53,12 @@ export default function ClientLogin() {
           />
           <View style={{ height: 8 }} />
           <Button title={t("login.client.submit")} onPress={submit} loading={loading} />
+
+          <Pressable onPress={() => router.push("/register/client")} style={styles.linkWrap}>
+            <Text style={styles.link}>
+              {t("login.noAccount")} <Text style={styles.linkStrong}>{t("login.createAccount")}</Text>
+            </Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -62,4 +69,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { padding: 20 },
   heading: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 16 },
+  linkWrap: { paddingVertical: 18, alignItems: "center" },
+  link: { color: colors.textMuted, fontSize: 14 },
+  linkStrong: { color: colors.primary, fontWeight: "700" },
 });

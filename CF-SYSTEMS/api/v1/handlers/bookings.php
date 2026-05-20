@@ -128,6 +128,59 @@ if ($method === 'POST' && $id > 0 && ($sub === 'deliver' || $sub === 'return')) 
     ApiResponse::ok(['booking' => ApiHelpers::bookingToArray(BookingData::getById($id))]);
 }
 
+if ($method === 'POST' && $id > 0 && $sub === 'sign') {
+    $b = BookingData::getById($id);
+    if (!_booking_can_view($auth, $b)) ApiResponse::err('not_found', 'Reserva no encontrada', 404);
+    if ($auth['type'] === 'client' && intval($b->person_id) !== intval($auth['id'])) {
+        ApiResponse::err('forbidden', 'No puedes firmar esta reserva', 403);
+    }
+    if (in_array(intval($b->status), [2, 4], true)) {
+        ApiResponse::err('conflict', 'No se puede firmar una reserva cancelada o finalizada', 409);
+    }
+
+    $body = ApiResponse::input();
+    $sig  = (string)($body['signature'] ?? '');
+    if ($sig === '') ApiResponse::err('invalid_request', 'signature requerido (base64 PNG)', 400);
+
+    if (preg_match('#^data:image/\w+;base64,#i', $sig)) {
+        $sig = preg_replace('#^data:image/\w+;base64,#i', '', $sig);
+    }
+    $sig = str_replace(' ', '+', $sig);
+    $bin = base64_decode($sig, true);
+    if ($bin === false || strlen($bin) < 100) {
+        ApiResponse::err('invalid_request', 'Firma inválida', 400);
+    }
+
+    $dir = dirname(__DIR__, 3) . '/firmas';
+    if (!is_dir($dir)) @mkdir($dir, 0775, true);
+    $filename = 'booking_' . $id . '_' . time() . '.png';
+    $abs = $dir . '/' . $filename;
+    if (file_put_contents($abs, $bin) === false) {
+        ApiResponse::err('server_error', 'No se pudo guardar la firma', 500);
+    }
+
+    $b->firma = 'firmas/' . $filename;
+    $b->update_firma();
+    // Auto-confirm booking once signed (status 0 → 1)
+    if (intval($b->status) === 0) {
+        $b->status = 1;
+        $b->update_status();
+    }
+
+    if (class_exists('NotificationService')) {
+        NotificationService::notifyStockUsers(intval($b->stock_id),
+            defined('NotificationService::EVENT_BOOKING_SIGNED') ? NotificationService::EVENT_BOOKING_SIGNED : 'booking_signed',
+            'Reserva firmada por cliente',
+            'El cliente firmó la reserva #'.$b->id.'.',
+            ['booking_id' => intval($b->id), 'stock_id' => intval($b->stock_id)]);
+    }
+
+    ApiResponse::ok([
+        'booking'       => ApiHelpers::bookingToArray(BookingData::getById($id)),
+        'signature_url' => ApiHelpers::normalizeUrl('firmas/' . $filename),
+    ]);
+}
+
 if ($method === 'POST' && $id > 0 && $sub === 'cancel') {
     $b = BookingData::getById($id);
     if (!_booking_can_view($auth, $b)) ApiResponse::err('not_found', 'Reserva no encontrada', 404);
@@ -225,9 +278,20 @@ if ($method === 'POST' && $id === 0) {
         ApiResponse::err('conflict', 'El vehículo no está disponible en ese rango', 409);
     }
 
-    $days = max(1, intval(ceil(($tsEnd - $tsStart) / 86400)));
-    $price = isset($body['price']) ? floatval($body['price']) : floatval($car->price);
-    $total = isset($body['total']) ? floatval($body['total']) : $price * $days;
+    $days  = max(1, intval(ceil(($tsEnd - $tsStart) / 86400)));
+    $sure  = floatval($body['sure'] ?? 0);
+
+    if ($auth['type'] === 'client') {
+        // Server-authoritative pricing for clients. We trust the car's price
+        // and accept `sure` (extras) only if non-negative, then compute total.
+        $price = floatval($car->price);
+        if ($sure < 0) $sure = 0;
+        $total = ($price * $days) + $sure;
+    } else {
+        // Staff may override (manual quotes, custom discounts).
+        $price = isset($body['price']) ? floatval($body['price']) : floatval($car->price);
+        $total = isset($body['total']) ? floatval($body['total']) : ($price * $days) + $sure;
+    }
 
     $b = new BookingData();
     $b->person_id   = $person_id;
@@ -247,7 +311,7 @@ if ($method === 'POST' && $id === 0) {
     $b->status      = 0; // pending
     $b->fuel        = (string)($body['fuel'] ?? '');
     $b->deposit     = floatval($body['deposit'] ?? 0);
-    $b->sure        = floatval($body['sure'] ?? 0);
+    $b->sure        = $sure;
     $b->payment     = '0';
     $b->card        = '0';
 

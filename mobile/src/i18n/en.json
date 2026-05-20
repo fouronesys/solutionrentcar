@@ -38,7 +38,27 @@
     "errors": {
       "invalid": "Invalid credentials",
       "empty": "Please complete all fields"
-    }
+    },
+    "noAccount": "No account yet?",
+    "createAccount": "Create account"
+  },
+  "register": {
+    "title": "Create account",
+    "subtitle": "Start booking in minutes",
+    "name": "First name",
+    "lastname": "Last name",
+    "phone": "Phone",
+    "email": "Email (optional)",
+    "password": "Password",
+    "passwordConfirm": "Confirm password",
+    "submit": "Create account",
+    "errors": {
+      "required": "Name, phone and password are required",
+      "passwordShort": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords don't match"
+    },
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in"
   },
   "tabs": {
     "cars": "Cars",
@@ -52,7 +72,12 @@
     "perDay": "/ day",
     "details": "Details",
     "noPhoto": "No photo",
-    "book": "Book this car"
+    "book": "Book this car",
+    "filterDates": "Filter by dates",
+    "pickup": "Pick-up",
+    "dropoff": "Return",
+    "applyFilter": "Find available",
+    "clearFilter": "Clear filter"
   },
   "booking": {
     "title": "New booking",
@@ -83,7 +108,42 @@
     "created": "Booking created",
     "noneClient": "You don't have bookings yet",
     "noneStaff": "No bookings match the filters",
-    "myBookings": "My bookings"
+    "myBookings": "My bookings",
+    "paymentMethod": "Payment method",
+    "cashOnPickup": "Cash on pickup",
+    "subtotal": "Subtotal",
+    "extrasTotal": "Extras",
+    "selectLocation": "Select…",
+    "signRequired": "Signature required",
+    "signNow": "Sign now",
+    "viewSignature": "View signature",
+    "signed": "Signed",
+    "needsSignature": "Missing signature"
+  },
+  "sign": {
+    "title": "Customer signature",
+    "instructions": "Sign with your finger inside the box to confirm the booking.",
+    "clear": "Clear",
+    "save": "Save signature",
+    "saved": "Signature saved",
+    "missing": "Please sign before saving."
+  },
+  "documents": {
+    "title": "My documents",
+    "subtitle": "Upload your ID, license and passport to speed up pickup.",
+    "cedula": "National ID",
+    "passport": "Passport",
+    "license": "Driver license",
+    "home": "Proof of address",
+    "upload": "Upload",
+    "replace": "Replace",
+    "uploaded": "Uploaded",
+    "missing": "Pending",
+    "view": "View",
+    "uploading": "Uploading…",
+    "saved": "Document saved",
+    "fromCamera": "Take photo",
+    "fromGallery": "Pick from gallery"
   },
   "agenda": {
     "title": "Today",

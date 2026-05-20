@@ -18,6 +18,13 @@ type AuthCtx = {
   user: Profile | null;
   loginStaff: (username: string, password: string) => Promise<void>;
   loginClient: (phone: string, password: string) => Promise<void>;
+  registerClient: (data: {
+    name: string;
+    lastname?: string;
+    phone: string;
+    email?: string;
+    password: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
   setUser: (p: Profile) => void;
@@ -74,6 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [finalize],
   );
 
+  const registerClient = useCallback(
+    async (data: { name: string; lastname?: string; phone: string; email?: string; password: string }) => {
+      const res = await api.post<LoginResult>("/auth/register", data);
+      await finalize(res);
+    },
+    [finalize],
+  );
+
   const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout", {});
@@ -102,8 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [role]);
 
   const value = useMemo<AuthCtx>(
-    () => ({ bootstrapped, role, user, loginStaff, loginClient, logout, refreshMe, setUser }),
-    [bootstrapped, role, user, loginStaff, loginClient, logout, refreshMe, setUser],
+    () => ({ bootstrapped, role, user, loginStaff, loginClient, registerClient, logout, refreshMe, setUser }),
+    [bootstrapped, role, user, loginStaff, loginClient, registerClient, logout, refreshMe, setUser],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

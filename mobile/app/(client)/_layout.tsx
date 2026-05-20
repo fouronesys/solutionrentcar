@@ -83,6 +83,7 @@ export default function ClientLayout() {
       <Tabs.Screen name="car/[id]" options={{ href: null }} />
       <Tabs.Screen name="book/[carId]" options={{ href: null }} />
       <Tabs.Screen name="booking/[id]" options={{ href: null }} />
+      <Tabs.Screen name="sign/[id]" options={{ href: null }} />
     </Tabs>
     </>
   );

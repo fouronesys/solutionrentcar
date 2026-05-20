@@ -38,7 +38,27 @@
     "errors": {
       "invalid": "Credenciales inválidas",
       "empty": "Completa todos los campos"
-    }
+    },
+    "noAccount": "¿No tienes cuenta?",
+    "createAccount": "Crear cuenta"
+  },
+  "register": {
+    "title": "Crear cuenta",
+    "subtitle": "Empieza a reservar en minutos",
+    "name": "Nombre",
+    "lastname": "Apellido",
+    "phone": "Teléfono",
+    "email": "Correo (opcional)",
+    "password": "Contraseña",
+    "passwordConfirm": "Confirma contraseña",
+    "submit": "Crear cuenta",
+    "errors": {
+      "required": "Nombre, teléfono y contraseña son obligatorios",
+      "passwordShort": "La contraseña debe tener al menos 6 caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden"
+    },
+    "haveAccount": "¿Ya tienes cuenta?",
+    "signIn": "Iniciar sesión"
   },
   "tabs": {
     "cars": "Autos",
@@ -52,7 +72,12 @@
     "perDay": "/ día",
     "details": "Detalles",
     "noPhoto": "Sin foto",
-    "book": "Reservar este auto"
+    "book": "Reservar este auto",
+    "filterDates": "Filtrar por fechas",
+    "pickup": "Recogida",
+    "dropoff": "Devolución",
+    "applyFilter": "Buscar disponibles",
+    "clearFilter": "Quitar filtro"
   },
   "booking": {
     "title": "Nueva reserva",
@@ -83,7 +108,42 @@
     "created": "Reserva creada",
     "noneClient": "Aún no tienes reservas",
     "noneStaff": "No hay reservas con esos filtros",
-    "myBookings": "Mis reservas"
+    "myBookings": "Mis reservas",
+    "paymentMethod": "Método de pago",
+    "cashOnPickup": "Efectivo al recoger",
+    "subtotal": "Subtotal",
+    "extrasTotal": "Extras",
+    "selectLocation": "Selecciona…",
+    "signRequired": "Firma requerida",
+    "signNow": "Firmar ahora",
+    "viewSignature": "Ver firma",
+    "signed": "Firmada",
+    "needsSignature": "Falta firma"
+  },
+  "sign": {
+    "title": "Firma del cliente",
+    "instructions": "Firma con tu dedo en el recuadro para confirmar la reserva.",
+    "clear": "Borrar",
+    "save": "Guardar firma",
+    "saved": "Firma guardada correctamente",
+    "missing": "Por favor firma antes de guardar."
+  },
+  "documents": {
+    "title": "Mis documentos",
+    "subtitle": "Sube tu cédula, licencia y pasaporte para agilizar la entrega.",
+    "cedula": "Cédula",
+    "passport": "Pasaporte",
+    "license": "Licencia de conducir",
+    "home": "Comprobante de domicilio",
+    "upload": "Subir",
+    "replace": "Reemplazar",
+    "uploaded": "Subido",
+    "missing": "Pendiente",
+    "view": "Ver",
+    "uploading": "Subiendo…",
+    "saved": "Documento guardado",
+    "fromCamera": "Tomar foto",
+    "fromGallery": "Elegir de galería"
   },
   "agenda": {
     "title": "Hoy",
