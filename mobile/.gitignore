@@ -1,5 +1,6 @@
 google-service-account.json
 google-services-firebase.json
+google-services.json
 *.p8
 *.p12
 *.keystore
