@@ -11,21 +11,25 @@ class Database {
     public int    $port;
 
     public function __construct(){
-        $this->host   = 'srv500.hstgr.io';
+        $this->host   = 'localhost';
         $this->user   = 'u144787244_solutionsrent';
-        $this->pass   = 'PSsolutions99';
+        $this->pass   = 'SolutionRentCar01';
         $this->ddbb   = 'u144787244_solutionsrent';
-        $this->socket = '';
+        $this->socket = '/tmp/mysql.sock';
         $this->port   = 3306;
     }
 
     public function connect(){
-        $con = new mysqli(
-            $this->host,
+        $con = new mysqli();
+        $con->init();
+        $con->options(MYSQLI_OPT_LOCAL_INFILE, true);
+        $con->real_connect(
+            null,
             $this->user,
             $this->pass,
             $this->ddbb,
-            $this->port
+            $this->port,
+            $this->socket
         );
 
         if ($con->connect_errno) {

@@ -15,11 +15,20 @@ mysqlx=0
 user=runner
 MYSQLEOF
 
+init_mysql() {
+    if [ ! -d "$MYSQL_DATA" ] || [ ! -f "$MYSQL_DATA/ibdata1" ]; then
+        echo "[mysql] Initializing data directory..."
+        mkdir -p "$MYSQL_DATA"
+        mysqld --defaults-file="$MYSQL_CNF" --initialize-insecure > /tmp/mysql-init.log 2>&1
+        echo "[mysql] Init complete"
+    fi
+}
+
 start_mysql() {
     rm -f "$MYSQL_SOCKET" "$MYSQL_PID"
     mysqld --defaults-file="$MYSQL_CNF" > /tmp/mysql-out.log 2>&1 &
     echo "[mysql] Started mysqld background"
-    for i in $(seq 1 60); do
+    for i in $(seq 1 120); do
         if [ -S "$MYSQL_SOCKET" ]; then
             mysql -u root --socket="$MYSQL_SOCKET" -e "SELECT 1;" > /dev/null 2>&1
             if [ $? -eq 0 ]; then
@@ -30,6 +39,7 @@ start_mysql() {
         sleep 0.5
     done
     echo "[mysql] WARNING: Could not connect to MySQL"
+    cat /tmp/mysql-out.log | tail -20
     return 1
 }
 
@@ -188,6 +198,9 @@ mysql_watchdog() {
         fi
     done
 }
+
+echo "[start.sh] Initializing MySQL data directory if needed..."
+init_mysql
 
 echo "[start.sh] Starting MySQL..."
 start_mysql
