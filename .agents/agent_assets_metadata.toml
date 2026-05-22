@@ -11,3 +11,21 @@ id = "0caEbDpIpdQa-mR_hp76_"
 uri = "file://attached_assets/solutions_logo_1024.png"
 type = "image"
 title = "Solutions Rent Car — Logo 1024x1024 (fondo blanco)"
+
+[[outputs]]
+id = "1e0F1GIgoSdueJvbrs9Mg"
+uri = "file://attached_assets/store_assets/appstore_icon_1024.png"
+type = "image"
+title = "App Store icon — 1024x1024 (sin transparencia, RGB)"
+
+[[outputs]]
+id = "4vZrLB0S0S94xGUg-gEDk"
+uri = "file://attached_assets/store_assets/playstore_icon_512.png"
+type = "image"
+title = "Play Store icon — 512x512"
+
+[[outputs]]
+id = "Du4BghnTvBLZn4oGhMm64"
+uri = "file://attached_assets/store_assets/playstore_feature_1024x500.png"
+type = "image"
+title = "Play Store Feature Graphic — 1024x500"
