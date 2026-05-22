@@ -40,12 +40,12 @@ function InboxIcon({ focused }: { focused: boolean }) {
 export default function StaffLayout() {
   return (
     <>
-    <StatusBar style="light" />
+    <StatusBar style="dark" />
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: "#fff",
-        tabBarActiveTintColor: colors.primary,
+        headerTintColor: "#1A1A1A",
+        tabBarActiveTintColor: colors.primaryDark,
       }}
     >
       <Tabs.Screen

@@ -95,5 +95,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     overflow: "hidden",
   },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary, color: "#fff" },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary, color: "#1A1A1A" },
 });

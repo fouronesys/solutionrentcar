@@ -62,7 +62,7 @@ export default function NotificationsScreen() {
       {err ? <Text style={styles.err}>{err}</Text> : null}
       <View style={{ padding: 12, paddingBottom: 0, alignItems: "flex-end" }}>
         <Pressable onPress={markAll}>
-          <Text style={{ color: colors.primary, fontWeight: "600" }}>{t("notifications.markAllRead")}</Text>
+          <Text style={{ color: colors.primaryDark, fontWeight: "600" }}>{t("notifications.markAllRead")}</Text>
         </Pressable>
       </View>
       <FlatList

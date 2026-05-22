@@ -1,7 +1,7 @@
 export const colors = {
-  primary: "#0E2A47",
-  primaryDark: "#091B2E",
-  primaryLight: "#1B4475",
+  primary: "#F2A900",
+  primaryDark: "#B8800A",
+  primaryLight: "#FFC94A",
   accent: "#F2A900",
   bg: "#F5F7FA",
   card: "#FFFFFF",
@@ -11,7 +11,7 @@ export const colors = {
   success: "#16A34A",
   warning: "#F59E0B",
   danger: "#DC2626",
-  info: "#0284C7",
+  info: "#475569",
 };
 
 export const radius = { sm: 6, md: 10, lg: 16, xl: 24 };

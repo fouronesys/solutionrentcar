@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     minWidth: 90,
     alignItems: "center",
   },
-  docBtnText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  docBtnText: { color: "#1A1A1A", fontWeight: "600", fontSize: 13 },
   docBtnSec: {
     backgroundColor: "transparent",
     paddingHorizontal: 12,

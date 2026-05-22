@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   galleryImg: { width: 320, height: 200, borderRadius: 12, marginRight: 10, backgroundColor: "#eee" },
   title: { fontSize: 22, fontWeight: "700", color: colors.text, flexShrink: 1, marginRight: 8 },
   meta: { color: colors.textMuted, fontSize: 14, marginTop: 4 },
-  price: { fontSize: 24, color: colors.primary, fontWeight: "800", marginTop: 12 },
+  price: { fontSize: 24, color: colors.primaryDark, fontWeight: "800", marginTop: 12 },
   per: { fontSize: 14, color: colors.textMuted, fontWeight: "400" },
   desc: { color: colors.text, marginTop: 16, fontSize: 14, lineHeight: 20 },
 });

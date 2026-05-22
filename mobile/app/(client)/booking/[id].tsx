@@ -102,7 +102,7 @@ export default function BookingDetailScreen() {
             {payments.map((p) => (
               <View key={p.id} style={styles.payRow}>
                 <Text style={{ color: colors.text }}>{dateTime(p.created_at)}</Text>
-                <Text style={{ color: colors.primary, fontWeight: "700" }}>{money(p.val)}</Text>
+                <Text style={{ color: colors.primaryDark, fontWeight: "700" }}>{money(p.val)}</Text>
               </View>
             ))}
           </Card>

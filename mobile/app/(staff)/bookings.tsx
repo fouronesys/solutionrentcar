@@ -143,10 +143,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     overflow: "hidden",
   },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary, color: "#fff" },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary, color: "#1A1A1A" },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { fontSize: 15, fontWeight: "700", color: colors.text, flexShrink: 1, marginRight: 8 },
   meta: { color: colors.textMuted, fontSize: 13, marginTop: 4 },
-  total: { color: colors.primary, fontWeight: "700", fontSize: 16, marginTop: 6 },
+  total: { color: colors.primaryDark, fontWeight: "700", fontSize: 16, marginTop: 6 },
   err: { color: colors.danger, padding: 12, textAlign: "center" },
 });

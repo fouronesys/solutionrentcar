@@ -71,5 +71,5 @@ const styles = StyleSheet.create({
   heading: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 16 },
   linkWrap: { paddingVertical: 18, alignItems: "center" },
   link: { color: colors.textMuted, fontSize: 14 },
-  linkStrong: { color: colors.primary, fontWeight: "700" },
+  linkStrong: { color: colors.primaryDark, fontWeight: "700" },
 });

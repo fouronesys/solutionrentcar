@@ -312,7 +312,7 @@ export default function BookCar() {
                     onPress={() => toggleExtra(ex.id)}
                     style={[styles.extraRow, active && styles.extraActive]}
                   >
-                    <Text style={[styles.extraName, active && { color: colors.primary }]}>
+                    <Text style={[styles.extraName, active && { color: colors.primaryDark }]}>
                       {active ? "☑  " : "☐  "}
                       {ex.name}
                     </Text>
@@ -329,7 +329,7 @@ export default function BookCar() {
               onPress={() => setPaymentMethod("cash")}
               style={[styles.extraRow, paymentMethod === "cash" && styles.extraActive]}
             >
-              <Text style={[styles.extraName, paymentMethod === "cash" && { color: colors.primary }]}>
+              <Text style={[styles.extraName, paymentMethod === "cash" && { color: colors.primaryDark }]}>
                 {paymentMethod === "cash" ? "●  " : "○  "}
                 {t("booking.cashOnPickup")}
               </Text>
@@ -354,7 +354,7 @@ export default function BookCar() {
             ) : null}
             <View style={[styles.kv, { marginTop: 6, paddingTop: 6, borderTopWidth: 1, borderTopColor: colors.border }]}>
               <Text style={[styles.k, { fontWeight: "700", color: colors.text }]}>{t("booking.total")}</Text>
-              <Text style={[styles.v, { fontWeight: "700", fontSize: 18, color: colors.primary }]}>{money(total)}</Text>
+              <Text style={[styles.v, { fontWeight: "700", fontSize: 18, color: colors.primaryDark }]}>{money(total)}</Text>
             </View>
           </Card>
 
@@ -370,7 +370,7 @@ export default function BookCar() {
 const styles = StyleSheet.create({
   carTitle: { fontSize: 17, fontWeight: "700", color: colors.text },
   carMeta: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
-  carPrice: { fontSize: 18, color: colors.primary, fontWeight: "700", marginTop: 8 },
+  carPrice: { fontSize: 18, color: colors.primaryDark, fontWeight: "700", marginTop: 8 },
   per: { fontSize: 12, color: colors.textMuted, fontWeight: "400" },
   label: { fontSize: 13, color: colors.textMuted, marginBottom: 6, marginTop: 6, fontWeight: "500" },
   dateBtn: {
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   chipActive: { borderColor: colors.primary, backgroundColor: colors.primary + "15" },
   chipText: { color: colors.text, fontSize: 13 },
-  chipTextActive: { color: colors.primary, fontWeight: "700" },
+  chipTextActive: { color: colors.primaryDark, fontWeight: "700" },
   extraRow: {
     flexDirection: "row",
     justifyContent: "space-between",

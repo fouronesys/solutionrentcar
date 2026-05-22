@@ -102,5 +102,5 @@ const styles = StyleSheet.create({
   subtitle: { color: colors.textMuted, marginBottom: 16 },
   linkWrap: { paddingVertical: 16, alignItems: "center" },
   link: { color: colors.textMuted, fontSize: 14 },
-  linkStrong: { color: colors.primary, fontWeight: "700" },
+  linkStrong: { color: colors.primaryDark, fontWeight: "700" },
 });

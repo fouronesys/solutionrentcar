@@ -4,8 +4,8 @@ import { colors, radius } from "@/theme/colors";
 
 export function Badge({ label, color }: { label: string; color?: string }) {
   return (
-    <View style={[styles.box, { backgroundColor: (color ?? colors.primary) + "22", borderColor: color ?? colors.primary }]}>
-      <Text style={[styles.txt, { color: color ?? colors.primary }]}>{label}</Text>
+    <View style={[styles.box, { backgroundColor: (color ?? colors.primaryDark) + "22", borderColor: color ?? colors.primaryDark }]}>
+      <Text style={[styles.txt, { color: color ?? colors.primaryDark }]}>{label}</Text>
     </View>
   );
 }

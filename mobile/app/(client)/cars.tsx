@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   name: { fontSize: 16, fontWeight: "700", color: colors.text, flexShrink: 1, marginRight: 8 },
   meta: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
-  price: { fontSize: 18, color: colors.primary, fontWeight: "700", marginTop: 8 },
+  price: { fontSize: 18, color: colors.primaryDark, fontWeight: "700", marginTop: 8 },
   per: { fontSize: 13, color: colors.textMuted, fontWeight: "400" },
   err: { color: colors.danger, padding: 12, textAlign: "center" },
   filterLabel: { fontSize: 13, fontWeight: "700", color: colors.text, marginBottom: 8 },
