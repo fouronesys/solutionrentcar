@@ -189,9 +189,9 @@ export default function BookCar() {
                 mode="datetime"
                 display={Platform.OS === "ios" ? "spinner" : "default"}
                 minimumDate={new Date()}
-                onChange={(_: DateTimePickerEvent, d?: Date) => {
+                onChange={(event: DateTimePickerEvent, d?: Date) => {
                   setShowStart(Platform.OS === "ios");
-                  if (d) {
+                  if (event.type === "set" && d) {
                     setStart(d);
                     if (d >= end) setEnd(new Date(d.getTime() + 3 * 86400000));
                   }
@@ -209,9 +209,9 @@ export default function BookCar() {
                 mode="datetime"
                 display={Platform.OS === "ios" ? "spinner" : "default"}
                 minimumDate={new Date(start.getTime() + 3600000)}
-                onChange={(_: DateTimePickerEvent, d?: Date) => {
+                onChange={(event: DateTimePickerEvent, d?: Date) => {
                   setShowEnd(Platform.OS === "ios");
-                  if (d) setEnd(d);
+                  if (event.type === "set" && d) setEnd(d);
                 }}
               />
             )}
