@@ -1,8 +1,13 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "sPfYJsKGUEMQ7B307JCBJ"
 uri = "file://mobile/assets/icon.png"
 type = "image"
 title = "yellow car app icon clean"
+
+[[outputs]]
+id = "0caEbDpIpdQa-mR_hp76_"
+uri = "file://attached_assets/solutions_logo_1024.png"
+type = "image"
+title = "Solutions Rent Car — Logo 1024x1024 (fondo blanco)"
