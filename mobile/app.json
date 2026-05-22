@@ -61,7 +61,6 @@
             "targetSdkVersion": 35,
             "minSdkVersion": 24,
             "ndkVersion": "27.1.12297006",
-            "kotlinVersion": "1.9.25",
             "enableProguardInReleaseBuilds": true
           },
           "ios": {
