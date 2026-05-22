@@ -20,9 +20,9 @@ export function Button({
   style?: ViewStyle;
 }) {
   const palette = {
-    primary: { bg: colors.primary, fg: "#fff", border: colors.primary },
-    secondary: { bg: "#fff", fg: colors.primary, border: colors.primary },
-    ghost: { bg: "transparent", fg: colors.primary, border: "transparent" },
+    primary: { bg: "#000000", fg: "#fff", border: "#000000" },
+    secondary: { bg: "#fff", fg: "#000000", border: "#000000" },
+    ghost: { bg: "transparent", fg: "#000000", border: "transparent" },
     danger: { bg: colors.danger, fg: "#fff", border: colors.danger },
   }[variant];
 
