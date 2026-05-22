@@ -62,7 +62,11 @@
     },
     "extra": {
       "router": { "origin": false },
-      "apiBaseUrl": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1"
-    }
+      "apiBaseUrl": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1",
+      "eas": {
+        "projectId": "bf359c12-b13d-432d-944c-b059795b9f3b"
+      }
+    },
+    "owner": "fouronesys"
   }
 }
