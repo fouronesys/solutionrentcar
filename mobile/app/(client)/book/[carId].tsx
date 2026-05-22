@@ -61,6 +61,8 @@ export default function BookCar() {
 
   const [placeStart, setPlaceStart] = useState("");
   const [placeEnd, setPlaceEnd] = useState("");
+  const [customStart, setCustomStart] = useState(false);
+  const [customEnd, setCustomEnd] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
   const [comment, setComment] = useState("");
   const [extras, setExtras] = useState<Insurance[]>([]);
@@ -85,9 +87,14 @@ export default function BookCar() {
       try {
         const loc = await api.get<{ locations: Location[] }>("/catalog/locations");
         if (Array.isArray(loc.locations) && loc.locations.length) {
-          setLocations(loc.locations);
-          setPlaceStart(loc.locations[0].name);
-          setPlaceEnd(loc.locations[0].name);
+          const airports = loc.locations.filter((l) =>
+            /aeropuerto|airport/i.test(l.name ?? ""),
+          );
+          setLocations(airports);
+          if (airports.length) {
+            setPlaceStart(airports[0].name);
+            setPlaceEnd(airports[0].name);
+          }
         }
       } catch {
         /* ignore */
@@ -212,38 +219,84 @@ export default function BookCar() {
 
           <Card>
             <Text style={styles.label}>{t("booking.placeStart")}</Text>
-            {locations.length > 0 ? (
-              <View style={styles.chipRow}>
-                {locations.map((l) => (
-                  <Pressable
-                    key={`s-${l.id}`}
-                    onPress={() => setPlaceStart(l.name)}
-                    style={[styles.chip, placeStart === l.name && styles.chipActive]}
+            <View style={styles.chipRow}>
+              {locations.map((l) => (
+                <Pressable
+                  key={`s-${l.id}`}
+                  onPress={() => {
+                    setCustomStart(false);
+                    setPlaceStart(l.name);
+                  }}
+                  style={[styles.chip, !customStart && placeStart === l.name && styles.chipActive]}
+                >
+                  <Text
+                    style={[styles.chipText, !customStart && placeStart === l.name && styles.chipTextActive]}
                   >
-                    <Text style={[styles.chipText, placeStart === l.name && styles.chipTextActive]}>{l.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            ) : (
-              <Input value={placeStart} onChangeText={setPlaceStart} />
-            )}
+                    {l.name}
+                  </Text>
+                </Pressable>
+              ))}
+              <Pressable
+                onPress={() => {
+                  setCustomStart(true);
+                  setPlaceStart("");
+                }}
+                style={[styles.chip, customStart && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, customStart && styles.chipTextActive]}>
+                  {t("booking.placeOther")}
+                </Text>
+              </Pressable>
+            </View>
+            {customStart ? (
+              <Input
+                value={placeStart}
+                onChangeText={setPlaceStart}
+                maxLength={250}
+                multiline
+                placeholder={t("booking.placeCustomPlaceholder")}
+              />
+            ) : null}
 
             <Text style={styles.label}>{t("booking.placeEnd")}</Text>
-            {locations.length > 0 ? (
-              <View style={styles.chipRow}>
-                {locations.map((l) => (
-                  <Pressable
-                    key={`e-${l.id}`}
-                    onPress={() => setPlaceEnd(l.name)}
-                    style={[styles.chip, placeEnd === l.name && styles.chipActive]}
+            <View style={styles.chipRow}>
+              {locations.map((l) => (
+                <Pressable
+                  key={`e-${l.id}`}
+                  onPress={() => {
+                    setCustomEnd(false);
+                    setPlaceEnd(l.name);
+                  }}
+                  style={[styles.chip, !customEnd && placeEnd === l.name && styles.chipActive]}
+                >
+                  <Text
+                    style={[styles.chipText, !customEnd && placeEnd === l.name && styles.chipTextActive]}
                   >
-                    <Text style={[styles.chipText, placeEnd === l.name && styles.chipTextActive]}>{l.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            ) : (
-              <Input value={placeEnd} onChangeText={setPlaceEnd} />
-            )}
+                    {l.name}
+                  </Text>
+                </Pressable>
+              ))}
+              <Pressable
+                onPress={() => {
+                  setCustomEnd(true);
+                  setPlaceEnd("");
+                }}
+                style={[styles.chip, customEnd && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, customEnd && styles.chipTextActive]}>
+                  {t("booking.placeOther")}
+                </Text>
+              </Pressable>
+            </View>
+            {customEnd ? (
+              <Input
+                value={placeEnd}
+                onChangeText={setPlaceEnd}
+                maxLength={250}
+                multiline
+                placeholder={t("booking.placeCustomPlaceholder")}
+              />
+            ) : null}
 
             <Input label={t("booking.comment")} value={comment} onChangeText={setComment} multiline numberOfLines={3} />
           </Card>

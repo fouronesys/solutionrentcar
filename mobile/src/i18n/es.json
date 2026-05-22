@@ -85,6 +85,8 @@
     "end": "Fecha de devolución",
     "placeStart": "Lugar de entrega",
     "placeEnd": "Lugar de devolución",
+    "placeOther": "Otro",
+    "placeCustomPlaceholder": "Indica la dirección o lugar (máx. 250 caracteres)",
     "comment": "Comentario (vuelo, notas…)",
     "extras": "Extras / coberturas",
     "submit": "Confirmar reserva",

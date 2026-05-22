@@ -85,6 +85,8 @@
     "end": "Return date",
     "placeStart": "Pick-up place",
     "placeEnd": "Return place",
+    "placeOther": "Other",
+    "placeCustomPlaceholder": "Enter address or place (max 250 characters)",
     "comment": "Comment (flight, notes…)",
     "extras": "Extras / coverage",
     "submit": "Confirm booking",
