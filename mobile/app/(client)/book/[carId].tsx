@@ -57,7 +57,11 @@ export default function BookCar() {
   const [start, setStart] = useState<Date>(parseDbDate(params.start) ?? defaultStart());
   const [end, setEnd] = useState<Date>(parseDbDate(params.end) ?? defaultEnd());
   const [showStart, setShowStart] = useState(false);
+  const [showStartTime, setShowStartTime] = useState(false);
+  const [pendingStart, setPendingStart] = useState<Date | null>(null);
   const [showEnd, setShowEnd] = useState(false);
+  const [showEndTime, setShowEndTime] = useState(false);
+  const [pendingEnd, setPendingEnd] = useState<Date | null>(null);
 
   const [placeStart, setPlaceStart] = useState("");
   const [placeEnd, setPlaceEnd] = useState("");
@@ -186,14 +190,36 @@ export default function BookCar() {
             {showStart && (
               <DateTimePicker
                 value={start}
-                mode="datetime"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
+                mode={Platform.OS === "ios" ? "datetime" : "date"}
+                display={Platform.OS === "ios" ? "spinner" : "calendar"}
                 minimumDate={new Date()}
                 onChange={(event: DateTimePickerEvent, d?: Date) => {
-                  setShowStart(Platform.OS === "ios");
+                  setShowStart(false);
                   if (event.type === "set" && d) {
-                    setStart(d);
-                    if (d >= end) setEnd(new Date(d.getTime() + 3 * 86400000));
+                    if (Platform.OS === "ios") {
+                      setStart(d);
+                      if (d >= end) setEnd(new Date(d.getTime() + 3 * 86400000));
+                    } else {
+                      setPendingStart(d);
+                      setShowStartTime(true);
+                    }
+                  }
+                }}
+              />
+            )}
+            {showStartTime && Platform.OS === "android" && (
+              <DateTimePicker
+                value={pendingStart ?? start}
+                mode="time"
+                display="clock"
+                onChange={(event: DateTimePickerEvent, d?: Date) => {
+                  setShowStartTime(false);
+                  setPendingStart(null);
+                  if (event.type === "set" && d && pendingStart) {
+                    const combined = new Date(pendingStart);
+                    combined.setHours(d.getHours(), d.getMinutes(), 0, 0);
+                    setStart(combined);
+                    if (combined >= end) setEnd(new Date(combined.getTime() + 3 * 86400000));
                   }
                 }}
               />
@@ -206,12 +232,35 @@ export default function BookCar() {
             {showEnd && (
               <DateTimePicker
                 value={end}
-                mode="datetime"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
+                mode={Platform.OS === "ios" ? "datetime" : "date"}
+                display={Platform.OS === "ios" ? "spinner" : "calendar"}
                 minimumDate={new Date(start.getTime() + 3600000)}
                 onChange={(event: DateTimePickerEvent, d?: Date) => {
-                  setShowEnd(Platform.OS === "ios");
-                  if (event.type === "set" && d) setEnd(d);
+                  setShowEnd(false);
+                  if (event.type === "set" && d) {
+                    if (Platform.OS === "ios") {
+                      setEnd(d);
+                    } else {
+                      setPendingEnd(d);
+                      setShowEndTime(true);
+                    }
+                  }
+                }}
+              />
+            )}
+            {showEndTime && Platform.OS === "android" && (
+              <DateTimePicker
+                value={pendingEnd ?? end}
+                mode="time"
+                display="clock"
+                onChange={(event: DateTimePickerEvent, d?: Date) => {
+                  setShowEndTime(false);
+                  setPendingEnd(null);
+                  if (event.type === "set" && d && pendingEnd) {
+                    const combined = new Date(pendingEnd);
+                    combined.setHours(d.getHours(), d.getMinutes(), 0, 0);
+                    setEnd(combined);
+                  }
                 }}
               />
             )}
