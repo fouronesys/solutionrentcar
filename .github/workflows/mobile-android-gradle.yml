@@ -50,8 +50,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: npm
-          cache-dependency-path: mobile/package-lock.json
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -63,7 +61,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install JS dependencies
-        run: npm ci
+        run: npm install
 
       - name: Expo prebuild (generate android/)
         env:
