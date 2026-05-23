@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@continuedev/cli": "^1.5.45"
+  }
+}
