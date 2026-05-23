@@ -13,7 +13,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.solutionsrent.app",
@@ -61,7 +63,8 @@
             "targetSdkVersion": 35,
             "minSdkVersion": 24,
             "ndkVersion": "27.1.12297006",
-            "enableProguardInReleaseBuilds": true
+            "enableProguardInReleaseBuilds": false,
+            "enableShrinkResourcesInReleaseBuilds": false
           },
           "ios": {
             "deploymentTarget": "15.1"
@@ -76,7 +79,9 @@
       "policy": "appVersion"
     },
     "extra": {
-      "router": { "origin": false },
+      "router": {
+        "origin": false
+      },
       "apiBaseUrl": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1",
       "eas": {
         "projectId": "bf359c12-b13d-432d-944c-b059795b9f3b"
