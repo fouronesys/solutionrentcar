@@ -88,20 +88,34 @@ export default function BookCar() {
       } catch {
         /* ignore */
       }
+      // RD airports fallback (siempre disponibles aunque el backend no los traiga)
+      const RD_AIRPORTS: Location[] = [
+        { id: -1, name: "Aeropuerto Las Américas (SDQ) — Santo Domingo" },
+        { id: -2, name: "Aeropuerto Punta Cana (PUJ)" },
+        { id: -3, name: "Aeropuerto Cibao (STI) — Santiago" },
+        { id: -4, name: "Aeropuerto Gregorio Luperón (POP) — Puerto Plata" },
+        { id: -5, name: "Aeropuerto La Romana (LRM)" },
+        { id: -6, name: "Aeropuerto Samaná El Catey (AZS)" },
+        { id: -7, name: "Aeropuerto La Isabela / JBQ — Santo Domingo Norte" },
+        { id: -8, name: "Aeropuerto María Montez (BRX) — Barahona" },
+      ] as unknown as Location[];
+
+      let finalAirports: Location[] = RD_AIRPORTS;
       try {
         const loc = await api.get<{ locations: Location[] }>("/catalog/locations");
         if (Array.isArray(loc.locations) && loc.locations.length) {
-          const airports = loc.locations.filter((l) =>
+          const apiAirports = loc.locations.filter((l) =>
             /aeropuerto|airport/i.test(l.name ?? ""),
           );
-          setLocations(airports);
-          if (airports.length) {
-            setPlaceStart(airports[0].name);
-            setPlaceEnd(airports[0].name);
-          }
+          if (apiAirports.length) finalAirports = apiAirports;
         }
       } catch {
-        /* ignore */
+        /* mantener fallback */
+      }
+      setLocations(finalAirports);
+      if (finalAirports.length) {
+        setPlaceStart(finalAirports[0].name);
+        setPlaceEnd(finalAirports[0].name);
       }
     })();
   }, [params.carId]);
