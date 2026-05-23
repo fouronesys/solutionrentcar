@@ -36,8 +36,7 @@
       "permissions": [
         "NOTIFICATIONS",
         "POST_NOTIFICATIONS",
-        "CAMERA",
-        "READ_MEDIA_IMAGES"
+        "CAMERA"
       ],
       "versionCode": 2
     },
