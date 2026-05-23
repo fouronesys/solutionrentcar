@@ -3,7 +3,7 @@
     "name": "Solutions Rent Car",
     "slug": "solutions-rent-car",
     "scheme": "solutionsrentcar",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.solutionsrent.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Necesitamos la cámara para capturar fotos del vehículo y firmas.",
@@ -38,7 +38,8 @@
         "POST_NOTIFICATIONS",
         "CAMERA",
         "READ_EXTERNAL_STORAGE"
-      ]
+      ],
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png",
