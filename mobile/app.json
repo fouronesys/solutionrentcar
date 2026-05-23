@@ -24,7 +24,8 @@
         "NSCameraUsageDescription": "Necesitamos la cámara para capturar fotos del vehículo y firmas.",
         "NSPhotoLibraryUsageDescription": "Para adjuntar fotos a las reservas y firmas.",
         "NSUserNotificationsUsageDescription": "Para enviarte avisos sobre tus reservas y pagos."
-      }
+      },
+      "icon": "./assets/icon-ios.png"
     },
     "android": {
       "package": "com.solutionsrent.app",
