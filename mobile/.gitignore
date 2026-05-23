@@ -6,3 +6,11 @@ google-services.json
 *.keystore
 *.jks
 CREDENTIALS.md
+.DS_Store
+.idea/
+.expo/
+.env
+.env.local
+.env.*.local
+*.log
+node_modules/
