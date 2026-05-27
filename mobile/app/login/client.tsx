@@ -9,6 +9,24 @@ import { ApiError } from "@/api/client";
 import { colors } from "@/theme/colors";
 import { t } from "@/i18n";
 
+function loginErrorMessage(e: unknown): string {
+  if (e instanceof ApiError) {
+    switch (e.code) {
+      case "network_unreachable":
+        return t("login.errors.network");
+      case "service_blocked":
+        return t("login.errors.blocked");
+      case "service_unavailable":
+        return t("login.errors.unavailable");
+      case "invalid_credentials":
+        return t("login.errors.invalid");
+      default:
+        return e.message || t("login.errors.invalid");
+    }
+  }
+  return t("login.errors.invalid");
+}
+
 export default function ClientLogin() {
   const router = useRouter();
   const { loginClient } = useAuth();
@@ -25,8 +43,7 @@ export default function ClientLogin() {
     try {
       await loginClient(phone.trim(), password.trim());
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : t("login.errors.invalid");
-      Alert.alert(msg);
+      Alert.alert(loginErrorMessage(e));
     } finally {
       setLoading(false);
     }

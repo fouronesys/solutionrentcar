@@ -37,7 +37,10 @@
     },
     "errors": {
       "invalid": "Credenciales inválidas",
-      "empty": "Completa todos los campos"
+      "empty": "Completa todos los campos",
+      "network": "No pudimos conectar con el servidor. Revisa tu conexión e intenta de nuevo.",
+      "blocked": "No pudimos conectar con el servidor en este momento. Inténtalo en unos segundos.",
+      "unavailable": "El servicio no está disponible por ahora. Intenta de nuevo en unos minutos."
     },
     "noAccount": "¿No tienes cuenta?",
     "createAccount": "Crear cuenta"

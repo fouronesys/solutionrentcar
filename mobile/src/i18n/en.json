@@ -37,7 +37,10 @@
     },
     "errors": {
       "invalid": "Invalid credentials",
-      "empty": "Please complete all fields"
+      "empty": "Please complete all fields",
+      "network": "Couldn't reach the server. Check your connection and try again.",
+      "blocked": "We couldn't reach the server right now. Please try again in a moment.",
+      "unavailable": "The service is temporarily unavailable. Please try again shortly."
     },
     "noAccount": "No account yet?",
     "createAccount": "Create account"
