@@ -179,7 +179,10 @@
     "phone": "Phone",
     "language": "Language",
     "save": "Save changes",
-    "saved": "Profile updated"
+    "saved": "Profile updated",
+    "deleteAccount": "Delete account",
+    "deleteAccountConfirmTitle": "Delete your account?",
+    "deleteAccountConfirmMsg": "This will permanently delete your account and cannot be undone."
   },
   "update": {
     "available": "Update available",
