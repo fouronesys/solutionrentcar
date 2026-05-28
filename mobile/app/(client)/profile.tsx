@@ -31,6 +31,7 @@ export default function ProfileScreen() {
   const [form, setForm] = useState<Partial<Profile>>(user ?? {});
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<DocKind | null>(null);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [lang, setLang] = useState<"es" | "en">(i18n.locale === "en" ? "en" : "es");
 
   const save = async () => {
@@ -78,6 +79,33 @@ export default function ProfileScreen() {
       { text: t("documents.fromGallery"), onPress: () => pick(kind, false) },
       { text: t("common.cancel"), style: "cancel" },
     ]);
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(
+      t("profile.deleteAccountConfirmTitle"),
+      t("profile.deleteAccountConfirmMsg"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("profile.deleteAccount"),
+          style: "destructive",
+          onPress: deleteAccount,
+        },
+      ]
+    );
+  };
+
+  const deleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await api.del("/me");
+      await logout();
+    } catch (e) {
+      Alert.alert(e instanceof ApiError ? e.message : t("common.error"));
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   const docs = user?.documents ?? {};
@@ -177,6 +205,22 @@ export default function ProfileScreen() {
           </Text>
 
           <Button title={t("common.logout")} variant="danger" onPress={logout} />
+
+          {role === "client" ? (
+            <View style={styles.deleteSection}>
+              <Pressable
+                style={[styles.deleteBtn, deletingAccount && styles.deleteBtnDisabled]}
+                onPress={confirmDeleteAccount}
+                disabled={deletingAccount}
+              >
+                {deletingAccount ? (
+                  <ActivityIndicator color="#dc2626" size="small" />
+                ) : (
+                  <Text style={styles.deleteBtnText}>{t("profile.deleteAccount")}</Text>
+                )}
+              </Pressable>
+            </View>
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -218,4 +262,26 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   docBtnSecText: { color: colors.text, fontWeight: "600", fontSize: 13 },
+  deleteSection: {
+    marginTop: 24,
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  deleteBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#dc2626",
+    minWidth: 180,
+    alignItems: "center",
+  },
+  deleteBtnDisabled: {
+    opacity: 0.5,
+  },
+  deleteBtnText: {
+    color: "#dc2626",
+    fontWeight: "600",
+    fontSize: 14,
+  },
 });
