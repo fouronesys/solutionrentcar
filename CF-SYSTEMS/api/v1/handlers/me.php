@@ -1,9 +1,12 @@
 <?php
 /**
- * GET   /me        — return the authenticated principal's profile.
- * PATCH /me        — update basic profile fields (name, lastname, phone,
- *                    email, address, language). Returns the updated profile.
- *                    Also accepts POST for clients without PATCH support.
+ * GET    /me        — return the authenticated principal's profile.
+ * PATCH  /me        — update basic profile fields (name, lastname, phone,
+ *                     email, address, language). Returns the updated profile.
+ *                     Also accepts POST for clients without PATCH support.
+ * DELETE /me        — permanently delete the authenticated client account
+ *                     (anonymises PII and logs out). Staff accounts cannot
+ *                     self-delete via this endpoint.
  */
 $auth   = ApiAuth::require();
 $action = strtolower($segments[1] ?? '');
@@ -131,6 +134,53 @@ if ($method === 'PATCH' || $method === 'POST') {
     $pid = intval($p->id);
     @$con->query("UPDATE person SET ".implode(',', $sets)." WHERE id=$pid");
     ApiResponse::ok(['role' => 'client', 'user' => ApiHelpers::personToArray(PersonData::getById($pid))]);
+}
+
+// DELETE /me — permanently removes (anonymises) the authenticated client account.
+// Staff accounts cannot self-delete; they must be removed by an administrator.
+if ($method === 'DELETE') {
+    if ($auth['type'] !== 'client') {
+        ApiResponse::err('forbidden', 'Las cuentas de staff no se pueden eliminar por esta vía', 403);
+    }
+
+    $con = Database::getCon();
+    $pid = intval($auth['id']);
+
+    // Verify the account still exists.
+    $p = PersonData::getById($pid);
+    if (!$p) ApiResponse::err('not_found', 'Cuenta no encontrada', 404);
+
+    // Anonymise all personally-identifiable fields so no user data is retained,
+    // but referential integrity with historical bookings is preserved.
+    $stamp   = date('YmdHis');
+    $anonName  = $con->real_escape_string("Cuenta Eliminada");
+    $anonPhone = $con->real_escape_string("deleted_{$pid}_{$stamp}");
+    $anonEmail = $con->real_escape_string("deleted_{$pid}_{$stamp}@deleted.invalid");
+
+    $con->query(
+        "UPDATE person SET
+            name          = '$anonName',
+            lastname      = '',
+            phone         = '$anonPhone',
+            phone2        = '',
+            email         = '$anonEmail',
+            address       = '',
+            address2      = '',
+            nationality   = '',
+            passport      = '',
+            license       = '',
+            invoice_file  = '',
+            passport_file = '',
+            license_file  = '',
+            home_file     = '',
+            active        = 0
+        WHERE id = $pid"
+    );
+
+    // Invalidate all refresh tokens for this client so existing sessions stop working.
+    @$con->query("DELETE FROM refresh_tokens WHERE person_id = $pid");
+
+    ApiResponse::ok(['deleted' => true]);
 }
 
 ApiResponse::err('method_not_allowed', 'Use GET o PATCH', 405);
