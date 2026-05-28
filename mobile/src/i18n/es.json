@@ -179,7 +179,10 @@
     "phone": "Teléfono",
     "language": "Idioma",
     "save": "Guardar cambios",
-    "saved": "Perfil actualizado"
+    "saved": "Perfil actualizado",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountConfirmTitle": "¿Eliminar tu cuenta?",
+    "deleteAccountConfirmMsg": "Esta acción eliminará tu cuenta permanentemente y no se puede deshacer."
   },
   "update": {
     "available": "Actualización disponible",
