@@ -150,6 +150,14 @@ if ($method === 'DELETE') {
     $p = PersonData::getById($pid);
     if (!$p) ApiResponse::err('not_found', 'Cuenta no encontrada', 404);
 
+    // Protect the Apple App Store review demo account from deletion so the
+    // reviewer-provided credentials keep working across submissions.
+    $uname = strtolower(trim((string)($p->username ?? '')));
+    $pphone = strtolower(trim((string)($p->phone ?? '')));
+    if ($uname === 'appdemo' || $pphone === 'appdemo') {
+        ApiResponse::err('forbidden', 'Esta cuenta de demostración no se puede eliminar', 403);
+    }
+
     // Anonymise all personally-identifiable fields so no user data is retained,
     // but referential integrity with historical bookings is preserved.
     $stamp   = date('YmdHis');
