@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 42, height: 42,
     borderRadius: 21,
-    backgroundColor: "rgba(11,18,32,0.45)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     alignItems: "center",
     justifyContent: "center",
   },

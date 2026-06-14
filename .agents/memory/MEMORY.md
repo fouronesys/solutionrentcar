@@ -1,1 +1,2 @@
 - [Rent-car API web-preview CORS](rent-car-api-cors.md) — web preview can't call the external API (CORS/401); validate the mobile app on a real device via Expo Go.
+- [Rent-car brand palette](rent-car-palette.md) — app is black + gold, never navy/blue; all tokens in src/theme/colors.ts.

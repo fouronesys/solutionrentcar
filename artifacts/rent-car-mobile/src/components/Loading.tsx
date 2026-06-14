@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(11,18,32,0.45)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     zIndex: 99,
   },
   pill: {

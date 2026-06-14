@@ -105,7 +105,7 @@ const sigWebStyle = `
     background: #FAFAFA;
   }
   .m-signature-pad--body {
-    border: 2px dashed #E2E8F0;
+    border: 2px dashed #E6E6E3;
     border-radius: 12px;
     margin: 12px;
   }

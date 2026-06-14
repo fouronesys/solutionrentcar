@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 12,
     right: 12,
-    backgroundColor: "rgba(11,18,32,0.82)",
+    backgroundColor: "rgba(0,0,0,0.85)",
     borderRadius: radius.md,
     paddingHorizontal: 12,
     paddingVertical: 7,
