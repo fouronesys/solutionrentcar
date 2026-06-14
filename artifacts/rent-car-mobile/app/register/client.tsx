@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -72,7 +73,7 @@ export default function ClientRegister() {
               <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
             </Pressable>
             <View style={styles.logoChip}>
-              <Ionicons name="car-sport" size={32} color={colors.dark} />
+              <Image source={require("../../assets/images/logo.png")} style={{ width: 82, height: 82 }} resizeMode="contain" />
             </View>
             <Text style={styles.brand}>SOLUTION</Text>
             <Text style={styles.brandAccent}>Rent Car</Text>
@@ -148,13 +149,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logoChip: {
-    width: 68,
-    height: 68,
+    width: 90,
+    height: 90,
     borderRadius: radius.xl,
-    backgroundColor: colors.primary,
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 14,
+    overflow: "hidden",
   },
   brand: { ...type.label, color: "rgba(255,255,255,0.7)", letterSpacing: 3 },
   brandAccent: { ...type.h1, color: colors.primary, marginTop: 2 },
