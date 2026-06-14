@@ -38,3 +38,9 @@ externalPort = 3000
 [[ports]]
 localPort = 21048
 externalPort = 3002
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_GUEST_USERNAME = "8090000000"
+EXPO_PUBLIC_GUEST_PASSWORD = "8090000000"

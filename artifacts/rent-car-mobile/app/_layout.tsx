@@ -39,8 +39,14 @@ function Gate() {
       router.replace("/(client)/cars");
     } else if (role === "staff" && !inStaff) {
       router.replace("/(staff)/agenda");
-    } else if (!role && !inAuth) {
-      router.replace(inStaff ? "/login/staff" : "/login/client");
+    } else if (!role) {
+      // Logged-out users browse the catalog as guests; only the staff area and
+      // explicit auth screens are excluded. Login is requested at reservation.
+      if (inStaff) {
+        router.replace("/login/staff");
+      } else if (!inClient && !inAuth) {
+        router.replace("/(client)/cars");
+      }
     }
   }, [bootstrapped, role, segments, router]);
 
