@@ -1,37 +1,52 @@
 import React from "react";
 import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
-import { colors, radius } from "@/theme/colors";
+import { colors, radius, shadow } from "@/theme/colors";
 
 export function Card({
   children,
   onPress,
   style,
+  variant = "default",
+  padding = 16,
 }: {
   children: React.ReactNode;
   onPress?: () => void;
   style?: ViewStyle;
+  variant?: "default" | "dark" | "flat";
+  padding?: number;
 }) {
-  const content = <View style={[styles.card, style]}>{children}</View>;
+  const bg =
+    variant === "dark" ? colors.dark :
+    variant === "flat" ? colors.borderLight :
+    colors.card;
+
+  const cardStyle = [
+    styles.card,
+    shadow.md,
+    { backgroundColor: bg, padding },
+    style,
+  ];
+
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
-        {content}
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          cardStyle,
+          pressed && { opacity: 0.92, transform: [{ scale: 0.99 }] },
+        ]}
+      >
+        {children}
       </Pressable>
     );
   }
-  return content;
+  return <View style={cardStyle}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,
-    padding: 14,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
 });

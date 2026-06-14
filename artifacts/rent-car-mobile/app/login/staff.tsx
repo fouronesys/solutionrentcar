@@ -1,12 +1,21 @@
 import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiError } from "@/api/client";
-import { colors } from "@/theme/colors";
+import { colors, spacing } from "@/theme/colors";
 import { t } from "@/i18n";
 
 function loginErrorMessage(e: unknown): string {
@@ -23,6 +32,7 @@ function loginErrorMessage(e: unknown): string {
 }
 
 export default function StaffLogin() {
+  const router = useRouter();
   const { loginStaff } = useAuth();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
@@ -44,15 +54,46 @@ export default function StaffLogin() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <Stack.Screen options={{ headerShown: true, title: t("login.staff.title") }} />
+    <SafeAreaView style={styles.screen}>
+      <Stack.Screen options={{ headerShown: false }} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-          <Text style={styles.heading}>{t("login.staff.title")}</Text>
-          <Input label={t("login.staff.user")} autoCapitalize="none" autoCorrect={false} value={user} onChangeText={setUser} />
-          <Input label={t("login.staff.password")} secureTextEntry value={password} onChangeText={setPassword} />
-          <View style={{ height: 8 }} />
-          <Button title={t("login.staff.submit")} onPress={submit} loading={loading} />
+        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <View style={styles.hero}>
+            <Text style={styles.logo}>🛡️</Text>
+            <Text style={styles.brand}>Solutions</Text>
+            <Text style={styles.brandAccent}>Staff</Text>
+            <Text style={styles.brandSub}>{t("login.staff.title")}</Text>
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.title}>{t("login.staff.title")}</Text>
+
+            <View style={styles.form}>
+              <Input
+                label={t("login.staff.user")}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="username"
+                value={user}
+                onChangeText={setUser}
+                placeholder="usuario"
+              />
+              <Input
+                label={t("login.staff.password")}
+                secureTextEntry
+                autoComplete="password"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="••••••••"
+              />
+            </View>
+
+            <Button title={t("login.staff.submit")} onPress={submit} loading={loading} size="lg" variant="dark" />
+          </View>
+
+          <Pressable onPress={() => router.push("/(client)/cars")} style={styles.skipWrap}>
+            <Text style={styles.skipText}>← {t("cars.title")}</Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -60,7 +101,29 @@ export default function StaffLogin() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  body: { padding: 20 },
-  heading: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 16 },
+  screen: { flex: 1, backgroundColor: colors.dark },
+  body: { flexGrow: 1 },
+  hero: {
+    alignItems: "center",
+    paddingTop: 48,
+    paddingBottom: 32,
+    backgroundColor: colors.dark,
+  },
+  logo: { fontSize: 48, marginBottom: 12 },
+  brand: { color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase" },
+  brandAccent: { color: colors.primary, fontSize: 28, fontWeight: "800", letterSpacing: -0.3 },
+  brandSub: { color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 4 },
+  card: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: spacing.xl,
+    paddingTop: spacing.xxl,
+    minHeight: 360,
+  },
+  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 24 },
+  form: { marginBottom: 8 },
+  skipWrap: { paddingVertical: 20, alignItems: "center", backgroundColor: colors.bg },
+  skipText: { color: colors.textMuted, fontSize: 14, fontWeight: "600" },
 });

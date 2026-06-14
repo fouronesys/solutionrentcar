@@ -1,11 +1,26 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { colors, radius } from "@/theme/colors";
+import { radius } from "@/theme/colors";
 
-export function Badge({ label, color }: { label: string; color?: string }) {
+export function Badge({
+  label,
+  color,
+  bg,
+  size = "md",
+}: {
+  label: string;
+  color?: string;
+  bg?: string;
+  size?: "sm" | "md";
+}) {
+  const textColor = color ?? "#D97706";
+  const bgColor = bg ?? textColor + "18";
+
   return (
-    <View style={[styles.box, { backgroundColor: (color ?? colors.primaryDark) + "22", borderColor: color ?? colors.primaryDark }]}>
-      <Text style={[styles.txt, { color: color ?? colors.primaryDark }]}>{label}</Text>
+    <View style={[styles.box, { backgroundColor: bgColor }, size === "sm" && styles.sm]}>
+      <Text style={[styles.txt, { color: textColor }, size === "sm" && styles.txtSm]}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -13,10 +28,11 @@ export function Badge({ label, color }: { label: string; color?: string }) {
 const styles = StyleSheet.create({
   box: {
     alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: radius.sm,
-    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radius.full,
   },
-  txt: { fontSize: 12, fontWeight: "600" },
+  sm: { paddingHorizontal: 8, paddingVertical: 3 },
+  txt: { fontSize: 12, fontWeight: "700", letterSpacing: 0.2 },
+  txtSm: { fontSize: 11 },
 });
