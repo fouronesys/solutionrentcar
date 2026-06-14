@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from "react-native";
-import { colors, radius } from "@/theme/colors";
+import { Ionicons } from "@expo/vector-icons";
+import { colors, font, radius, type } from "@/theme/colors";
 
 export function Input({
   label,
@@ -12,31 +13,53 @@ export function Input({
   label?: string;
   error?: string;
   containerStyle?: ViewStyle;
-  icon?: React.ReactNode;
+  icon?: keyof typeof Ionicons.glyphMap;
 }) {
+  const [focused, setFocused] = useState(false);
+
+  const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
+
   return (
-    <View style={[{ marginBottom: 14 }, containerStyle]}>
+    <View style={[{ marginBottom: 16 }, containerStyle]}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
-      <View style={[styles.wrap, error ? styles.wrapError : null]}>
-        {icon ? <View style={styles.icon}>{icon}</View> : null}
+      <View
+        style={[
+          styles.wrap,
+          { borderColor },
+          focused && !error ? styles.wrapFocused : null,
+        ]}
+      >
+        {icon ? (
+          <Ionicons
+            name={icon}
+            size={18}
+            color={focused ? colors.primaryDark : colors.textMuted}
+            style={styles.icon}
+          />
+        ) : null}
         <TextInput
           placeholderTextColor={colors.textMuted}
-          style={[styles.input, icon ? { paddingLeft: 42 } : null]}
+          style={[styles.input, icon ? { paddingLeft: 44 } : null]}
+          onFocus={(e) => { setFocused(true); rest.onFocus?.(e); }}
+          onBlur={(e) => { setFocused(false); rest.onBlur?.(e); }}
           {...rest}
         />
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <View style={styles.errorRow}>
+          <Ionicons name="alert-circle" size={13} color={colors.danger} />
+          <Text style={styles.error}>{error}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   label: {
-    fontSize: 13,
+    ...type.captionMed,
     color: colors.textSecondary,
-    marginBottom: 6,
-    fontWeight: "600",
-    letterSpacing: 0.1,
+    marginBottom: 7,
   },
   wrap: {
     flexDirection: "row",
@@ -44,18 +67,20 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: "#fff",
-    overflow: "hidden",
+    backgroundColor: colors.card,
   },
-  wrapError: { borderColor: colors.danger },
-  icon: { position: "absolute", left: 12, zIndex: 1, opacity: 0.5 },
+  wrapFocused: {
+    backgroundColor: colors.primaryXLight,
+  },
+  icon: { position: "absolute", left: 14, zIndex: 1 },
   input: {
     flex: 1,
-    minHeight: 50,
-    paddingHorizontal: 14,
+    minHeight: 52,
+    paddingHorizontal: 16,
+    fontFamily: font.medium,
     fontSize: 15,
     color: colors.text,
-    fontWeight: "400",
   },
-  error: { color: colors.danger, fontSize: 12, marginTop: 4, fontWeight: "500" },
+  errorRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 5 },
+  error: { ...type.small, color: colors.danger },
 });

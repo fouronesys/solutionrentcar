@@ -1,13 +1,16 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { colors } from "@/theme/colors";
+import { Ionicons } from "@expo/vector-icons";
+import { colors, radius, type } from "@/theme/colors";
 
-const ICONS: Record<string, string> = {
-  cars: "🚗",
-  bookings: "📋",
-  notifications: "🔔",
-  search: "🔍",
-  default: "📭",
+const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  cars: "car-sport-outline",
+  bookings: "calendar-outline",
+  notifications: "notifications-outline",
+  search: "search-outline",
+  payments: "card-outline",
+  profile: "person-outline",
+  default: "file-tray-outline",
 };
 
 export function EmptyState({
@@ -19,11 +22,11 @@ export function EmptyState({
   subtitle?: string;
   icon?: string;
 }) {
-  const emoji = icon ? (ICONS[icon] ?? icon) : ICONS.default;
+  const name = (icon && ICONS[icon]) || ICONS.default;
   return (
     <View style={styles.box}>
       <View style={styles.iconWrap}>
-        <Text style={styles.emoji}>{emoji}</Text>
+        <Ionicons name={name} size={34} color={colors.primaryDark} />
       </View>
       <Text style={styles.title}>{title}</Text>
       {subtitle ? <Text style={styles.sub}>{subtitle}</Text> : null}
@@ -32,23 +35,18 @@ export function EmptyState({
 }
 
 const styles = StyleSheet.create({
-  box: { paddingVertical: 56, paddingHorizontal: 32, alignItems: "center" },
+  box: { paddingVertical: 60, paddingHorizontal: 32, alignItems: "center" },
   iconWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#F1F5F9",
+    width: 84,
+    height: 84,
+    borderRadius: radius.full,
+    backgroundColor: colors.primaryXLight,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: colors.primaryLight,
   },
-  emoji: { fontSize: 36 },
-  title: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: "700",
-    marginBottom: 6,
-    textAlign: "center",
-  },
-  sub: { color: colors.textMuted, fontSize: 14, textAlign: "center", lineHeight: 20 },
+  title: { ...type.h3, color: colors.text, marginBottom: 6, textAlign: "center" },
+  sub: { ...type.callout, color: colors.textMuted, textAlign: "center" },
 });

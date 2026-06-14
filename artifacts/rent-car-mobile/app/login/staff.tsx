@@ -11,11 +11,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiError } from "@/api/client";
-import { colors, spacing } from "@/theme/colors";
+import { colors, radius, type } from "@/theme/colors";
 import { t } from "@/i18n";
 
 function loginErrorMessage(e: unknown): string {
@@ -54,23 +56,35 @@ export default function StaffLogin() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar style="light" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          {/* Hero */}
           <View style={styles.hero}>
-            <Text style={styles.logo}>🛡️</Text>
-            <Text style={styles.brand}>Solutions</Text>
+            <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+              <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+            </Pressable>
+            <View style={styles.logoChip}>
+              <Ionicons name="shield-checkmark" size={34} color={colors.dark} />
+            </View>
+            <Text style={styles.brand}>SOLUTION</Text>
             <Text style={styles.brandAccent}>Staff</Text>
-            <Text style={styles.brandSub}>{t("login.staff.title")}</Text>
+            <View style={styles.staffPill}>
+              <Ionicons name="briefcase-outline" size={13} color="rgba(255,255,255,0.7)" />
+              <Text style={styles.brandSub}>{t("login.staff.title")}</Text>
+            </View>
           </View>
 
+          {/* Card */}
           <View style={styles.card}>
             <Text style={styles.title}>{t("login.staff.title")}</Text>
 
             <View style={styles.form}>
               <Input
                 label={t("login.staff.user")}
+                icon="person-outline"
                 autoCapitalize="none"
                 autoCorrect={false}
                 autoComplete="username"
@@ -80,6 +94,7 @@ export default function StaffLogin() {
               />
               <Input
                 label={t("login.staff.password")}
+                icon="lock-closed-outline"
                 secureTextEntry
                 autoComplete="password"
                 value={password}
@@ -88,12 +103,13 @@ export default function StaffLogin() {
               />
             </View>
 
-            <Button title={t("login.staff.submit")} onPress={submit} loading={loading} size="lg" variant="dark" />
-          </View>
+            <Button title={t("login.staff.submit")} icon="log-in-outline" onPress={submit} loading={loading} size="lg" variant="dark" />
 
-          <Pressable onPress={() => router.push("/(client)/cars")} style={styles.skipWrap}>
-            <Text style={styles.skipText}>← {t("cars.title")}</Text>
-          </Pressable>
+            <Pressable onPress={() => router.push("/(client)/cars")} style={styles.skipWrap}>
+              <Ionicons name="car-sport-outline" size={16} color={colors.textMuted} />
+              <Text style={styles.skipText}>{t("cars.title")}</Text>
+            </Pressable>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -105,25 +121,54 @@ const styles = StyleSheet.create({
   body: { flexGrow: 1 },
   hero: {
     alignItems: "center",
-    paddingTop: 48,
-    paddingBottom: 32,
-    backgroundColor: colors.dark,
+    paddingTop: 36,
+    paddingBottom: 36,
+    paddingHorizontal: 20,
   },
-  logo: { fontSize: 48, marginBottom: 12 },
-  brand: { color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase" },
-  brandAccent: { color: colors.primary, fontSize: 28, fontWeight: "800", letterSpacing: -0.3 },
-  brandSub: { color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 4 },
+  backBtn: {
+    position: "absolute",
+    left: 16,
+    top: 24,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoChip: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xl,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  brand: { ...type.label, color: "rgba(255,255,255,0.6)", letterSpacing: 3 },
+  brandAccent: { ...type.h1, color: colors.primary, marginTop: 2 },
+  staffPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+    backgroundColor: "rgba(255,255,255,0.07)",
+  },
+  brandSub: { ...type.caption, color: "rgba(255,255,255,0.6)" },
   card: {
     flex: 1,
     backgroundColor: colors.bg,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: spacing.xl,
-    paddingTop: spacing.xxl,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    padding: 20,
+    paddingTop: 28,
     minHeight: 360,
   },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 24 },
+  title: { ...type.h1, color: colors.text, marginBottom: 24 },
   form: { marginBottom: 8 },
-  skipWrap: { paddingVertical: 20, alignItems: "center", backgroundColor: colors.bg },
-  skipText: { color: colors.textMuted, fontSize: 14, fontWeight: "600" },
+  skipWrap: { marginTop: 24, paddingVertical: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  skipText: { ...type.bodyMed, color: colors.textMuted },
 });

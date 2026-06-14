@@ -11,15 +11,19 @@ import {
   View,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Loading } from "@/components/Loading";
 import { api, ApiError } from "@/api/client";
 import { useAuth } from "@/auth/AuthContext";
 import type { Car } from "@/api/types";
-import { colors, radius, shadow, spacing } from "@/theme/colors";
+import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
 
@@ -45,6 +49,15 @@ function fmtTime(d: Date) {
 }
 function daysBetween(a: Date, b: Date) {
   return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / 86400000));
+}
+
+function SectionLabel({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: string }) {
+  return (
+    <View style={styles.sectionLabelRow}>
+      <Ionicons name={icon} size={14} color={colors.primaryDark} />
+      <Text style={styles.sectionLabel}>{text}</Text>
+    </View>
+  );
 }
 
 // ─── Inline auth guard ─────────────────────────────────────────────────────────
@@ -83,8 +96,10 @@ function LoginRequired({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <View style={styles.authCard}>
-      <View style={styles.authIconWrap}><Text style={{ fontSize: 40 }}>🔐</Text></View>
+    <Card style={styles.authCard} padding={spacing.xl} elevation="lg">
+      <View style={styles.authIconWrap}>
+        <Ionicons name="lock-closed" size={28} color={colors.primaryDark} />
+      </View>
       <Text style={styles.authTitle}>{t("login.requiredTitle")}</Text>
       <Text style={styles.authSub}>{t("login.requiredSubtitle")}</Text>
 
@@ -110,23 +125,23 @@ function LoginRequired({ onSuccess }: { onSuccess: () => void }) {
       {mode === "register" && (
         <View style={styles.nameRow}>
           <View style={{ flex: 1, marginRight: 8 }}>
-            <Input label={t("register.name")} value={name} onChangeText={setName} autoCapitalize="words" />
+            <Input label={t("register.name")} value={name} onChangeText={setName} autoCapitalize="words" icon="person-outline" />
           </View>
           <View style={{ flex: 1 }}>
             <Input label={t("register.lastname")} value={lastname} onChangeText={setLastname} autoCapitalize="words" />
           </View>
         </View>
       )}
-      <Input label={t("login.client.phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoCapitalize="none" placeholder="809-000-0000" />
+      <Input label={t("login.client.phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoCapitalize="none" placeholder="809-000-0000" icon="call-outline" />
       {mode === "register" && (
-        <Input label={t("register.email")} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholder="opcional" />
+        <Input label={t("register.email")} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholder="opcional" icon="mail-outline" />
       )}
-      <Input label={t("login.client.password")} value={password} onChangeText={setPassword} secureTextEntry placeholder="••••••••" />
+      <Input label={t("login.client.password")} value={password} onChangeText={setPassword} secureTextEntry placeholder="••••••••" icon="lock-closed-outline" />
       {mode === "register" && (
-        <Input label={t("register.passwordConfirm")} value={confirm} onChangeText={setConfirm} secureTextEntry placeholder="Repite la contraseña" />
+        <Input label={t("register.passwordConfirm")} value={confirm} onChangeText={setConfirm} secureTextEntry placeholder="Repite la contraseña" icon="lock-closed-outline" />
       )}
-      <Button title={mode === "login" ? t("login.client.submit") : t("register.submit")} onPress={submit} loading={loading} size="lg" />
-    </View>
+      <Button title={mode === "login" ? t("login.client.submit") : t("register.submit")} onPress={submit} loading={loading} size="lg" icon="arrow-forward" iconRight />
+    </Card>
   );
 }
 
@@ -136,6 +151,7 @@ export default function BookScreen() {
     carId: string; start?: string; end?: string;
   }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { role } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -229,39 +245,61 @@ export default function BookScreen() {
   if (loadingCar) return <Loading />;
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top"]}>
+    <View style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>←</Text>
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>{t("cars.book")}</Text>
-          {car ? (
-            <Text style={styles.headerSub}>{car.brand ? `${car.brand} ` : ""}{car.name ?? car.model ?? ""}</Text>
-          ) : null}
+      <StatusBar style="light" />
+
+      {/* Hero header */}
+      <LinearGradient
+        colors={gradients.hero}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.hero, { paddingTop: insets.top + 10 }]}
+      >
+        <View style={styles.heroTopRow}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+            <Ionicons name="arrow-back" size={22} color="#fff" />
+          </Pressable>
+          <View style={styles.heroBrandRow}>
+            <View style={styles.heroLogo}>
+              <Ionicons name="car-sport" size={16} color={colors.dark} />
+            </View>
+            <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+          </View>
         </View>
-      </View>
+        <Text style={styles.heroTitle}>{t("cars.book")}</Text>
+        {car ? (
+          <Text style={styles.heroSub}>
+            {car.brand ? `${car.brand} ` : ""}{car.name ?? car.model ?? ""}
+          </Text>
+        ) : null}
+      </LinearGradient>
 
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView ref={scrollRef} contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {carErr ? <View style={styles.errBox}><Text style={styles.errText}>⚠️  {carErr}</Text></View> : null}
+          {carErr ? (
+            <View style={styles.errBox}>
+              <Ionicons name="warning-outline" size={16} color={colors.danger} />
+              <Text style={styles.errText}>{carErr}</Text>
+            </View>
+          ) : null}
 
           {!authDone ? (
             <LoginRequired onSuccess={() => setAuthDone(true)} />
           ) : (
             <>
               {/* Dates */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>{locale === "en" ? "📅 Rental Period" : "📅 Período de renta"}</Text>
+              <Card style={styles.section} elevation="md">
+                <SectionLabel icon="calendar-outline" text={locale === "en" ? "Rental Period" : "Período de renta"} />
                 <View style={styles.datesRow}>
                   <Pressable onPress={() => { setShowPicker("start"); setPickerMode("date"); }} style={styles.datePill}>
                     <Text style={styles.datePillLabel}>{locale === "en" ? "Pickup" : "Recogida"}</Text>
                     <Text style={styles.datePillDate}>{fmtDate(start)}</Text>
                     <Text style={styles.datePillTime}>{fmtTime(start)}</Text>
                   </Pressable>
-                  <Text style={styles.dateArrow}>→</Text>
+                  <View style={styles.dateArrow}>
+                    <Ionicons name="arrow-forward" size={16} color={colors.textMuted} />
+                  </View>
                   <Pressable onPress={() => { setShowPicker("end"); setPickerMode("date"); }} style={styles.datePill}>
                     <Text style={styles.datePillLabel}>{locale === "en" ? "Return" : "Devolución"}</Text>
                     <Text style={styles.datePillDate}>{fmtDate(end)}</Text>
@@ -277,29 +315,34 @@ export default function BookScreen() {
                     onChange={handleDateChange}
                   />
                 ) : null}
-              </View>
+              </Card>
 
               {/* Price summary */}
               {car ? (
                 <View style={styles.summaryCard}>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>{money(car.price_day ?? car.price)} × {days} {locale === "en" ? "days" : "días"}</Text>
-                    <Text style={styles.summaryTotal}>{money(total)}</Text>
+                  <View style={styles.summaryIcon}>
+                    <Ionicons name="cash-outline" size={20} color={colors.primaryDark} />
                   </View>
-                  <Text style={styles.summaryNote}>{locale === "en" ? "Estimated total" : "Total estimado"}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.summaryLabel}>
+                      {money(car.price_day ?? car.price)} × {days} {locale === "en" ? "days" : "días"}
+                    </Text>
+                    <Text style={styles.summaryNote}>{locale === "en" ? "Estimated total" : "Total estimado"}</Text>
+                  </View>
+                  <Text style={styles.summaryTotal}>{money(total)}</Text>
                 </View>
               ) : null}
 
               {/* Locations */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>{locale === "en" ? "📍 Locations" : "📍 Lugares"}</Text>
-                <Input label={t("booking.placeStart")} value={placeStart} onChangeText={setPlaceStart} placeholder={locale === "en" ? "Airport, hotel, address…" : "Aeropuerto, hotel, dirección…"} />
-                <Input label={t("booking.placeEnd")} value={placeEnd} onChangeText={setPlaceEnd} placeholder={locale === "en" ? "Same as pickup if empty" : "Igual al recogido si está vacío"} />
-              </View>
+              <Card style={styles.section} elevation="md">
+                <SectionLabel icon="location-outline" text={locale === "en" ? "Locations" : "Lugares"} />
+                <Input label={t("booking.placeStart")} value={placeStart} onChangeText={setPlaceStart} icon="navigate-outline" placeholder={locale === "en" ? "Airport, hotel, address…" : "Aeropuerto, hotel, dirección…"} />
+                <Input label={t("booking.placeEnd")} value={placeEnd} onChangeText={setPlaceEnd} icon="flag-outline" placeholder={locale === "en" ? "Same as pickup if empty" : "Igual al recogido si está vacío"} />
+              </Card>
 
               {/* Notes */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>{locale === "en" ? "💬 Notes (optional)" : "💬 Notas (opcional)"}</Text>
+              <Card style={styles.section} elevation="md">
+                <SectionLabel icon="chatbubble-ellipses-outline" text={locale === "en" ? "Notes (optional)" : "Notas (opcional)"} />
                 <View style={styles.textareaWrap}>
                   <TextInput
                     value={comment}
@@ -312,91 +355,116 @@ export default function BookScreen() {
                     textAlignVertical="top"
                   />
                 </View>
-              </View>
+              </Card>
 
               <View style={styles.cta}>
-                <Button title={`${t("book.confirm")} · ${money(total)}`} onPress={submit} loading={submitting} size="lg" />
+                <Button title={`${t("book.confirm")} · ${money(total)}`} onPress={submit} loading={submitting} size="lg" icon="checkmark-circle-outline" />
               </View>
             </>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row", alignItems: "center",
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
-    backgroundColor: colors.dark,
+
+  hero: {
+    paddingBottom: 22,
+    paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
   },
+  heroTopRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 18 },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center", justifyContent: "center", marginRight: 12,
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center", justifyContent: "center",
   },
-  backText: { fontSize: 20, fontWeight: "700", color: "#fff", marginTop: -2 },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#fff" },
-  headerSub: { fontSize: 13, color: "rgba(255,255,255,0.6)", marginTop: 1 },
-
-  body: { paddingBottom: 32 },
-  errBox: { margin: spacing.lg, padding: 12, backgroundColor: colors.dangerBg, borderRadius: radius.md },
-  errText: { color: colors.danger, fontSize: 13 },
-
-  section: {
-    backgroundColor: colors.card, marginTop: 8,
-    padding: spacing.lg,
-    borderTopWidth: 1, borderTopColor: colors.border,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
+  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  heroLogo: {
+    width: 26, height: 26, borderRadius: radius.xs,
+    backgroundColor: colors.primary,
+    alignItems: "center", justifyContent: "center",
   },
-  sectionLabel: { fontSize: 14, fontWeight: "700", color: colors.text, marginBottom: 14 },
+  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
+  heroTitle: { ...type.display, color: "#FFFFFF" },
+  heroSub: { ...type.callout, color: "rgba(255,255,255,0.6)", marginTop: 4 },
+
+  body: { padding: spacing.lg, paddingBottom: 40 },
+  errBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: spacing.md,
+    padding: 14,
+    backgroundColor: colors.dangerBg,
+    borderRadius: radius.md,
+  },
+  errText: { ...type.caption, color: colors.danger, flex: 1 },
+
+  section: { padding: spacing.lg },
+  sectionLabelRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 14 },
+  sectionLabel: { ...type.label, color: colors.textMuted },
 
   datesRow: { flexDirection: "row", alignItems: "center" },
   datePill: {
-    flex: 1, backgroundColor: colors.borderLight,
+    flex: 1, backgroundColor: colors.bg,
     borderRadius: radius.md, padding: 12,
-    borderWidth: 1.5, borderColor: colors.border,
+    borderWidth: 1, borderColor: colors.border,
   },
-  datePillLabel: { fontSize: 10, color: colors.textMuted, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.4 },
-  datePillDate: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 3 },
-  datePillTime: { fontSize: 12, color: colors.primaryDark, marginTop: 1, fontWeight: "600" },
-  dateArrow: { paddingHorizontal: 10, fontSize: 18, color: colors.textMuted },
+  datePillLabel: { ...type.label, color: colors.textMuted, fontSize: 10 },
+  datePillDate: { ...type.title, color: colors.text, marginTop: 3 },
+  datePillTime: { ...type.caption, color: colors.primaryDark, marginTop: 1, fontFamily: font.semibold },
+  dateArrow: { paddingHorizontal: 8 },
 
   summaryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     backgroundColor: colors.primaryXLight,
     padding: spacing.lg,
-    borderTopWidth: 2, borderTopColor: colors.primaryLight,
-    borderBottomWidth: 1, borderBottomColor: colors.primaryLight,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.primaryLight,
+    marginBottom: 12,
   },
-  summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  summaryLabel: { fontSize: 15, color: colors.textSecondary, fontWeight: "500" },
-  summaryTotal: { fontSize: 22, fontWeight: "800", color: colors.primaryDark },
-  summaryNote: { fontSize: 11, color: colors.textMuted, marginTop: 4 },
+  summaryIcon: {
+    width: 40, height: 40, borderRadius: radius.full,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center", justifyContent: "center",
+  },
+  summaryLabel: { ...type.bodyMed, color: colors.textSecondary },
+  summaryNote: { ...type.small, color: colors.textMuted, marginTop: 2 },
+  summaryTotal: { ...type.h2, color: colors.primaryDark, fontFamily: font.extrabold },
 
-  textareaWrap: { borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, backgroundColor: "#fff" },
-  textarea: { padding: 14, minHeight: 80, fontSize: 15, color: colors.text },
-  cta: { padding: spacing.lg, paddingTop: spacing.md },
+  textareaWrap: { borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.card },
+  textarea: { padding: 14, minHeight: 80, ...type.body, color: colors.text },
+  cta: { paddingTop: spacing.sm },
 
   // Auth card
   authCard: {
-    backgroundColor: colors.card,
-    margin: spacing.lg, borderRadius: radius.xl,
-    padding: spacing.xl,
-    ...shadow.lg,
     borderTopWidth: 4, borderTopColor: colors.primary,
   },
-  authIconWrap: { alignItems: "center", marginBottom: 12 },
-  authTitle: { fontSize: 20, fontWeight: "800", color: colors.text, marginBottom: 4, textAlign: "center" },
-  authSub: { fontSize: 13, color: colors.textMuted, textAlign: "center", marginBottom: 20, lineHeight: 18 },
+  authIconWrap: {
+    alignItems: "center", justifyContent: "center",
+    alignSelf: "center",
+    width: 64, height: 64, borderRadius: radius.full,
+    backgroundColor: colors.primaryXLight,
+    borderWidth: 1, borderColor: colors.primaryLight,
+    marginBottom: 14,
+  },
+  authTitle: { ...type.h2, color: colors.text, marginBottom: 4, textAlign: "center" },
+  authSub: { ...type.caption, color: colors.textMuted, textAlign: "center", marginBottom: 20, lineHeight: 18 },
   authToggle: {
     flexDirection: "row", backgroundColor: colors.borderLight,
     borderRadius: radius.md, padding: 3, marginBottom: 20,
   },
   authTab: { flex: 1, paddingVertical: 10, alignItems: "center", borderRadius: radius.sm },
-  authTabActive: { backgroundColor: "#fff", ...shadow.sm },
-  authTabText: { fontSize: 13, color: colors.textMuted, fontWeight: "600" },
-  authTabTextActive: { color: colors.text, fontWeight: "700" },
+  authTabActive: { backgroundColor: colors.card, ...shadow.sm },
+  authTabText: { ...type.captionMed, color: colors.textMuted },
+  authTabTextActive: { color: colors.text, fontFamily: font.bold },
   nameRow: { flexDirection: "row" },
 });

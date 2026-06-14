@@ -11,11 +11,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiError } from "@/api/client";
-import { colors, spacing } from "@/theme/colors";
+import { colors, font, radius, type } from "@/theme/colors";
 import { t } from "@/i18n";
 
 export default function ClientRegister() {
@@ -59,30 +61,39 @@ export default function ClientRegister() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar style="light" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          {/* Hero */}
           <View style={styles.hero}>
-            <Text style={styles.logo}>🚀</Text>
-            <Text style={styles.brand}>Solutions</Text>
+            <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+              <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+            </Pressable>
+            <View style={styles.logoChip}>
+              <Ionicons name="car-sport" size={32} color={colors.dark} />
+            </View>
+            <Text style={styles.brand}>SOLUTION</Text>
             <Text style={styles.brandAccent}>Rent Car</Text>
           </View>
 
+          {/* Card */}
           <View style={styles.card}>
             <Text style={styles.title}>{t("register.title")}</Text>
             <Text style={styles.subtitle}>{t("register.subtitle")}</Text>
 
             <View style={styles.nameRow}>
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Input label={t("register.name")} value={name} onChangeText={setName} autoCapitalize="words" />
+                <Input label={t("register.name")} icon="person-outline" value={name} onChangeText={setName} autoCapitalize="words" />
               </View>
               <View style={{ flex: 1 }}>
-                <Input label={t("register.lastname")} value={lastname} onChangeText={setLastname} autoCapitalize="words" />
+                <Input label={t("register.lastname")} icon="people-outline" value={lastname} onChangeText={setLastname} autoCapitalize="words" />
               </View>
             </View>
             <Input
               label={t("register.phone")}
+              icon="call-outline"
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
@@ -91,16 +102,17 @@ export default function ClientRegister() {
             />
             <Input
               label={t("register.email")}
+              icon="mail-outline"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               placeholder={`${t("register.email")} (${t("common.ok").toLowerCase()})`}
             />
-            <Input label={t("register.password")} value={password} onChangeText={setPassword} secureTextEntry placeholder="Mín. 6 caracteres" />
-            <Input label={t("register.passwordConfirm")} value={confirm} onChangeText={setConfirm} secureTextEntry placeholder="Repite la contraseña" />
+            <Input label={t("register.password")} icon="lock-closed-outline" value={password} onChangeText={setPassword} secureTextEntry placeholder="Mín. 6 caracteres" />
+            <Input label={t("register.passwordConfirm")} icon="lock-closed-outline" value={confirm} onChangeText={setConfirm} secureTextEntry placeholder="Repite la contraseña" />
 
-            <Button title={t("register.submit")} onPress={submit} loading={loading} size="lg" style={{ marginTop: 8 }} />
+            <Button title={t("register.submit")} icon="person-add-outline" onPress={submit} loading={loading} size="lg" style={{ marginTop: 8 }} />
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>{t("register.haveAccount")} </Text>
@@ -120,25 +132,44 @@ const styles = StyleSheet.create({
   body: { flexGrow: 1 },
   hero: {
     alignItems: "center",
-    paddingTop: 40,
-    paddingBottom: 28,
-    backgroundColor: colors.dark,
+    paddingTop: 32,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
   },
-  logo: { fontSize: 42, marginBottom: 10 },
-  brand: { color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase" },
-  brandAccent: { color: colors.primary, fontSize: 26, fontWeight: "800", letterSpacing: -0.3 },
+  backBtn: {
+    position: "absolute",
+    left: 16,
+    top: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoChip: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.xl,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  brand: { ...type.label, color: "rgba(255,255,255,0.7)", letterSpacing: 3 },
+  brandAccent: { ...type.h1, color: colors.primary, marginTop: 2 },
   card: {
     flex: 1,
     backgroundColor: colors.bg,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: spacing.xl,
-    paddingTop: spacing.xxl,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    padding: 20,
+    paddingTop: 28,
   },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 4 },
-  subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: 24, lineHeight: 20 },
+  title: { ...type.h1, color: colors.text, marginBottom: 4 },
+  subtitle: { ...type.callout, color: colors.textMuted, marginBottom: 24 },
   nameRow: { flexDirection: "row" },
-  footer: { flexDirection: "row", justifyContent: "center", paddingVertical: 24 },
-  footerText: { color: colors.textMuted, fontSize: 14 },
-  footerLink: { color: colors.primaryDark, fontWeight: "700", fontSize: 14 },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", paddingVertical: 24 },
+  footerText: { ...type.callout, color: colors.textMuted },
+  footerLink: { ...type.callout, color: colors.primaryDark, fontFamily: font.bold },
 });

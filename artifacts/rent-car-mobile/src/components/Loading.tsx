@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { colors } from "@/theme/colors";
+import { colors, radius, shadow, type } from "@/theme/colors";
 import { t } from "@/i18n";
 
 export function Loading({ label, overlay }: { label?: string; overlay?: boolean }) {
@@ -16,33 +16,31 @@ export function Loading({ label, overlay }: { label?: string; overlay?: boolean 
   }
   return (
     <View style={styles.container}>
-      <View style={styles.spinner}>
-        <ActivityIndicator color={colors.primaryDark} size="large" />
-      </View>
+      <ActivityIndicator color={colors.primaryDark} size="large" />
       {label ? <Text style={styles.label}>{label}</Text> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  spinner: { marginBottom: 12 },
-  label: { color: colors.textMuted, fontSize: 14, fontWeight: "500" },
+  container: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, backgroundColor: colors.bg },
+  label: { ...type.callout, color: colors.textMuted, marginTop: 14 },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(15,23,42,0.4)",
+    backgroundColor: "rgba(11,18,32,0.45)",
     zIndex: 99,
   },
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.card,
     paddingVertical: 14,
     paddingHorizontal: 22,
-    borderRadius: 40,
+    borderRadius: radius.full,
     gap: 10,
+    ...shadow.lg,
   },
-  pillLabel: { color: colors.text, fontSize: 14, fontWeight: "600" },
+  pillLabel: { ...type.bodyMed, color: colors.text },
 });

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Image,
-  Platform,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,16 +9,18 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import { Button } from "@/components/Button";
 import { Loading } from "@/components/Loading";
-import { Badge } from "@/components/Badge";
 import { api, ApiError } from "@/api/client";
 import type { Car } from "@/api/types";
-import { carStatus, colors, radius, shadow, spacing } from "@/theme/colors";
+import { carStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { money } from "@/utils/format";
 
-type Spec = { icon: string; value: string; label: string };
+type Spec = { icon: keyof typeof Ionicons.glyphMap; value: string; label: string };
 
 export default function CarDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -45,7 +45,8 @@ export default function CarDetail() {
     return (
       <View style={styles.errContainer}>
         <Stack.Screen options={{ headerShown: true, title: "Error" }} />
-        <Text style={styles.errText}>⚠️  {err}</Text>
+        <Ionicons name="warning-outline" size={40} color={colors.danger} />
+        <Text style={styles.errText}>{err}</Text>
         <Button title={t("common.retry")} onPress={() => router.back()} variant="ghost" style={{ marginTop: 12 }} />
       </View>
     );
@@ -58,55 +59,59 @@ export default function CarDetail() {
   const isAvailable = Number(car.status ?? 0) === 0;
 
   const specs: Spec[] = [
-    car.year ? { icon: "📅", value: String(car.year), label: locale === "en" ? "Year" : "Año" } : null,
-    car.transmission ? { icon: "⚙️", value: car.transmission, label: locale === "en" ? "Transmission" : "Transmisión" } : null,
-    car.fuel ? { icon: "⛽", value: car.fuel, label: locale === "en" ? "Fuel" : "Combustible" } : null,
-    car.seat ? { icon: "💺", value: String(car.seat), label: locale === "en" ? "Seats" : "Asientos" } : null,
-    car.color ? { icon: "🎨", value: car.color, label: locale === "en" ? "Color" : "Color" } : null,
-    car.plate ? { icon: "🪪", value: car.plate, label: locale === "en" ? "Plate" : "Placa" } : null,
+    car.year ? { icon: "calendar-outline", value: String(car.year), label: locale === "en" ? "Year" : "Año" } : null,
+    car.transmission ? { icon: "cog-outline", value: car.transmission, label: locale === "en" ? "Transmission" : "Transmisión" } : null,
+    car.fuel ? { icon: "water-outline", value: car.fuel, label: locale === "en" ? "Fuel" : "Combustible" } : null,
+    car.seat ? { icon: "people-outline", value: String(car.seat), label: locale === "en" ? "Seats" : "Asientos" } : null,
+    car.color ? { icon: "color-palette-outline", value: car.color, label: locale === "en" ? "Color" : "Color" } : null,
+    car.plate ? { icon: "card-outline", value: car.plate, label: locale === "en" ? "Plate" : "Placa" } : null,
   ].filter(Boolean) as Spec[];
 
   return (
     <View style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="light" />
 
-      {/* Image gallery */}
-      <View style={styles.gallery}>
-        {gallery.length > 0 ? (
-          <Image source={{ uri: gallery[imgIndex] }} style={styles.galleryImg} resizeMode="cover" />
-        ) : (
-          <View style={[styles.galleryImg, styles.galleryPlaceholder]}>
-            <Text style={{ fontSize: 64 }}>🚗</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 140 }} showsVerticalScrollIndicator={false}>
+        {/* Image gallery */}
+        <View style={styles.gallery}>
+          {gallery.length > 0 ? (
+            <Image source={{ uri: gallery[imgIndex] }} style={styles.galleryImg} resizeMode="cover" />
+          ) : (
+            <View style={[styles.galleryImg, styles.galleryPlaceholder]}>
+              <Ionicons name="car-sport" size={72} color={colors.textFaint} />
+            </View>
+          )}
+          <LinearGradient colors={gradients.imageScrim} style={styles.galleryScrim} />
+          <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+              <Ionicons name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            {status ? (
+              <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                <View style={[styles.statusDot, { backgroundColor: status.color }]} />
+                <Text style={[styles.statusText, { color: status.color }]}>{status[locale]}</Text>
+              </View>
+            ) : null}
           </View>
-        )}
-        <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backBtnText}>←</Text>
-          </TouchableOpacity>
-          {status ? (
-            <Badge label={status[locale]} color={status.color} bg={status.bg} />
-          ) : null}
+          {gallery.length > 1 && (
+            <View style={styles.dots}>
+              {gallery.map((_, i) => (
+                <TouchableOpacity key={i} onPress={() => setImgIndex(i)} hitSlop={8}>
+                  <View style={[styles.dot, i === imgIndex && styles.dotActive]} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
-        {gallery.length > 1 && (
-          <View style={styles.dots}>
-            {gallery.map((_, i) => (
-              <TouchableOpacity key={i} onPress={() => setImgIndex(i)}>
-                <View style={[styles.dot, i === imgIndex && styles.dotActive]} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
 
-      <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.infoHeader}>
           {car.brand ? <Text style={styles.brand}>{car.brand}</Text> : null}
           <Text style={styles.model}>{car.name ?? car.model ?? ""}</Text>
           <View style={styles.priceRow}>
             <Text style={styles.price}>{money(car.price_day ?? car.price)}</Text>
-            <Text style={styles.priceLabel}> {t("cars.perDay")}</Text>
+            <Text style={styles.priceLabel}>/ {t("cars.perDay")}</Text>
           </View>
         </View>
 
@@ -117,7 +122,9 @@ export default function CarDetail() {
             <View style={styles.specsGrid}>
               {specs.map((sp) => (
                 <View key={sp.label} style={styles.specCard}>
-                  <Text style={styles.specIcon}>{sp.icon}</Text>
+                  <View style={styles.specIconWrap}>
+                    <Ionicons name={sp.icon} size={18} color={colors.primaryDark} />
+                  </View>
                   <Text style={styles.specValue}>{sp.value}</Text>
                   <Text style={styles.specLabel}>{sp.label}</Text>
                 </View>
@@ -138,12 +145,14 @@ export default function CarDetail() {
       {/* CTA */}
       <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>
         <View>
+          <Text style={styles.ctaPer}>{locale === "en" ? "Total per day" : "Precio por día"}</Text>
           <Text style={styles.ctaPrice}>{money(car.price_day ?? car.price)}</Text>
-          <Text style={styles.ctaPer}>{t("cars.perDay")}</Text>
         </View>
         <Button
-          title={isAvailable ? t("cars.book") : (status?.es ?? "No disponible")}
+          title={isAvailable ? t("cars.book") : (status?.[locale] ?? t("common.empty"))}
           disabled={!isAvailable}
+          icon={isAvailable ? "arrow-forward" : undefined}
+          iconRight
           onPress={() => router.push({ pathname: "/(client)/book/[carId]", params: { carId: String(car.id) } })}
           style={{ flex: 1, marginLeft: 16 }}
           size="lg"
@@ -155,12 +164,13 @@ export default function CarDetail() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  errContainer: { flex: 1, padding: 24, justifyContent: "center", alignItems: "center" },
-  errText: { color: colors.danger, fontSize: 15, textAlign: "center" },
+  errContainer: { flex: 1, padding: 24, justifyContent: "center", alignItems: "center", backgroundColor: colors.bg, gap: 12 },
+  errText: { ...type.body, color: colors.danger, textAlign: "center" },
 
-  gallery: { height: 300, position: "relative", backgroundColor: colors.dark },
-  galleryImg: { width: "100%", height: 300 },
+  gallery: { height: 320, position: "relative", backgroundColor: colors.dark },
+  galleryImg: { width: "100%", height: 320 },
   galleryPlaceholder: { alignItems: "center", justifyContent: "center" },
+  galleryScrim: { ...StyleSheet.absoluteFillObject },
   topBar: {
     position: "absolute",
     top: 0, left: 0, right: 0,
@@ -171,53 +181,66 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   backBtn: {
-    width: 40, height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    width: 42, height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(11,18,32,0.45)",
     alignItems: "center",
     justifyContent: "center",
   },
-  backBtnText: { color: "#fff", fontSize: 20, fontWeight: "700", marginTop: -2 },
-  dots: { position: "absolute", bottom: 12, alignSelf: "center", flexDirection: "row", gap: 6 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.4)" },
-  dotActive: { backgroundColor: "#fff", width: 18 },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+  },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { ...type.small, fontFamily: font.semibold },
+  dots: { position: "absolute", bottom: 16, alignSelf: "center", flexDirection: "row", gap: 6 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.5)" },
+  dotActive: { backgroundColor: "#fff", width: 20 },
 
-  body: { flex: 1 },
   infoHeader: {
     backgroundColor: colors.card,
     padding: spacing.xl,
-    ...shadow.sm,
+    marginTop: -24,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
   },
-  brand: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: colors.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  model: { fontSize: 28, fontWeight: "800", color: colors.text, letterSpacing: -0.5 },
-  priceRow: { flexDirection: "row", alignItems: "baseline", marginTop: 8 },
-  price: { fontSize: 26, fontWeight: "800", color: colors.primaryDark },
-  priceLabel: { fontSize: 14, color: colors.textMuted },
+  brand: { ...type.label, color: colors.textMuted, marginBottom: 4 },
+  model: { ...type.h1, color: colors.text },
+  priceRow: { flexDirection: "row", alignItems: "baseline", marginTop: 10, gap: 6 },
+  price: { ...type.h1, color: colors.primaryDark, fontFamily: font.extrabold },
+  priceLabel: { ...type.callout, color: colors.textMuted },
 
-  section: { padding: spacing.xl, borderTopWidth: 1, borderTopColor: colors.border },
-  sectionTitle: { fontSize: 14, fontWeight: "700", color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 16 },
+  section: { paddingHorizontal: spacing.xl, paddingVertical: spacing.xl, borderTopWidth: 1, borderTopColor: colors.borderLight },
+  sectionTitle: { ...type.label, color: colors.textMuted, marginBottom: 16 },
 
   specsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   specCard: {
-    flex: 1,
-    minWidth: "28%",
-    backgroundColor: colors.borderLight,
+    flexGrow: 1,
+    flexBasis: "28%",
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
     padding: 14,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.borderLight,
   },
-  specIcon: { fontSize: 22, marginBottom: 6 },
-  specValue: { fontSize: 14, fontWeight: "700", color: colors.text, textAlign: "center" },
-  specLabel: { fontSize: 11, color: colors.textMuted, marginTop: 2, textAlign: "center" },
+  specIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.full,
+    backgroundColor: colors.primaryXLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  specValue: { ...type.title, color: colors.text, textAlign: "center" },
+  specLabel: { ...type.caption, color: colors.textMuted, marginTop: 2, textAlign: "center" },
 
-  description: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
+  description: { ...type.body, color: colors.textSecondary, lineHeight: 24 },
 
   cta: {
     position: "absolute",
@@ -231,6 +254,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     ...shadow.lg,
   },
-  ctaPrice: { fontSize: 22, fontWeight: "800", color: colors.text },
-  ctaPer: { fontSize: 12, color: colors.textMuted },
+  ctaPer: { ...type.caption, color: colors.textMuted },
+  ctaPrice: { ...type.h2, color: colors.text, fontFamily: font.extrabold },
 });

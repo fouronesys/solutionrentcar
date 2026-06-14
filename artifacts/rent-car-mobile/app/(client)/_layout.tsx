@@ -1,17 +1,26 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { colors, radius } from "@/theme/colors";
+import { Ionicons } from "@expo/vector-icons";
+import { colors, font } from "@/theme/colors";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
 
-type TabIconProps = { emoji: string; label: string; focused: boolean };
-
-function TabIcon({ emoji, label, focused }: TabIconProps) {
+function Icon({
+  name,
+  focused,
+}: {
+  name: keyof typeof Ionicons.glyphMap;
+  focused: boolean;
+}) {
   return (
-    <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-      <Text style={[styles.tabEmoji, { opacity: focused ? 1 : 0.5 }]}>{emoji}</Text>
+    <View style={styles.tabItem}>
+      <Ionicons
+        name={name}
+        size={24}
+        color={focused ? colors.primaryDark : colors.textMuted}
+      />
     </View>
   );
 }
@@ -19,8 +28,12 @@ function TabIcon({ emoji, label, focused }: TabIconProps) {
 function InboxIcon({ focused }: { focused: boolean }) {
   const { unread } = useNotificationsCtx();
   return (
-    <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-      <Text style={[styles.tabEmoji, { opacity: focused ? 1 : 0.5 }]}>🔔</Text>
+    <View style={styles.tabItem}>
+      <Ionicons
+        name={focused ? "notifications" : "notifications-outline"}
+        size={24}
+        color={focused ? colors.primaryDark : colors.textMuted}
+      />
       {unread > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{unread > 9 ? "9+" : unread}</Text>
@@ -36,40 +49,31 @@ export default function ClientLayout() {
       <StatusBar style="dark" />
       <Tabs
         screenOptions={{
-          headerStyle: {
-            backgroundColor: colors.card,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-            elevation: 0,
-            shadowOpacity: 0,
-          } as object,
-          headerTintColor: colors.text,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-            fontSize: 18,
-            color: colors.text,
-          },
+          headerShown: false,
           tabBarStyle: styles.tabBar,
           tabBarShowLabel: true,
           tabBarLabelStyle: styles.tabLabel,
           tabBarActiveTintColor: colors.primaryDark,
           tabBarInactiveTintColor: colors.textMuted,
-          tabBarIconStyle: { marginBottom: -2 },
+          tabBarItemStyle: { paddingTop: 8 },
         }}
       >
         <Tabs.Screen
           name="cars"
           options={{
             title: t("tabs.cars"),
-            headerShown: false,
-            tabBarIcon: ({ focused }) => <TabIcon emoji="🚗" label="" focused={focused} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon name={focused ? "car-sport" : "car-sport-outline"} focused={focused} />
+            ),
           }}
         />
         <Tabs.Screen
           name="bookings"
           options={{
             title: t("tabs.bookings"),
-            tabBarIcon: ({ focused }) => <TabIcon emoji="📅" label="" focused={focused} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon name={focused ? "calendar" : "calendar-outline"} focused={focused} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -83,7 +87,9 @@ export default function ClientLayout() {
           name="profile"
           options={{
             title: t("tabs.profile"),
-            tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="" focused={focused} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon name={focused ? "person" : "person-outline"} focused={focused} />
+            ),
           }}
         />
         <Tabs.Screen name="car/[id]" options={{ href: null }} />
@@ -100,37 +106,27 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    height: 64,
-    paddingBottom: 8,
+    height: Platform.OS === "web" ? 84 : 88,
+    paddingBottom: Platform.OS === "web" ? 34 : 28,
     paddingTop: 6,
     elevation: 0,
     shadowOpacity: 0,
   },
-  tabLabel: { fontSize: 11, fontWeight: "600" },
-  tabItem: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 44,
-    height: 34,
-    borderRadius: radius.md,
-  },
-  tabItemActive: {
-    backgroundColor: colors.primaryXLight,
-  },
-  tabEmoji: { fontSize: 18 },
+  tabLabel: { fontFamily: font.semibold, fontSize: 11, marginTop: 2 },
+  tabItem: { alignItems: "center", justifyContent: "center", width: 48, height: 30 },
   badge: {
     position: "absolute",
-    top: -3,
-    right: -8,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
+    top: -5,
+    right: 4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: colors.danger,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 3,
-    borderWidth: 1.5,
+    paddingHorizontal: 4,
+    borderWidth: 2,
     borderColor: colors.card,
   },
-  badgeText: { color: "#fff", fontSize: 9, fontWeight: "800" },
+  badgeText: { color: "#fff", fontSize: 9, fontFamily: font.bold },
 });

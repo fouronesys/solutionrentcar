@@ -1,0 +1,1 @@
+- [Rent-car API web-preview CORS](rent-car-api-cors.md) — web preview can't call the external API (CORS/401); validate the mobile app on a real device via Expo Go.

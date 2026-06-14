@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -15,30 +14,39 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Loading } from "@/components/Loading";
 import { api, ApiError } from "@/api/client";
 import { useAuth } from "@/auth/AuthContext";
 import type { ClientDocuments, Profile } from "@/api/types";
-import { colors, radius, shadow, spacing } from "@/theme/colors";
+import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n, setLocale, t } from "@/i18n";
 
 type DocKind = keyof ClientDocuments;
 const DOC_KINDS: DocKind[] = ["cedula", "license", "passport", "home"];
 
-function DocIcons(): Record<DocKind, string> {
-  return { cedula: "🪪", license: "🚗", passport: "🛂", home: "🏠" };
+function DocIcons(): Record<DocKind, keyof typeof Ionicons.glyphMap> {
+  return {
+    cedula: "card-outline",
+    license: "car-sport-outline",
+    passport: "airplane-outline",
+    home: "home-outline",
+  };
 }
 
 function LoginPrompt() {
   const router = useRouter();
   return (
     <View style={styles.prompt}>
-      <View style={styles.promptIcon}><Text style={{ fontSize: 48 }}>👤</Text></View>
+      <View style={styles.promptIcon}>
+        <Ionicons name="person-outline" size={38} color={colors.primaryDark} />
+      </View>
       <Text style={styles.promptTitle}>{t("login.requiredTitle")}</Text>
       <Text style={styles.promptSub}>{t("login.requiredSubtitle")}</Text>
-      <Button title={t("login.goToLogin")} onPress={() => router.push("/login/client")} size="lg" style={{ marginBottom: 12 }} />
+      <Button title={t("login.goToLogin")} onPress={() => router.push("/login/client")} size="lg" style={{ alignSelf: "stretch", marginBottom: 12 }} />
       <Pressable onPress={() => router.push("/register/client")}>
         <Text style={styles.registerLink}>
           {t("login.noAccount")} <Text style={styles.registerLinkBold}>{t("login.createAccount")}</Text>
@@ -60,9 +68,15 @@ export default function ProfileScreen() {
   if (!role) {
     return (
       <SafeAreaView style={styles.screen} edges={["top"]}>
-        <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>{t("profile.title")}</Text>
-        </View>
+        <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroPlain}>
+          <View style={styles.heroBrandRow}>
+            <View style={styles.heroLogo}>
+              <Ionicons name="car-sport" size={20} color={colors.dark} />
+            </View>
+            <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+          </View>
+          <Text style={styles.heroTitle}>{t("profile.title")}</Text>
+        </LinearGradient>
         <LoginPrompt />
       </SafeAreaView>
     );
@@ -126,43 +140,54 @@ export default function ProfileScreen() {
   const docs = user?.documents ?? {};
   const docIcons = DocIcons();
   const locale = i18n.locale === "en" ? "en" : "es";
+  const initial = (user?.name ?? "?")[0].toUpperCase();
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <View style={styles.pageHeader}>
-        <Text style={styles.pageTitle}>{t("profile.title")}</Text>
-      </View>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {/* Avatar */}
-          <View style={styles.avatarSection}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {(user?.name ?? "?")[0].toUpperCase()}
-              </Text>
+          {/* Hero header with avatar */}
+          <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <View style={styles.heroBrandRow}>
+              <View style={styles.heroLogo}>
+                <Ionicons name="car-sport" size={20} color={colors.dark} />
+              </View>
+              <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
             </View>
-            <View>
-              <Text style={styles.avatarName}>{user?.name} {user?.lastname ?? ""}</Text>
-              <Text style={styles.avatarSub}>
-                {role === "staff" ? "👔 Staff" : "👤 Cliente"} · #{user?.id}
-              </Text>
+            <View style={styles.avatarSection}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initial}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.avatarName} numberOfLines={1}>{user?.name} {user?.lastname ?? ""}</Text>
+                <View style={styles.rolePill}>
+                  <Ionicons
+                    name={role === "staff" ? "briefcase" : "person"}
+                    size={12}
+                    color={colors.primaryLight}
+                  />
+                  <Text style={styles.rolePillText}>
+                    {role === "staff" ? "Staff" : "Cliente"} · #{user?.id}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Personal Info */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionLabel}>{locale === "en" ? "Personal Info" : "Información personal"}</Text>
             <View style={styles.nameRow}>
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Input label={t("profile.name")} value={form.name ?? ""} onChangeText={(v) => setForm({ ...form, name: v })} />
+                <Input label={t("profile.name")} icon="person-outline" value={form.name ?? ""} onChangeText={(v) => setForm({ ...form, name: v })} />
               </View>
               <View style={{ flex: 1 }}>
-                <Input label={t("profile.lastname")} value={form.lastname ?? ""} onChangeText={(v) => setForm({ ...form, lastname: v })} />
+                <Input label={t("profile.lastname")} icon="people-outline" value={form.lastname ?? ""} onChangeText={(v) => setForm({ ...form, lastname: v })} />
               </View>
             </View>
-            <Input label={t("profile.email")} value={form.email ?? ""} onChangeText={(v) => setForm({ ...form, email: v })} autoCapitalize="none" keyboardType="email-address" />
-            <Input label={t("profile.phone")} value={form.phone ?? ""} onChangeText={(v) => setForm({ ...form, phone: v })} keyboardType="phone-pad" />
-            <Button title={t("profile.save")} onPress={save} loading={saving} />
+            <Input label={t("profile.email")} icon="mail-outline" value={form.email ?? ""} onChangeText={(v) => setForm({ ...form, email: v })} autoCapitalize="none" keyboardType="email-address" />
+            <Input label={t("profile.phone")} icon="call-outline" value={form.phone ?? ""} onChangeText={(v) => setForm({ ...form, phone: v })} keyboardType="phone-pad" />
+            <Button title={t("profile.save")} icon="checkmark" onPress={save} loading={saving} />
           </View>
 
           {/* Documents */}
@@ -176,25 +201,39 @@ export default function ProfileScreen() {
                 return (
                   <View key={k} style={styles.docRow}>
                     <View style={styles.docLeft}>
-                      <Text style={styles.docIcon}>{docIcons[k]}</Text>
+                      <View style={[styles.docIconWrap, url ? styles.docIconWrapOk : null]}>
+                        <Ionicons name={docIcons[k]} size={20} color={url ? colors.success : colors.textMuted} />
+                      </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.docName}>{t(`documents.${k}`)}</Text>
-                        <Text style={[styles.docStatus, url ? styles.docOk : styles.docPending]}>
-                          {url ? `✓ ${t("documents.uploaded")}` : t("documents.missing")}
-                        </Text>
+                        <View style={styles.docStatusRow}>
+                          {url ? (
+                            <Ionicons name="checkmark-circle" size={13} color={colors.success} />
+                          ) : (
+                            <Ionicons name="ellipse-outline" size={13} color={colors.textMuted} />
+                          )}
+                          <Text style={[styles.docStatus, url ? styles.docOk : styles.docPending]}>
+                            {url ? t("documents.uploaded") : t("documents.missing")}
+                          </Text>
+                        </View>
                       </View>
                     </View>
                     <View style={styles.docActions}>
                       {url ? (
                         <Pressable onPress={() => Linking.openURL(url)} style={styles.docBtnSec}>
+                          <Ionicons name="eye-outline" size={15} color={colors.textSecondary} />
                           <Text style={styles.docBtnSecText}>{t("documents.view")}</Text>
                         </Pressable>
                       ) : null}
                       <Pressable onPress={() => askDocSource(k)} disabled={isUploading} style={styles.docBtn}>
-                        {isUploading
-                          ? <ActivityIndicator color={colors.dark} size="small" />
-                          : <Text style={styles.docBtnText}>{url ? t("documents.replace") : t("documents.upload")}</Text>
-                        }
+                        {isUploading ? (
+                          <ActivityIndicator color="#1A1100" size="small" />
+                        ) : (
+                          <>
+                            <Ionicons name={url ? "refresh" : "cloud-upload-outline"} size={15} color="#1A1100" />
+                            <Text style={styles.docBtnText}>{url ? t("documents.replace") : t("documents.upload")}</Text>
+                          </>
+                        )}
                       </Pressable>
                     </View>
                   </View>
@@ -211,14 +250,22 @@ export default function ProfileScreen() {
                 onPress={() => { setLocale("es"); setLang("es"); }}
                 style={[styles.langBtn, lang === "es" && styles.langBtnActive]}
               >
-                <Text style={styles.langFlag}>🇩🇴</Text>
+                <Ionicons
+                  name={lang === "es" ? "checkmark-circle" : "ellipse-outline"}
+                  size={18}
+                  color={lang === "es" ? colors.primaryDark : colors.textMuted}
+                />
                 <Text style={[styles.langText, lang === "es" && styles.langTextActive]}>Español</Text>
               </Pressable>
               <Pressable
                 onPress={() => { setLocale("en"); setLang("en"); }}
                 style={[styles.langBtn, lang === "en" && styles.langBtnActive]}
               >
-                <Text style={styles.langFlag}>🇺🇸</Text>
+                <Ionicons
+                  name={lang === "en" ? "checkmark-circle" : "ellipse-outline"}
+                  size={18}
+                  color={lang === "en" ? colors.primaryDark : colors.textMuted}
+                />
                 <Text style={[styles.langText, lang === "en" && styles.langTextActive]}>English</Text>
               </Pressable>
             </View>
@@ -226,9 +273,10 @@ export default function ProfileScreen() {
 
           {/* Logout */}
           <View style={styles.sectionCard}>
-            <Button title={t("common.logout")} variant="secondary" onPress={logout} />
+            <Button title={t("common.logout")} variant="danger" icon="log-out-outline" onPress={logout} />
             {role === "client" ? (
               <Pressable onPress={confirmDelete} style={styles.deleteBtn}>
+                <Ionicons name="trash-outline" size={15} color={colors.danger} />
                 <Text style={styles.deleteText}>{t("profile.deleteAccount")}</Text>
               </Pressable>
             ) : null}
@@ -241,92 +289,118 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  pageHeader: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  pageTitle: { fontSize: 20, fontWeight: "800", color: colors.text },
-
   body: { paddingBottom: 40 },
 
-  avatarSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.dark,
-    padding: spacing.xl,
-    gap: 16,
+  hero: {
+    paddingTop: 20,
+    paddingBottom: 26,
+    paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
   },
+  heroPlain: {
+    paddingTop: 20,
+    paddingBottom: 26,
+    paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+  },
+  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
+  heroLogo: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
+  heroTitle: { ...type.display, color: "#FFFFFF" },
+
+  avatarSection: { flexDirection: "row", alignItems: "center", gap: 16 },
   avatar: {
-    width: 60, height: 60, borderRadius: 30,
+    width: 64, height: 64, borderRadius: 32,
     backgroundColor: colors.primary,
     alignItems: "center", justifyContent: "center",
+    ...shadow.gold,
   },
-  avatarText: { fontSize: 26, fontWeight: "800", color: colors.dark },
-  avatarName: { fontSize: 18, fontWeight: "800", color: "#fff" },
-  avatarSub: { fontSize: 13, color: "rgba(255,255,255,0.55)", marginTop: 3 },
+  avatarText: { ...type.h1, color: colors.dark, fontFamily: font.extrabold },
+  avatarName: { ...type.h2, color: "#FFFFFF" },
+  rolePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    marginTop: 7,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+  rolePillText: { ...type.captionMed, color: "rgba(255,255,255,0.8)" },
 
   sectionCard: {
     backgroundColor: colors.card,
-    marginTop: 8,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
     padding: spacing.lg,
-    borderTopWidth: 1, borderTopColor: colors.border,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
+    borderRadius: radius.lg,
+    ...shadow.sm,
   },
-  sectionLabel: {
-    fontSize: 11, fontWeight: "700", color: colors.textMuted,
-    textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 14,
-  },
-  sectionSubtitle: { color: colors.textMuted, fontSize: 13, marginBottom: 14, marginTop: -8 },
+  sectionLabel: { ...type.label, color: colors.textMuted, marginBottom: 14 },
+  sectionSubtitle: { ...type.caption, color: colors.textMuted, marginBottom: 14, marginTop: -8 },
   nameRow: { flexDirection: "row" },
 
   docRow: { paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.borderLight },
-  docLeft: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  docIcon: { fontSize: 24, marginRight: 12 },
-  docName: { fontSize: 15, fontWeight: "700", color: colors.text },
-  docStatus: { fontSize: 12, marginTop: 2, fontWeight: "600" },
+  docLeft: { flexDirection: "row", alignItems: "center", marginBottom: 10, gap: 12 },
+  docIconWrap: {
+    width: 42, height: 42, borderRadius: radius.md,
+    backgroundColor: colors.borderLight,
+    alignItems: "center", justifyContent: "center",
+  },
+  docIconWrapOk: { backgroundColor: colors.successBg },
+  docName: { ...type.title, color: colors.text },
+  docStatusRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 3 },
+  docStatus: { ...type.small },
   docOk: { color: colors.success },
   docPending: { color: colors.textMuted },
   docActions: { flexDirection: "row", gap: 8 },
   docBtn: {
-    flex: 1, backgroundColor: colors.primary, paddingVertical: 9,
-    borderRadius: radius.md, alignItems: "center", minHeight: 38,
-    justifyContent: "center",
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    backgroundColor: colors.primary, paddingVertical: 10,
+    borderRadius: radius.md, minHeight: 40,
   },
-  docBtnText: { color: colors.dark, fontWeight: "700", fontSize: 13 },
+  docBtnText: { ...type.captionMed, color: "#1A1100", fontFamily: font.bold },
   docBtnSec: {
-    flex: 1, backgroundColor: colors.borderLight, paddingVertical: 9,
-    borderRadius: radius.md, alignItems: "center",
-    borderWidth: 1, borderColor: colors.border,
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    backgroundColor: colors.bg, paddingVertical: 10,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
   },
-  docBtnSecText: { color: colors.textSecondary, fontWeight: "600", fontSize: 13 },
+  docBtnSecText: { ...type.captionMed, color: colors.textSecondary, fontFamily: font.semibold },
 
   langRow: { flexDirection: "row", gap: 10 },
   langBtn: {
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
-    paddingVertical: 12, borderRadius: radius.md,
+    paddingVertical: 14, borderRadius: radius.md,
     borderWidth: 1.5, borderColor: colors.border,
-    backgroundColor: colors.borderLight, gap: 8,
+    backgroundColor: colors.bg, gap: 8,
   },
   langBtnActive: { borderColor: colors.primary, backgroundColor: colors.primaryXLight },
-  langFlag: { fontSize: 20 },
-  langText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
-  langTextActive: { color: colors.primaryDark },
+  langText: { ...type.bodyMed, color: colors.textSecondary },
+  langTextActive: { color: colors.primaryDark, fontFamily: font.semibold },
 
-  deleteBtn: { marginTop: 16, paddingVertical: 12, alignItems: "center" },
-  deleteText: { color: colors.danger, fontWeight: "600", fontSize: 14 },
+  deleteBtn: { marginTop: 16, paddingVertical: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  deleteText: { ...type.bodyMed, color: colors.danger, fontFamily: font.semibold },
 
   prompt: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xxl },
   promptIcon: {
-    width: 88, height: 88, borderRadius: 44,
+    width: 84, height: 84, borderRadius: radius.full,
     backgroundColor: colors.primaryXLight,
     alignItems: "center", justifyContent: "center", marginBottom: 20,
+    borderWidth: 1, borderColor: colors.primaryLight,
   },
-  promptTitle: { fontSize: 20, fontWeight: "800", color: colors.text, textAlign: "center", marginBottom: 8 },
-  promptSub: { color: colors.textMuted, fontSize: 14, textAlign: "center", marginBottom: 28, lineHeight: 20 },
-  registerLink: { color: colors.textMuted, fontSize: 14 },
-  registerLinkBold: { color: colors.primaryDark, fontWeight: "700" },
+  promptTitle: { ...type.h2, color: colors.text, textAlign: "center", marginBottom: 8 },
+  promptSub: { ...type.callout, color: colors.textMuted, textAlign: "center", marginBottom: 28 },
+  registerLink: { ...type.callout, color: colors.textMuted },
+  registerLinkBold: { color: colors.primaryDark, fontFamily: font.bold },
 });

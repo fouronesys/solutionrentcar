@@ -2,31 +2,74 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { EmptyState } from "@/components/EmptyState";
-import { Loading } from "@/components/Loading";
+import { RowSkeleton } from "@/components/Skeleton";
 import { api, ApiError } from "@/api/client";
 import type { Agenda, AgendaItem } from "@/api/types";
-import { colors, radius, shadow, spacing } from "@/theme/colors";
-import { t } from "@/i18n";
+import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { i18n, t } from "@/i18n";
 import { dateTime, todayIso } from "@/utils/format";
 
-function AgendaCard({ item, label, onPress }: { item: AgendaItem; label: string; onPress: () => void }) {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function AgendaCard({
+  item,
+  label,
+  isDelivery,
+  onPress,
+}: {
+  item: AgendaItem;
+  label: string;
+  isDelivery: boolean;
+  onPress: () => void;
+}) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const accent = isDelivery ? colors.success : colors.info;
+  const accentBg = isDelivery ? colors.successBg : colors.infoBg;
+  const clientName = `${item.client?.name ?? ""} ${item.client?.lastname ?? ""}`.trim();
+
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.agendaCard, pressed && { opacity: 0.9 }]}>
-      <View style={styles.agendaLeft}>
-        <Text style={styles.agendaTypeLabel}>{label}</Text>
-        <Text style={styles.agendaCode}>#{item.booking.code ?? item.booking.id}</Text>
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withTiming(0.98, { duration: 90 }); }}
+      onPressOut={() => { scale.value = withTiming(1, { duration: 140 }); }}
+      style={[animStyle, styles.agendaCard]}
+    >
+      <View style={[styles.agendaIcon, { backgroundColor: accentBg }]}>
+        <Ionicons name={isDelivery ? "log-out-outline" : "log-in-outline"} size={22} color={accent} />
+      </View>
+      <View style={styles.agendaBody}>
+        <View style={styles.agendaTopRow}>
+          <Text style={styles.agendaCode}>#{item.booking.code ?? item.booking.id}</Text>
+          <View style={[styles.typePill, { backgroundColor: accentBg }]}>
+            <View style={[styles.typeDot, { backgroundColor: accent }]} />
+            <Text style={[styles.typePillText, { color: accent }]}>{label}</Text>
+          </View>
+        </View>
         <Text style={styles.agendaCar}>
           {item.car?.brand ? `${item.car.brand} ` : ""}{item.car?.name ?? item.car?.model ?? "—"}
         </Text>
-        <Text style={styles.agendaClient}>
-          👤 {item.client?.name ?? ""} {item.client?.lastname ?? ""}
-          {item.client?.phone ? ` · ${item.client.phone}` : ""}
-        </Text>
-        <Text style={styles.agendaTime}>🕐 {dateTime(label === "Entrega" || label === "Delivery" ? item.booking.start_at : item.booking.end_at)}</Text>
+        {clientName ? (
+          <View style={styles.agendaMetaRow}>
+            <Ionicons name="person-outline" size={13} color={colors.textMuted} />
+            <Text style={styles.agendaMeta} numberOfLines={1}>
+              {clientName}{item.client?.phone ? ` · ${item.client.phone}` : ""}
+            </Text>
+          </View>
+        ) : null}
+        <View style={styles.agendaMetaRow}>
+          <Ionicons name="time-outline" size={13} color={colors.primaryDark} />
+          <Text style={[styles.agendaMeta, { color: colors.primaryDark, fontFamily: font.semibold }]}>
+            {dateTime(isDelivery ? item.booking.start_at : item.booking.end_at)}
+          </Text>
+        </View>
       </View>
-      <Text style={styles.agendaChevron}>›</Text>
-    </Pressable>
+      <Ionicons name="chevron-forward" size={20} color={colors.textFaint} />
+    </AnimatedPressable>
   );
 }
 
@@ -56,76 +99,106 @@ export default function AgendaScreen() {
   const navigate = (id: number) =>
     router.push({ pathname: "/(staff)/booking/[id]", params: { id: String(id) } });
 
-  if (loading) return <Loading />;
+  const locale = i18n.locale === "en" ? "en" : "es";
+  const today = new Date().toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
+    weekday: "long", day: "numeric", month: "long",
+  });
 
-  const today = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  const renderHero = () => (
+    <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+      <View style={styles.heroBrandRow}>
+        <View style={styles.heroLogo}>
+          <Ionicons name="car-sport" size={20} color={colors.dark} />
+        </View>
+        <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+      </View>
+      <Text style={styles.heroTitle}>{t("agenda.title")}</Text>
+      <Text style={styles.heroDate}>{today}</Text>
+    </LinearGradient>
+  );
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerIcon}><Text style={{ fontSize: 24 }}>🗓️</Text></View>
-        <View>
-          <Text style={styles.headerSub}>{t("agenda.title")}</Text>
-          <Text style={styles.headerDate}>{today}</Text>
-        </View>
-      </View>
-
-      {err ? <View style={styles.errBox}><Text style={styles.errText}>⚠️  {err}</Text></View> : null}
-
       <ScrollView
-        contentContainerStyle={styles.body}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.primaryDark} />
         }
       >
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: colors.success }]}>
-            <Text style={styles.statNum}>{data?.deliveries?.length ?? 0}</Text>
-            <Text style={[styles.statLabel, { color: colors.success }]}>📦 {t("agenda.deliveries")}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: colors.info }]}>
-            <Text style={styles.statNum}>{data?.returns?.length ?? 0}</Text>
-            <Text style={[styles.statLabel, { color: colors.info }]}>🔁 {t("agenda.returns")}</Text>
-          </View>
-        </View>
+        {renderHero()}
 
-        {/* Deliveries */}
-        <View style={styles.groupHeader}>
-          <View style={[styles.groupDot, { backgroundColor: colors.success }]} />
-          <Text style={styles.groupTitle}>{t("agenda.deliveries")}</Text>
-        </View>
-        {data?.deliveries?.length ? (
-          data.deliveries.map((it) => (
-            <AgendaCard
-              key={`d-${it.booking.id}`}
-              item={it}
-              label="Entrega"
-              onPress={() => navigate(it.booking.id)}
-            />
-          ))
-        ) : (
-          <EmptyState title={t("agenda.noDeliveries")} />
-        )}
+        {err ? (
+          <View style={styles.errBox}>
+            <Ionicons name="warning-outline" size={16} color={colors.danger} />
+            <Text style={styles.errText}>{err}</Text>
+          </View>
+        ) : null}
 
-        {/* Returns */}
-        <View style={[styles.groupHeader, { marginTop: spacing.lg }]}>
-          <View style={[styles.groupDot, { backgroundColor: colors.info }]} />
-          <Text style={styles.groupTitle}>{t("agenda.returns")}</Text>
-        </View>
-        {data?.returns?.length ? (
-          data.returns.map((it) => (
-            <AgendaCard
-              key={`r-${it.booking.id}`}
-              item={it}
-              label="Devolución"
-              onPress={() => navigate(it.booking.id)}
-            />
-          ))
+        {loading ? (
+          <View style={styles.body}>
+            <RowSkeleton />
+            <RowSkeleton />
+            <RowSkeleton />
+          </View>
         ) : (
-          <EmptyState title={t("agenda.noReturns")} />
+          <View style={styles.body}>
+            {/* Stats */}
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <View style={[styles.statIcon, { backgroundColor: colors.successBg }]}>
+                  <Ionicons name="log-out-outline" size={18} color={colors.success} />
+                </View>
+                <Text style={styles.statNum}>{data?.deliveries?.length ?? 0}</Text>
+                <Text style={styles.statLabel}>{t("agenda.deliveries")}</Text>
+              </View>
+              <View style={styles.statCard}>
+                <View style={[styles.statIcon, { backgroundColor: colors.infoBg }]}>
+                  <Ionicons name="log-in-outline" size={18} color={colors.info} />
+                </View>
+                <Text style={styles.statNum}>{data?.returns?.length ?? 0}</Text>
+                <Text style={styles.statLabel}>{t("agenda.returns")}</Text>
+              </View>
+            </View>
+
+            {/* Deliveries */}
+            <View style={styles.groupHeader}>
+              <View style={[styles.groupDot, { backgroundColor: colors.success }]} />
+              <Text style={styles.groupTitle}>{t("agenda.deliveries")}</Text>
+            </View>
+            {data?.deliveries?.length ? (
+              data.deliveries.map((it) => (
+                <AgendaCard
+                  key={`d-${it.booking.id}`}
+                  item={it}
+                  label={t("agenda.deliveries")}
+                  isDelivery
+                  onPress={() => navigate(it.booking.id)}
+                />
+              ))
+            ) : (
+              <EmptyState title={t("agenda.noDeliveries")} icon="bookings" />
+            )}
+
+            {/* Returns */}
+            <View style={[styles.groupHeader, { marginTop: spacing.xl }]}>
+              <View style={[styles.groupDot, { backgroundColor: colors.info }]} />
+              <Text style={styles.groupTitle}>{t("agenda.returns")}</Text>
+            </View>
+            {data?.returns?.length ? (
+              data.returns.map((it) => (
+                <AgendaCard
+                  key={`r-${it.booking.id}`}
+                  item={it}
+                  label={t("agenda.returns")}
+                  isDelivery={false}
+                  onPress={() => navigate(it.booking.id)}
+                />
+              ))
+            ) : (
+              <EmptyState title={t("agenda.noReturns")} icon="bookings" />
+            )}
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -134,58 +207,96 @@ export default function AgendaScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
+  scrollContent: { paddingBottom: 32 },
+
+  hero: {
+    paddingTop: 24,
+    paddingBottom: 26,
+    paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+  },
+  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
+  heroLogo: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
+  heroTitle: { ...type.display, color: "#FFFFFF" },
+  heroDate: { ...type.callout, color: "rgba(255,255,255,0.6)", marginTop: 4, textTransform: "capitalize" },
+
+  errBox: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.dark,
-    gap: 14,
+    gap: 8,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    padding: 14,
+    backgroundColor: colors.dangerBg,
+    borderRadius: radius.md,
   },
-  headerIcon: {
-    width: 48, height: 48, borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center", justifyContent: "center",
-  },
-  headerSub: { fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8 },
-  headerDate: { fontSize: 16, color: "#fff", fontWeight: "700", marginTop: 2, textTransform: "capitalize" },
+  errText: { ...type.caption, color: colors.danger, flex: 1 },
 
-  errBox: { margin: spacing.lg, padding: 12, backgroundColor: colors.dangerBg, borderRadius: radius.md },
-  errText: { color: colors.danger, fontSize: 13 },
+  body: { padding: spacing.lg },
 
-  body: { padding: spacing.lg, paddingBottom: 32 },
-
-  statsRow: { flexDirection: "row", gap: 12, marginBottom: spacing.lg },
+  statsRow: { flexDirection: "row", gap: 12, marginBottom: spacing.xl },
   statCard: {
     flex: 1,
     backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: spacing.lg,
-    alignItems: "center",
-    borderWidth: 2,
-    ...shadow.sm,
+    ...shadow.md,
   },
-  statNum: { fontSize: 32, fontWeight: "800", color: colors.text },
-  statLabel: { fontSize: 13, fontWeight: "700", marginTop: 4 },
+  statIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  statNum: { ...type.display, color: colors.text },
+  statLabel: { ...type.captionMed, color: colors.textMuted, marginTop: 2 },
 
   groupHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: spacing.md },
   groupDot: { width: 8, height: 8, borderRadius: 4 },
-  groupTitle: { fontSize: 14, fontWeight: "800", color: colors.text, textTransform: "uppercase", letterSpacing: 0.5 },
+  groupTitle: { ...type.label, color: colors.textSecondary },
 
   agendaCard: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,
-    marginBottom: 10,
+    marginBottom: spacing.md,
     padding: spacing.lg,
     flexDirection: "row",
     alignItems: "center",
+    gap: 14,
     ...shadow.md,
   },
-  agendaLeft: { flex: 1 },
-  agendaTypeLabel: { fontSize: 10, fontWeight: "700", color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 },
-  agendaCode: { fontSize: 16, fontWeight: "800", color: colors.text },
-  agendaCar: { fontSize: 14, color: colors.textSecondary, marginTop: 2 },
-  agendaClient: { fontSize: 13, color: colors.textMuted, marginTop: 6 },
-  agendaTime: { fontSize: 12, color: colors.primaryDark, fontWeight: "700", marginTop: 4 },
-  agendaChevron: { fontSize: 24, color: colors.textMuted, fontWeight: "300", marginLeft: 12 },
+  agendaIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  agendaBody: { flex: 1 },
+  agendaTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 },
+  agendaCode: { ...type.h3, color: colors.text },
+  typePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  typeDot: { width: 6, height: 6, borderRadius: 3 },
+  typePillText: { ...type.small, fontFamily: font.semibold },
+  agendaCar: { ...type.bodyMed, color: colors.textSecondary, marginBottom: 6 },
+  agendaMetaRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 },
+  agendaMeta: { ...type.caption, color: colors.textMuted, flex: 1 },
 });

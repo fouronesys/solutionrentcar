@@ -170,10 +170,14 @@
   },
   "payment": {
     "title": "Register payment",
+    "register": "Register payment",
     "amount": "Amount",
     "method": "Payment method",
+    "note": "Note",
     "submit": "Save payment",
-    "saved": "Payment registered"
+    "save": "Save payment",
+    "saved": "Payment registered",
+    "invalidAmount": "Enter a valid amount"
   },
   "profile": {
     "title": "Profile",

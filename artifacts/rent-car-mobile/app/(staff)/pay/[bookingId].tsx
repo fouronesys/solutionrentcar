@@ -1,23 +1,27 @@
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { api, ApiError } from "@/api/client";
-import { colors, radius, shadow, spacing } from "@/theme/colors";
+import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { t } from "@/i18n";
 import { money } from "@/utils/format";
 
-const METHODS = [
-  { key: "cash", icon: "💵", label: "Efectivo" },
-  { key: "card", icon: "💳", label: "Tarjeta" },
-  { key: "transfer", icon: "🏦", label: "Transferencia" },
+const METHODS: { key: string; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+  { key: "cash", icon: "cash-outline", label: "Efectivo" },
+  { key: "card", icon: "card-outline", label: "Tarjeta" },
+  { key: "transfer", icon: "business-outline", label: "Transferencia" },
 ];
 
 export default function PayScreen() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("cash");
   const [note, setNote] = useState("");
@@ -37,16 +41,27 @@ export default function PayScreen() {
     }
   };
 
+  const preview = amount ? money(parseFloat(amount.replace(",", ".")) || 0) : null;
+
   return (
-    <SafeAreaView style={styles.screen} edges={["top"]}>
+    <View style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>←</Text>
-        </Pressable>
-        <Text style={styles.headerTitle}>💳  {t("payment.register")}</Text>
-      </View>
+      <StatusBar style="light" />
+
+      {/* Hero header */}
+      <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.hero, { paddingTop: insets.top + 8 }]}>
+        <View style={styles.heroTop}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+            <Ionicons name="arrow-back" size={22} color="#fff" />
+          </Pressable>
+        </View>
+        <View style={styles.heroTitleRow}>
+          <View style={styles.heroLogo}>
+            <Ionicons name="card" size={18} color={colors.dark} />
+          </View>
+          <Text style={styles.heroTitle}>{t("payment.register")}</Text>
+        </View>
+      </LinearGradient>
 
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -63,25 +78,34 @@ export default function PayScreen() {
                 containerStyle={{ flex: 1, marginBottom: 0 }}
               />
             </View>
-            {amount ? <Text style={styles.amountPreview}>{money(parseFloat(amount.replace(",", ".")) || 0)}</Text> : null}
+            {preview ? <Text style={styles.amountPreview}>{preview}</Text> : null}
           </View>
 
           {/* Method */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>{t("payment.method")}</Text>
             <View style={styles.methodGrid}>
-              {METHODS.map((m) => (
-                <Pressable
-                  key={m.key}
-                  onPress={() => setMethod(m.key)}
-                  style={[styles.methodBtn, method === m.key && styles.methodBtnActive]}
-                >
-                  <Text style={styles.methodIcon}>{m.icon}</Text>
-                  <Text style={[styles.methodLabel, method === m.key && styles.methodLabelActive]}>
-                    {m.label}
-                  </Text>
-                </Pressable>
-              ))}
+              {METHODS.map((m) => {
+                const active = method === m.key;
+                return (
+                  <Pressable
+                    key={m.key}
+                    onPress={() => setMethod(m.key)}
+                    style={[styles.methodBtn, active && styles.methodBtnActive]}
+                  >
+                    <View style={[styles.methodIconWrap, active && styles.methodIconWrapActive]}>
+                      <Ionicons
+                        name={m.icon}
+                        size={22}
+                        color={active ? colors.primaryDark : colors.textMuted}
+                      />
+                    </View>
+                    <Text style={[styles.methodLabel, active && styles.methodLabelActive]}>
+                      {m.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
@@ -97,58 +121,80 @@ export default function PayScreen() {
 
           {/* CTA */}
           <View style={styles.cta}>
-            <Button title={t("payment.save")} onPress={submit} loading={loading} size="lg" />
+            <Button title={t("payment.save")} icon="checkmark-circle-outline" onPress={submit} loading={loading} size="lg" />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.dark,
-    gap: 12,
+
+  hero: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: 22,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
   },
+  heroTop: { flexDirection: "row", alignItems: "center", marginBottom: 14 },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center", justifyContent: "center",
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  backText: { fontSize: 20, fontWeight: "700", color: "#fff", marginTop: -2 },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#fff" },
+  heroTitleRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  heroLogo: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroTitle: { ...type.h1, color: "#FFFFFF" },
 
   body: { paddingBottom: 40 },
   section: {
-    backgroundColor: colors.card, marginTop: 8,
+    backgroundColor: colors.card,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    borderRadius: radius.lg,
     padding: spacing.lg,
-    borderTopWidth: 1, borderTopColor: colors.border,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
+    ...shadow.sm,
   },
-  sectionLabel: {
-    fontSize: 11, fontWeight: "700", color: colors.textMuted,
-    textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 14,
-  },
+  sectionLabel: { ...type.label, color: colors.textMuted, marginBottom: 14 },
   amountRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  currency: { fontSize: 18, fontWeight: "700", color: colors.textMuted, paddingTop: 4 },
-  amountPreview: { fontSize: 28, fontWeight: "800", color: colors.primaryDark, marginTop: 8, textAlign: "right" },
+  currency: { ...type.h3, color: colors.textMuted, paddingTop: 4 },
+  amountPreview: { ...type.display, color: colors.primaryDark, marginTop: 10, textAlign: "right" },
 
   methodGrid: { flexDirection: "row", gap: 10 },
   methodBtn: {
-    flex: 1, alignItems: "center", paddingVertical: 14,
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 16,
     borderRadius: radius.md,
-    borderWidth: 1.5, borderColor: colors.border,
-    backgroundColor: colors.borderLight,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
   },
   methodBtnActive: { borderColor: colors.primary, backgroundColor: colors.primaryXLight },
-  methodIcon: { fontSize: 24, marginBottom: 6 },
-  methodLabel: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
-  methodLabelActive: { color: colors.primaryDark, fontWeight: "700" },
+  methodIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    backgroundColor: colors.borderLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  methodIconWrapActive: { backgroundColor: colors.card },
+  methodLabel: { ...type.captionMed, color: colors.textSecondary },
+  methodLabelActive: { color: colors.primaryDark, fontFamily: font.semibold },
 
-  cta: { padding: spacing.lg },
+  cta: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
 });

@@ -7,19 +7,24 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { EmptyState } from "@/components/EmptyState";
-import { Input } from "@/components/Input";
+import { ListSkeleton } from "@/components/Skeleton";
 import { api, ApiError } from "@/api/client";
-import { carStatus, colors, radius, shadow, spacing } from "@/theme/colors";
+import { carStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import type { Car } from "@/api/types";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function defaultStart() {
   const d = new Date();
@@ -44,27 +49,42 @@ function fmtTime(d: Date) {
   });
 }
 
+const SPEC_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  year: "calendar-outline",
+  transmission: "cog-outline",
+  fuel: "water-outline",
+  seats: "people-outline",
+};
+
 function CarCard({ car, onPress }: { car: Car; onPress: () => void }) {
   const s = carStatus[Number(car.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  const specs = [
-    car.year ? String(car.year) : null,
-    car.transmission,
-    car.fuel,
-    car.seat ? `${car.seat} ${locale === "es" ? "asientos" : "seats"}` : null,
-  ].filter(Boolean) as string[];
+  const specs: { key: string; value: string }[] = [
+    car.year ? { key: "year", value: String(car.year) } : null,
+    car.transmission ? { key: "transmission", value: car.transmission } : null,
+    car.fuel ? { key: "fuel", value: car.fuel } : null,
+    car.seat ? { key: "seats", value: `${car.seat}` } : null,
+  ].filter(Boolean) as { key: string; value: string }[];
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.88} style={styles.carCard}>
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withTiming(0.98, { duration: 90 }); }}
+      onPressOut={() => { scale.value = withTiming(1, { duration: 140 }); }}
+      style={[animStyle, styles.carCard]}
+    >
       <View style={styles.imageContainer}>
         {car.image ? (
           <Image source={{ uri: car.image }} style={styles.carImg} resizeMode="cover" />
         ) : (
           <View style={[styles.carImg, styles.imgPlaceholder]}>
-            <Text style={{ fontSize: 48 }}>🚗</Text>
+            <Ionicons name="car-sport" size={52} color={colors.textFaint} />
           </View>
         )}
+        <LinearGradient colors={gradients.cardScrim} style={styles.imgScrim} />
         <View style={styles.priceTag}>
           <Text style={styles.priceAmount}>{money(car.price_day ?? car.price)}</Text>
           <Text style={styles.pricePer}>{t("cars.perDay")}</Text>
@@ -77,37 +97,40 @@ function CarCard({ car, onPress }: { car: Car; onPress: () => void }) {
         ) : null}
       </View>
       <View style={styles.carInfo}>
-        <View style={styles.carNameRow}>
-          {car.brand ? <Text style={styles.carBrand}>{car.brand}</Text> : null}
-          <Text style={styles.carModel}>{car.name ?? car.model ?? ""}</Text>
-        </View>
+        {car.brand ? <Text style={styles.carBrand}>{car.brand}</Text> : null}
+        <Text style={styles.carModel}>{car.name ?? car.model ?? ""}</Text>
         {specs.length > 0 && (
           <View style={styles.specsRow}>
-            {specs.slice(0, 3).map((sp, i) => (
-              <React.Fragment key={i}>
-                {i > 0 ? <View style={styles.specDot} /> : null}
-                <Text style={styles.specText}>{sp}</Text>
-              </React.Fragment>
+            {specs.slice(0, 4).map((sp) => (
+              <View key={sp.key} style={styles.specChip}>
+                <Ionicons name={SPEC_ICONS[sp.key]} size={13} color={colors.textSecondary} />
+                <Text style={styles.specText}>{sp.value}</Text>
+              </View>
             ))}
           </View>
         )}
       </View>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
 function DatePickerField({
+  icon,
   label,
   value,
   onPress,
 }: {
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: Date;
   onPress: () => void;
 }) {
   return (
     <Pressable onPress={onPress} style={styles.dateField}>
-      <Text style={styles.dateFieldLabel}>{label}</Text>
+      <View style={styles.dateFieldLabelRow}>
+        <Ionicons name={icon} size={12} color={colors.textMuted} />
+        <Text style={styles.dateFieldLabel}>{label}</Text>
+      </View>
       <Text style={styles.dateFieldDate}>{fmtDate(value)}</Text>
       <Text style={styles.dateFieldTime}>{fmtTime(value)}</Text>
     </Pressable>
@@ -155,7 +178,7 @@ export default function CarsScreen() {
 
   const filterLabel = useMemo(() => {
     if (!filtered) return null;
-    return `${fmtDate(start)} → ${fmtDate(end)}`;
+    return `${fmtDate(start)}  →  ${fmtDate(end)}`;
   }, [filtered, start, end]);
 
   const handleDateChange = (e: DateTimePickerEvent, d?: Date) => {
@@ -200,56 +223,84 @@ export default function CarsScreen() {
   const renderHeader = () => (
     <View>
       {/* Hero */}
-      <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Solutions</Text>
-        <Text style={styles.heroAccent}>Rent Car</Text>
-        <Text style={styles.heroSub}>{t("cars.title")}</Text>
-      </View>
+      <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+        <View style={styles.heroBrandRow}>
+          <View style={styles.heroLogo}>
+            <Ionicons name="car-sport" size={20} color={colors.dark} />
+          </View>
+          <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+        </View>
+        <Text style={styles.heroTitle}>{t("cars.title")}</Text>
+        <Text style={styles.heroSub}>
+          {i18n.locale === "en"
+            ? "Premium vehicles, ready when you are."
+            : "Vehículos premium, listos cuando lo estés."}
+        </Text>
 
-      {/* Search */}
-      <View style={styles.searchWrap}>
-        <Input
-          placeholder={`🔍  ${t("common.search")}`}
-          value={q}
-          onChangeText={setQ}
-          autoCapitalize="none"
-          returnKeyType="search"
-          onSubmitEditing={() => load()}
-          containerStyle={{ marginBottom: 0 }}
-        />
-      </View>
+        {/* Search */}
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            placeholder={t("common.search")}
+            placeholderTextColor={colors.textMuted}
+            value={q}
+            onChangeText={setQ}
+            autoCapitalize="none"
+            returnKeyType="search"
+            onSubmitEditing={() => load()}
+            style={styles.searchInput}
+          />
+          {q ? (
+            <Pressable onPress={() => { setQ(""); load(); }} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+      </LinearGradient>
 
       {/* Filter toggle */}
-      <Pressable
-        onPress={() => setFilterOpen((v) => !v)}
-        style={[styles.filterToggle, filterOpen && styles.filterToggleActive]}
-      >
-        <Text style={[styles.filterToggleText, filterOpen && { color: colors.primaryDark }]}>
-          📆  {t("cars.filterDates")}
-        </Text>
-        {filtered ? (
-          <View style={styles.activePill}>
-            <Text style={styles.activePillText}>{t("cars.clearFilter")}</Text>
-          </View>
-        ) : (
-          <Text style={[styles.filterChevron, filterOpen && { transform: [{ rotate: "180deg" }] }]}>
-            ›
+      <View style={styles.toolbar}>
+        <Pressable
+          onPress={() => setFilterOpen((v) => !v)}
+          style={[styles.filterToggle, (filterOpen || filtered) && styles.filterToggleActive]}
+        >
+          <Ionicons
+            name="calendar-outline"
+            size={16}
+            color={filterOpen || filtered ? colors.primaryDark : colors.textSecondary}
+          />
+          <Text style={[styles.filterToggleText, (filterOpen || filtered) && { color: colors.primaryDark }]}>
+            {filtered ? filterLabel : t("cars.filterDates")}
           </Text>
-        )}
-      </Pressable>
+          <Ionicons
+            name={filterOpen ? "chevron-up" : "chevron-down"}
+            size={16}
+            color={colors.textMuted}
+          />
+        </Pressable>
+        {filtered ? (
+          <Pressable style={styles.clearChip} onPress={() => { setFiltered(false); setFilterOpen(false); load(); }}>
+            <Ionicons name="close" size={16} color={colors.textSecondary} />
+          </Pressable>
+        ) : null}
+      </View>
 
       {/* Filter panel */}
       {filterOpen && (
         <View style={styles.filterPanel}>
           <View style={styles.dateRow}>
             <DatePickerField
-              label={`📍  ${t("cars.pickup")}`}
+              icon="location-outline"
+              label={t("cars.pickup")}
               value={start}
               onPress={() => { setPendingField("start"); setShowStart(true); }}
             />
-            <View style={styles.dateArrow}><Text style={{ fontSize: 18, color: colors.textMuted }}>→</Text></View>
+            <View style={styles.dateArrow}>
+              <Ionicons name="arrow-forward" size={16} color={colors.textMuted} />
+            </View>
             <DatePickerField
-              label={`📍  ${t("cars.dropoff")}`}
+              icon="flag-outline"
+              label={t("cars.dropoff")}
               value={end}
               onPress={() => { setPendingField("end"); setShowEnd(true); }}
             />
@@ -282,38 +333,35 @@ export default function CarsScreen() {
             />
           )}
 
-          <View style={styles.filterActions}>
-            <Pressable
-              style={styles.filterApplyBtn}
-              onPress={() => { setFiltered(true); setFilterOpen(false); load(); }}
-            >
-              <Text style={styles.filterApplyText}>{t("cars.applyFilter")}</Text>
-            </Pressable>
-            {filtered ? (
-              <Pressable style={styles.filterClearBtn} onPress={() => { setFiltered(false); load(); }}>
-                <Text style={styles.filterClearText}>{t("cars.clearFilter")}</Text>
-              </Pressable>
-            ) : null}
-          </View>
-          {filterLabel ? (
-            <Text style={styles.filterSummary}>{filterLabel}</Text>
-          ) : null}
+          <Pressable
+            style={styles.filterApplyBtn}
+            onPress={() => { setFiltered(true); setFilterOpen(false); load(); }}
+          >
+            <LinearGradient
+              colors={gradients.gold}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Ionicons name="search" size={16} color="#1A1100" />
+            <Text style={styles.filterApplyText}>{t("cars.applyFilter")}</Text>
+          </Pressable>
         </View>
       )}
 
       {/* Count */}
-      <View style={styles.countRow}>
-        <Text style={styles.countText}>
-          {cars.length} {i18n.locale === "en" ? "vehicles" : "vehículos"}
-        </Text>
-        {filtered && (
-          <View style={styles.activeDot} />
-        )}
-      </View>
+      {!loading && (
+        <View style={styles.countRow}>
+          <Text style={styles.countText}>
+            {cars.length} {i18n.locale === "en" ? "vehicles available" : "vehículos disponibles"}
+          </Text>
+        </View>
+      )}
 
       {err ? (
         <View style={styles.errBox}>
-          <Text style={styles.errText}>⚠️  {err}</Text>
+          <Ionicons name="warning-outline" size={16} color={colors.danger} />
+          <Text style={styles.errText}>{err}</Text>
         </View>
       ) : null}
     </View>
@@ -335,13 +383,15 @@ export default function CarsScreen() {
           />
         }
         ListEmptyComponent={
-          !loading ? (
+          loading ? (
+            <ListSkeleton count={4} />
+          ) : (
             <EmptyState
               title={t("common.empty")}
               subtitle={filtered ? t("cars.clearFilter") : undefined}
-              icon="🚗"
+              icon="cars"
             />
-          ) : null
+          )
         }
         renderItem={({ item }) => (
           <CarCard
@@ -365,107 +415,130 @@ export default function CarsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  listContent: { paddingBottom: 24 },
+  listContent: { paddingBottom: 28 },
 
   hero: {
-    backgroundColor: colors.dark,
-    paddingTop: 32,
-    paddingBottom: 28,
+    paddingTop: 24,
+    paddingBottom: 22,
     paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
   },
-  heroTitle: { color: "rgba(255,255,255,0.7)", fontSize: 15, fontWeight: "600", letterSpacing: 2, textTransform: "uppercase" },
-  heroAccent: { color: colors.primary, fontSize: 36, fontWeight: "800", letterSpacing: -0.5, marginTop: 2 },
-  heroSub: { color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 },
+  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
+  heroLogo: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
+  heroTitle: { ...type.display, color: "#FFFFFF" },
+  heroSub: { ...type.callout, color: "rgba(255,255,255,0.6)", marginTop: 4 },
 
-  searchWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: 0, backgroundColor: colors.card },
-
-  filterToggle: {
+  searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    marginTop: 18,
+    height: 50,
+    ...shadow.md,
+  },
+  searchInput: { ...type.bodyMed, color: colors.text, height: 50, flex: 1 },
+
+  toolbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     paddingHorizontal: spacing.lg,
-    paddingVertical: 14,
+    paddingTop: spacing.lg,
+  },
+  filterToggle: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    height: 46,
     backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.xs,
   },
-  filterToggleActive: { backgroundColor: colors.primaryXLight },
-  filterToggleText: { fontSize: 14, color: colors.textSecondary, fontWeight: "600" },
-  filterChevron: { fontSize: 22, color: colors.textMuted, fontWeight: "300" },
-  activePill: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radius.full,
+  filterToggleActive: { borderColor: colors.primaryLight, backgroundColor: colors.primaryXLight },
+  filterToggleText: { ...type.captionMed, color: colors.textSecondary, flex: 1 },
+  clearChip: {
+    width: 46,
+    height: 46,
+    borderRadius: radius.md,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    ...shadow.xs,
   },
-  activePillText: { fontSize: 11, fontWeight: "700", color: colors.dark },
 
   filterPanel: {
     backgroundColor: colors.card,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.sm,
   },
   dateRow: { flexDirection: "row", alignItems: "center", marginBottom: spacing.md },
   dateArrow: { paddingHorizontal: 8 },
   dateField: {
     flex: 1,
-    backgroundColor: colors.borderLight,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
     padding: 12,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  dateFieldLabel: { fontSize: 10, color: colors.textMuted, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
-  dateFieldDate: { fontSize: 14, color: colors.text, fontWeight: "700", marginTop: 3 },
-  dateFieldTime: { fontSize: 12, color: colors.textSecondary, marginTop: 1 },
+  dateFieldLabelRow: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 5 },
+  dateFieldLabel: { ...type.label, color: colors.textMuted, fontSize: 10 },
+  dateFieldDate: { ...type.title, color: colors.text },
+  dateFieldTime: { ...type.caption, color: colors.textSecondary, marginTop: 1 },
 
-  filterActions: { flexDirection: "row", gap: 8 },
   filterApplyBtn: {
-    flex: 1,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: 12,
-    alignItems: "center",
-    ...shadow.primary,
-  },
-  filterApplyText: { color: colors.dark, fontWeight: "700", fontSize: 14 },
-  filterClearBtn: {
-    flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    paddingVertical: 12,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  filterClearText: { color: colors.textSecondary, fontWeight: "600", fontSize: 14 },
-  filterSummary: { color: colors.textMuted, fontSize: 11, marginTop: 8, textAlign: "center" },
-
-  countRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: 4,
+    justifyContent: "center",
+    gap: 8,
+    height: 48,
+    borderRadius: radius.md,
+    overflow: "hidden",
+    ...shadow.gold,
   },
-  countText: { fontSize: 13, color: colors.textMuted, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 },
-  activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, marginLeft: 6 },
+  filterApplyText: { ...type.title, color: "#1A1100", fontFamily: font.bold },
+
+  countRow: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: 2 },
+  countText: { ...type.label, color: colors.textMuted },
 
   errBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     marginHorizontal: spacing.lg,
-    marginTop: 8,
-    padding: 12,
+    marginTop: 10,
+    padding: 14,
     backgroundColor: colors.dangerBg,
     borderRadius: radius.md,
   },
-  errText: { color: colors.danger, fontSize: 13, fontWeight: "500" },
+  errText: { ...type.caption, color: colors.danger, flex: 1 },
 
-  // Car card
   carCard: {
     marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing.md,
     backgroundColor: colors.card,
     borderRadius: radius.lg,
     overflow: "hidden",
@@ -474,20 +547,21 @@ const styles = StyleSheet.create({
   imageContainer: { position: "relative", height: 200 },
   carImg: { width: "100%", height: 200, backgroundColor: colors.borderLight },
   imgPlaceholder: { alignItems: "center", justifyContent: "center" },
+  imgScrim: { position: "absolute", left: 0, right: 0, bottom: 0, height: 90 },
   priceTag: {
     position: "absolute",
     bottom: 12,
     right: 12,
-    backgroundColor: colors.dark,
+    backgroundColor: "rgba(11,18,32,0.82)",
     borderRadius: radius.md,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
     flexDirection: "row",
     alignItems: "baseline",
     gap: 3,
   },
-  priceAmount: { color: colors.primary, fontSize: 17, fontWeight: "800" },
-  pricePer: { color: "rgba(255,255,255,0.6)", fontSize: 11 },
+  priceAmount: { color: colors.primaryLight, fontFamily: font.extrabold, fontSize: 17 },
+  pricePer: { color: "rgba(255,255,255,0.6)", ...type.small },
   statusBadge: {
     position: "absolute",
     top: 12,
@@ -496,23 +570,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 5,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: radius.full,
   },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 11, fontWeight: "700" },
-  carInfo: { padding: spacing.md },
-  carNameRow: { marginBottom: 6 },
-  carBrand: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 2,
+  statusText: { ...type.small, fontFamily: font.semibold },
+  carInfo: { padding: spacing.lg },
+  carBrand: { ...type.label, color: colors.textMuted, marginBottom: 3 },
+  carModel: { ...type.h2, color: colors.text },
+  specsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  specChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.bg,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: radius.full,
   },
-  carModel: { fontSize: 18, fontWeight: "800", color: colors.text },
-  specsRow: { flexDirection: "row", alignItems: "center" },
-  specText: { fontSize: 13, color: colors.textSecondary },
-  specDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: colors.textMuted, marginHorizontal: 6 },
+  specText: { ...type.captionMed, color: colors.textSecondary },
 });

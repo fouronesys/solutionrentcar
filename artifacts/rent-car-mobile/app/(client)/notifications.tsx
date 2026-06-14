@@ -9,31 +9,118 @@ import {
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Loading } from "@/components/Loading";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { EmptyState } from "@/components/EmptyState";
+import { RowSkeleton } from "@/components/Skeleton";
 import { Button } from "@/components/Button";
 import { api, ApiError } from "@/api/client";
 import type { Notification } from "@/api/types";
-import { colors, radius, shadow, spacing } from "@/theme/colors";
+import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { t } from "@/i18n";
 import { dateTime } from "@/utils/format";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { useAuth } from "@/auth/AuthContext";
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function notifIcon(eventType?: string): keyof typeof Ionicons.glyphMap {
+  const e = (eventType ?? "").toLowerCase();
+  if (e.includes("payment") || e.includes("pay")) return "card-outline";
+  if (e.includes("deliver")) return "car-outline";
+  if (e.includes("return")) return "checkmark-done-outline";
+  if (e.includes("cancel")) return "close-circle-outline";
+  if (e.includes("booking") || e.includes("reserv")) return "calendar-outline";
+  return "notifications-outline";
+}
+
+function Hero({
+  unread,
+  showMarkAll,
+  onMarkAll,
+}: {
+  unread: number;
+  showMarkAll: boolean;
+  onMarkAll: () => void;
+}) {
+  return (
+    <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+      <View style={styles.heroBrandRow}>
+        <View style={styles.heroLogo}>
+          <Ionicons name="car-sport" size={20} color={colors.dark} />
+        </View>
+        <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+      </View>
+      <View style={styles.heroTitleRow}>
+        <Text style={styles.heroTitle}>{t("notifications.title")}</Text>
+        {showMarkAll ? (
+          <Pressable onPress={onMarkAll} style={styles.markAllBtn} hitSlop={6}>
+            <Ionicons name="checkmark-done" size={15} color={colors.primaryLight} />
+            <Text style={styles.markAllText}>{t("notifications.markAllRead")}</Text>
+          </Pressable>
+        ) : null}
+      </View>
+      {unread > 0 ? (
+        <View style={styles.unreadChip}>
+          <View style={styles.unreadChipDot} />
+          <Text style={styles.unreadChipText}>
+            {unread} {t("notifications.unread")}
+          </Text>
+        </View>
+      ) : null}
+    </LinearGradient>
+  );
+}
+
 function LoginPrompt() {
   const router = useRouter();
   return (
     <View style={styles.prompt}>
-      <View style={styles.promptIcon}><Text style={{ fontSize: 48 }}>🔔</Text></View>
+      <View style={styles.promptIcon}>
+        <Ionicons name="notifications-outline" size={38} color={colors.primaryDark} />
+      </View>
       <Text style={styles.promptTitle}>{t("login.requiredTitle")}</Text>
       <Text style={styles.promptSub}>{t("login.requiredSubtitle")}</Text>
-      <Button title={t("login.goToLogin")} onPress={() => router.push("/login/client")} size="lg" style={{ marginBottom: 12 }} />
+      <Button title={t("login.goToLogin")} onPress={() => router.push("/login/client")} size="lg" style={{ alignSelf: "stretch", marginBottom: 12 }} />
       <Pressable onPress={() => router.push("/register/client")}>
         <Text style={styles.registerLink}>
           {t("login.noAccount")} <Text style={styles.registerLinkBold}>{t("login.createAccount")}</Text>
         </Text>
       </Pressable>
     </View>
+  );
+}
+
+function NotifCard({ item, onPress }: { item: Notification; onPress: () => void }) {
+  const unread = !item.read_at;
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withTiming(0.985, { duration: 90 }); }}
+      onPressOut={() => { scale.value = withTiming(1, { duration: 140 }); }}
+      style={[animStyle, styles.notifCard, unread && styles.unreadCard]}
+    >
+      <View style={[styles.notifIconWrap, unread && styles.notifIconWrapUnread]}>
+        <Ionicons
+          name={notifIcon(item.event_type)}
+          size={20}
+          color={unread ? colors.primaryDark : colors.textMuted}
+        />
+      </View>
+      <View style={styles.notifContent}>
+        <View style={styles.notifTitleRow}>
+          <Text style={[styles.notifTitle, unread && styles.notifTitleUnread]} numberOfLines={1}>
+            {item.title}
+          </Text>
+          {unread ? <View style={styles.unreadDot} /> : null}
+        </View>
+        <Text style={styles.notifBody} numberOfLines={3}>{item.body}</Text>
+        <Text style={styles.notifDate}>{dateTime(item.created_at)}</Text>
+      </View>
+    </AnimatedPressable>
   );
 }
 
@@ -82,14 +169,10 @@ export default function NotificationsScreen() {
 
   const unread = items.filter((n) => !n.read_at).length;
 
-  if (!bootstrapped || (role && loading)) return <Loading />;
-
   if (!role) {
     return (
       <SafeAreaView style={styles.screen} edges={["top"]}>
-        <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>{t("notifications.title")}</Text>
-        </View>
+        <Hero unread={0} showMarkAll={false} onMarkAll={markAll} />
         <LoginPrompt />
       </SafeAreaView>
     );
@@ -97,107 +180,144 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <View style={styles.pageHeader}>
-        <Text style={styles.pageTitle}>{t("notifications.title")}</Text>
-        <Pressable onPress={markAll} style={styles.markAllBtn}>
-          <Text style={styles.markAllText}>{t("notifications.markAllRead")}</Text>
-        </Pressable>
-      </View>
-      {unread > 0 ? (
-        <View style={styles.unreadBanner}>
-          <Text style={styles.unreadText}>🔔  {unread} {t("notifications.unread")}</Text>
+      <Hero unread={unread} showMarkAll={unread > 0} onMarkAll={markAll} />
+
+      {err ? (
+        <View style={styles.errBox}>
+          <Ionicons name="warning-outline" size={16} color={colors.danger} />
+          <Text style={styles.errText}>{err}</Text>
         </View>
       ) : null}
-      {err ? <View style={styles.errBox}><Text style={styles.errText}>⚠️  {err}</Text></View> : null}
-      <FlatList
-        contentContainerStyle={styles.list}
-        data={items}
-        keyExtractor={(n) => String(n.id)}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => { setRefreshing(true); load(); }}
-            tintColor={colors.primaryDark}
-          />
-        }
-        ListEmptyComponent={<EmptyState title={t("notifications.empty")} icon="🔔" />}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => markOne(item)}
-            style={({ pressed }) => [styles.notifCard, !item.read_at && styles.unreadCard, pressed && { opacity: 0.88 }]}
-          >
-            {!item.read_at ? <View style={styles.unreadDot} /> : null}
-            <View style={styles.notifContent}>
-              <Text style={[styles.notifTitle, !item.read_at && { color: colors.text }]}>{item.title}</Text>
-              <Text style={styles.notifBody}>{item.body}</Text>
-              <Text style={styles.notifDate}>{dateTime(item.created_at)}</Text>
-            </View>
-          </Pressable>
-        )}
-      />
+
+      {!bootstrapped || loading ? (
+        <View style={styles.skeletonWrap}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <RowSkeleton key={i} />
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={styles.list}
+          data={items}
+          keyExtractor={(n) => String(n.id)}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => { setRefreshing(true); load(); }}
+              tintColor={colors.primaryDark}
+            />
+          }
+          ListEmptyComponent={<EmptyState title={t("notifications.empty")} icon="notifications" />}
+          renderItem={({ item }) => <NotifCard item={item} onPress={() => markOne(item)} />}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  pageHeader: {
+
+  hero: {
+    paddingTop: 20,
+    paddingBottom: 22,
+    paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+  },
+  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
+  heroLogo: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
+  heroTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  heroTitle: { ...type.display, color: "#FFFFFF", flexShrink: 1 },
+  markAllBtn: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  pageTitle: { flex: 1, fontSize: 20, fontWeight: "800", color: colors.text },
-  markAllBtn: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: radius.md, backgroundColor: colors.borderLight },
-  markAllText: { fontSize: 12, color: colors.primaryDark, fontWeight: "700" },
-  unreadBanner: {
-    backgroundColor: colors.primaryXLight,
+    gap: 6,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    paddingHorizontal: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.primaryLight,
+    borderRadius: radius.full,
+    backgroundColor: "rgba(245,158,11,0.16)",
   },
-  unreadText: { fontSize: 13, color: colors.primaryDark, fontWeight: "600" },
-  errBox: { margin: spacing.lg, padding: 12, backgroundColor: colors.dangerBg, borderRadius: radius.md },
-  errText: { color: colors.danger, fontSize: 13 },
-  list: { padding: spacing.lg, paddingTop: spacing.md },
+  markAllText: { ...type.small, color: colors.primaryLight },
+  unreadChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    alignSelf: "flex-start",
+    marginTop: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+  unreadChipDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.primaryLight },
+  unreadChipText: { ...type.captionMed, color: "rgba(255,255,255,0.85)" },
+
+  errBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    padding: 14,
+    backgroundColor: colors.dangerBg,
+    borderRadius: radius.md,
+  },
+  errText: { ...type.caption, color: colors.danger, flex: 1 },
+
+  skeletonWrap: { paddingTop: spacing.lg },
+  list: { padding: spacing.lg, paddingTop: spacing.lg, flexGrow: 1 },
 
   notifCard: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    marginBottom: 8,
-    padding: spacing.lg,
     flexDirection: "row",
     alignItems: "flex-start",
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     ...shadow.sm,
   },
   unreadCard: {
-    backgroundColor: colors.primaryXLight,
     borderLeftWidth: 3,
     borderLeftColor: colors.primary,
+    backgroundColor: colors.bgWarm,
   },
-  unreadDot: {
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: colors.primaryDark,
-    marginTop: 6, marginRight: 12, flexShrink: 0,
+  notifIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.borderLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
   },
+  notifIconWrapUnread: { backgroundColor: colors.primaryXLight },
   notifContent: { flex: 1 },
-  notifTitle: { fontSize: 15, fontWeight: "700", color: colors.textSecondary, marginBottom: 4 },
-  notifBody: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-  notifDate: { fontSize: 11, color: colors.textMuted, marginTop: 6, fontWeight: "500" },
+  notifTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  notifTitle: { ...type.title, color: colors.textSecondary, flex: 1 },
+  notifTitleUnread: { color: colors.text },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primaryDark, flexShrink: 0 },
+  notifBody: { ...type.callout, color: colors.textSecondary, marginTop: 4 },
+  notifDate: { ...type.small, color: colors.textMuted, marginTop: 8 },
 
   prompt: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xxl },
   promptIcon: {
-    width: 88, height: 88, borderRadius: 44,
+    width: 84, height: 84, borderRadius: radius.full,
     backgroundColor: colors.primaryXLight,
     alignItems: "center", justifyContent: "center", marginBottom: 20,
+    borderWidth: 1, borderColor: colors.primaryLight,
   },
-  promptTitle: { fontSize: 20, fontWeight: "800", color: colors.text, textAlign: "center", marginBottom: 8 },
-  promptSub: { color: colors.textMuted, fontSize: 14, textAlign: "center", marginBottom: 28, lineHeight: 20 },
-  registerLink: { color: colors.textMuted, fontSize: 14 },
-  registerLinkBold: { color: colors.primaryDark, fontWeight: "700" },
+  promptTitle: { ...type.h2, color: colors.text, textAlign: "center", marginBottom: 8 },
+  promptSub: { ...type.callout, color: colors.textMuted, textAlign: "center", marginBottom: 28 },
+  registerLink: { ...type.callout, color: colors.textMuted },
+  registerLinkBold: { color: colors.primaryDark, fontFamily: font.bold },
 });

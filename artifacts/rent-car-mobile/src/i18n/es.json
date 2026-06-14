@@ -170,10 +170,14 @@
   },
   "payment": {
     "title": "Registrar pago",
+    "register": "Registrar pago",
     "amount": "Monto",
     "method": "Método de pago",
+    "note": "Nota",
     "submit": "Guardar pago",
-    "saved": "Pago registrado"
+    "save": "Guardar pago",
+    "saved": "Pago registrado",
+    "invalidAmount": "Ingresa un monto válido"
   },
   "profile": {
     "title": "Perfil",
