@@ -39,10 +39,8 @@ function Gate() {
       router.replace("/(client)/cars");
     } else if (role === "staff" && !inStaff) {
       router.replace("/(staff)/agenda");
-    } else if (!role && inStaff) {
-      router.replace("/login/staff");
-    } else if (!role && !inClient && !inAuth) {
-      router.replace("/(client)/cars");
+    } else if (!role && !inAuth) {
+      router.replace(inStaff ? "/login/staff" : "/login/client");
     }
   }, [bootstrapped, role, segments, router]);
 
