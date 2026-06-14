@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
+  Image,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -29,7 +30,7 @@ function Hero({ count }: { count?: number }) {
     <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
       <View style={styles.heroBrandRow}>
         <View style={styles.heroLogo}>
-          <Ionicons name="car-sport" size={18} color={colors.dark} />
+          <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
         </View>
         <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
       </View>
@@ -225,9 +226,10 @@ const styles = StyleSheet.create({
   },
   heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
   heroLogo: {
-    width: 30, height: 30, borderRadius: radius.sm,
-    backgroundColor: colors.primary,
+    width: 36, height: 36, borderRadius: radius.sm,
+    backgroundColor: colors.card,
     alignItems: "center", justifyContent: "center",
+    overflow: "hidden",
   },
   heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
   heroTitleRow: { flexDirection: "row", alignItems: "center", gap: 10 },

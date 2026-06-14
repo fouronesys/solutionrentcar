@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: radius.sm,
-    backgroundColor: "transparent",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",

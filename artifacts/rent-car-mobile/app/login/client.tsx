@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: radius.xl,
-    backgroundColor: "transparent",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,

@@ -3,6 +3,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -262,7 +263,7 @@ export default function BookScreen() {
           </Pressable>
           <View style={styles.heroBrandRow}>
             <View style={styles.heroLogo}>
-              <Ionicons name="car-sport" size={16} color={colors.dark} />
+              <Image source={require("../../../assets/images/logo.png")} style={{ width: 30, height: 30 }} resizeMode="contain" />
             </View>
             <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
           </View>
@@ -385,9 +386,10 @@ const styles = StyleSheet.create({
   },
   heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   heroLogo: {
-    width: 26, height: 26, borderRadius: radius.xs,
-    backgroundColor: colors.primary,
+    width: 34, height: 34, borderRadius: radius.sm,
+    backgroundColor: colors.card,
     alignItems: "center", justifyContent: "center",
+    overflow: "hidden",
   },
   heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
   heroTitle: { ...type.display, color: "#FFFFFF" },

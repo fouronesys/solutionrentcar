@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -112,7 +112,7 @@ export default function StaffBookingsList() {
       <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.heroBrandRow}>
           <View style={styles.heroLogo}>
-            <Ionicons name="car-sport" size={20} color={colors.dark} />
+            <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
           </View>
           <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
         </View>
@@ -221,12 +221,13 @@ const styles = StyleSheet.create({
   },
   heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
   heroLogo: {
-    width: 30,
-    height: 30,
+    width: 36,
+    height: 36,
     borderRadius: radius.sm,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
   heroTitle: { ...type.display, color: "#FFFFFF" },

@@ -13,6 +13,7 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
 } from "@expo-google-fonts/inter";
+import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/auth/AuthContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
 import { colors } from "@/theme/colors";
@@ -70,6 +71,7 @@ function UpdatesWatcher() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
+    ...Ionicons.font,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
