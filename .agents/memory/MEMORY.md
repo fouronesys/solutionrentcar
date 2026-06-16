@@ -1,4 +1,5 @@
 - [Rent-car API web-preview CORS](rent-car-api-cors.md) — web preview can't call the external API (CORS/401); validate the mobile app on a real device via Expo Go.
 - [Rent-car brand palette](rent-car-palette.md) — app is black + gold, never navy/blue; all tokens in src/theme/colors.ts.
 - [Expo vector-icons font on Android](expo-vector-icons-android.md) — Android shows CJK/tofu + missing icons unless icon font loaded via useFonts ...Ionicons.font.
+- [ImageMagick App Store shots](imagemagick-appstore-shots.md) — gray gradient bg desaturates color foreground (force -type TrueColor); rounded-corner mask must be white-on-black; no zip/sharp CLI.
 - [Rent-car auth gating + guest catalog](rent-car-auth-gating.md) — external API needs a token for ALL endpoints incl /cars; catalog browses via an embedded read-only guest auto-login (role stays null), real login forced at reservation.

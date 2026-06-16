@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "3CqIHESNi6rcB6QthRNDh"
+uri = "file://appstore_screenshots.zip"
+type = "unspecified"
+title = "App Store screenshots — iPhone 6.9 + iPad 12.9 (10 imágenes)"
+
+[[outputs]]
+id = "vLmyqnHfPN-o45B-Hpz8i"
+uri = "file://appstore_screenshots/iphone-6.9/01-catalogo.png"
+type = "image"
+title = "Ejemplo iPhone 6.9 — Catálogo (1320×2868)"
+
+[[outputs]]
+id = "bv7I7IlflJDFirhyuh1JC"
+uri = "file://appstore_screenshots/ipad-12.9/01-catalogo.png"
+type = "image"
+title = "Ejemplo iPad 12.9 — Catálogo (2048×2732)"
