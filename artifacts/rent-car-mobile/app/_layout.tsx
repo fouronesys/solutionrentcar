@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Updates from "expo-updates";
@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/auth/AuthContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
 import { colors } from "@/theme/colors";
+import AnimatedSplash from "@/components/AnimatedSplash";
 import "@/i18n";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -53,6 +54,13 @@ function Gate() {
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
   );
+}
+
+function SplashOverlay() {
+  const { bootstrapped } = useAuth();
+  const [done, setDone] = useState(false);
+  if (done) return null;
+  return <AnimatedSplash appReady={bootstrapped} onFinish={() => setDone(true)} />;
 }
 
 function UpdatesWatcher() {
@@ -99,6 +107,7 @@ export default function RootLayout() {
             <UpdatesWatcher />
             <StatusBar style="light" />
             <Gate />
+            <SplashOverlay />
           </NotificationsProvider>
         </AuthProvider>
       </SafeAreaProvider>
