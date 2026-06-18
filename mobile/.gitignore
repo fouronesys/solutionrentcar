@@ -1,0 +1,16 @@
+google-service-account.json
+google-services-firebase.json
+google-services.json
+*.p8
+*.p12
+*.keystore
+*.jks
+CREDENTIALS.md
+.DS_Store
+.idea/
+.expo/
+.env
+.env.local
+.env.*.local
+*.log
+node_modules/

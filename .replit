@@ -1,23 +1,10 @@
-modules = ["nodejs-24", "python-3.11"]
-
-[deployment]
-router = "application"
-deploymentTarget = "autoscale"
-
-[deployment.postBuild]
-args = ["pnpm", "store", "prune"]
-env = { "CI" = "true" }
-
-[workflows]
-runButton = "Project"
-
+modules = ["nodejs-20", "php-8.2", "web"]
 [agent]
-stack = "PNPM_WORKSPACE"
 expertMode = true
+stack = "BEST_EFFORT_FALLBACK"
 
-[postMerge]
-path = "scripts/post-merge.sh"
-timeoutMs = 20000
+[nix]
+channel = "stable-25_05"
 
 [[ports]]
 localPort = 8080
@@ -39,8 +26,26 @@ externalPort = 3000
 localPort = 21048
 externalPort = 3002
 
-[userenv]
+[workflows]
+runButton = "Project"
 
-[userenv.shared]
-EXPO_PUBLIC_GUEST_USERNAME = "8090000000"
-EXPO_PUBLIC_GUEST_PASSWORD = "8090000000"
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash /home/runner/workspace/start.sh"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"

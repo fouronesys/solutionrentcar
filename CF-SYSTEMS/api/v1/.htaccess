@@ -1,0 +1,21 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>
+
+# Disable ModSecurity WAF for this API path so App Store review requests
+# (which originate from Apple VPN IPs) are not blocked and receive proper
+# JSON responses instead of HTML error pages.
+<IfModule mod_security.c>
+    SecRuleEngine Off
+</IfModule>
+<IfModule mod_security2.c>
+    SecRuleEngine Off
+    SecRequestBodyAccess Off
+</IfModule>

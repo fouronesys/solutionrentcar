@@ -1,20 +1,31 @@
 uploads = []
-generated = []
 
-[[outputs]]
-id = "3CqIHESNi6rcB6QthRNDh"
-uri = "file://appstore_screenshots.zip"
-type = "unspecified"
-title = "App Store screenshots — iPhone 6.9 + iPad 12.9 (10 imágenes)"
-
-[[outputs]]
-id = "vLmyqnHfPN-o45B-Hpz8i"
-uri = "file://appstore_screenshots/iphone-6.9/01-catalogo.png"
+[[generated]]
+id = "sPfYJsKGUEMQ7B307JCBJ"
+uri = "file://mobile/assets/icon.png"
 type = "image"
-title = "Ejemplo iPhone 6.9 — Catálogo (1320×2868)"
+title = "yellow car app icon clean"
 
 [[outputs]]
-id = "bv7I7IlflJDFirhyuh1JC"
-uri = "file://appstore_screenshots/ipad-12.9/01-catalogo.png"
+id = "0caEbDpIpdQa-mR_hp76_"
+uri = "file://attached_assets/solutions_logo_1024.png"
 type = "image"
-title = "Ejemplo iPad 12.9 — Catálogo (2048×2732)"
+title = "Solutions Rent Car — Logo 1024x1024 (fondo blanco)"
+
+[[outputs]]
+id = "1e0F1GIgoSdueJvbrs9Mg"
+uri = "file://attached_assets/store_assets/appstore_icon_1024.png"
+type = "image"
+title = "App Store icon — 1024x1024 (sin transparencia, RGB)"
+
+[[outputs]]
+id = "4vZrLB0S0S94xGUg-gEDk"
+uri = "file://attached_assets/store_assets/playstore_icon_512.png"
+type = "image"
+title = "Play Store icon — 512x512"
+
+[[outputs]]
+id = "Du4BghnTvBLZn4oGhMm64"
+uri = "file://attached_assets/store_assets/playstore_feature_1024x500.png"
+type = "image"
+title = "Play Store Feature Graphic — 1024x500"

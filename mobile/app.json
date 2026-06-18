@@ -1,0 +1,92 @@
+{
+  "expo": {
+    "name": "Solutions Rent Car",
+    "slug": "solutions-rent-car",
+    "scheme": "solutionsrentcar",
+    "version": "1.1.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.solutionsrent.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Necesitamos la cámara para capturar fotos del vehículo y firmas.",
+        "NSPhotoLibraryUsageDescription": "Para adjuntar fotos a las reservas y firmas.",
+        "NSUserNotificationsUsageDescription": "Para enviarte avisos sobre tus reservas y pagos."
+      },
+      "icon": "./assets/icon-ios.png"
+    },
+    "android": {
+      "package": "com.solutionsrent.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": [
+        "NOTIFICATIONS",
+        "POST_NOTIFICATIONS",
+        "CAMERA"
+      ],
+      "versionCode": 3
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#F2A900"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24,
+            "ndkVersion": "27.1.12297006",
+            "enableProguardInReleaseBuilds": false,
+            "enableShrinkResourcesInReleaseBuilds": false
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "apiBaseUrl": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1",
+      "eas": {
+        "projectId": "bf359c12-b13d-432d-944c-b059795b9f3b"
+      }
+    },
+    "owner": "fouronesys"
+  }
+}
