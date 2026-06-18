@@ -29,3 +29,9 @@ id = "Du4BghnTvBLZn4oGhMm64"
 uri = "file://attached_assets/store_assets/playstore_feature_1024x500.png"
 type = "image"
 title = "Play Store Feature Graphic — 1024x500"
+
+[[outputs]]
+id = "CeWr6wPyXPhQ-nnAlf5Rr"
+uri = "file://solution-rentcar-port.tar.gz"
+type = "unspecified"
+title = "Solution Rent Car — splash + guest browsing port"

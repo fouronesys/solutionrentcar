@@ -1,0 +1,4 @@
+- [Rent-car API web-preview CORS](rent-car-api-cors.md) — web preview can't call the external API (CORS/401); validate the mobile app on a real device via Expo Go.
+- [Rent-car brand palette](rent-car-palette.md) — app is black + gold, never navy/blue; all tokens in src/theme/colors.ts.
+- [Expo vector-icons font on Android](expo-vector-icons-android.md) — Android shows CJK/tofu + missing icons unless icon font loaded via useFonts ...Ionicons.font.
+- [Rent-car master/main split & delivery](rent-car-delivery.md) — real app is external `master` (no common ancestor w/ Replit `main`); can't git-push, deliver as apply-bundle; guest needs EXPO_PUBLIC_GUEST_* env vars.
