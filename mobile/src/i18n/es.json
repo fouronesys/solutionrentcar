@@ -43,7 +43,10 @@
       "unavailable": "El servicio no está disponible por ahora. Intenta de nuevo en unos minutos."
     },
     "noAccount": "¿No tienes cuenta?",
-    "createAccount": "Crear cuenta"
+    "createAccount": "Crear cuenta",
+    "goToLogin": "Iniciar sesión",
+    "requiredTitle": "Inicia sesión para continuar",
+    "requiredSubtitle": "Crea una cuenta o inicia sesión para hacer una reserva."
   },
   "register": {
     "title": "Crear cuenta",

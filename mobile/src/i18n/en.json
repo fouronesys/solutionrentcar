@@ -43,7 +43,10 @@
       "unavailable": "The service is temporarily unavailable. Please try again shortly."
     },
     "noAccount": "No account yet?",
-    "createAccount": "Create account"
+    "createAccount": "Create account",
+    "goToLogin": "Sign in",
+    "requiredTitle": "Sign in to continue",
+    "requiredSubtitle": "Create an account or sign in to make a booking."
   },
   "register": {
     "title": "Create account",

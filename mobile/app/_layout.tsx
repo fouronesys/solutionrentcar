@@ -1,12 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Updates from "expo-updates";
 import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from "@expo-google-fonts/inter";
+import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/auth/AuthContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
+import AnimatedSplash from "@/components/AnimatedSplash";
 import "@/i18n";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -23,14 +33,37 @@ function Gate() {
     const first = segments[0] as string | undefined;
     const inClient = first === "(client)";
     const inStaff = first === "(staff)";
+    const inAuth = first === "login" || first === "register";
 
-    if (role === "client" && !inClient) router.replace("/(client)/cars");
-    else if (role === "staff" && !inStaff) router.replace("/(staff)/agenda");
-    else if (!role && (inClient || inStaff)) router.replace("/");
+    if (role === "client" && !inClient) {
+      router.replace("/(client)/cars");
+    } else if (role === "staff" && !inStaff) {
+      router.replace("/(staff)/agenda");
+    } else if (!role) {
+      // Logged-out users browse the catalog as guests; only the staff area and
+      // explicit auth screens are excluded. Login is requested at reservation.
+      if (inStaff) {
+        router.replace("/login/staff");
+      } else if (!inClient && !inAuth) {
+        router.replace("/(client)/cars");
+      }
+    }
   }, [bootstrapped, role, segments, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#FFFFFF" } }} />
+  );
+}
+
+function SplashOverlay() {
+  const { bootstrapped } = useAuth();
+  const [done, setDone] = useState(false);
+  if (done) return null;
+  return (
+    <>
+      <StatusBar style="light" />
+      <AnimatedSplash appReady={bootstrapped} onFinish={() => setDone(true)} />
+    </>
   );
 }
 
@@ -53,6 +86,23 @@ function UpdatesWatcher() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    ...Ionicons.font,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -61,6 +111,7 @@ export default function RootLayout() {
             <UpdatesWatcher />
             <StatusBar style="dark" />
             <Gate />
+            <SplashOverlay />
           </NotificationsProvider>
         </AuthProvider>
       </SafeAreaProvider>

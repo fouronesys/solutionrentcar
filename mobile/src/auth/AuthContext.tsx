@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { api } from "@/api/client";
+import { api, ensureGuestSession } from "@/api/client";
 import {
   clearTokens,
   getProfile,
@@ -39,13 +39,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const tokens = await getTokens();
-      const stored = await getProfile();
-      if (tokens && stored) {
-        setRole(stored.role);
-        setUserState(stored.profile);
+      try {
+        const tokens = await getTokens();
+        const stored = await getProfile();
+        if (tokens && stored) {
+          setRole(stored.role);
+          setUserState(stored.profile);
+        } else {
+          // No real session — establish a guest token so the catalog is browsable.
+          await ensureGuestSession();
+        }
+      } finally {
+        setBootstrapped(true);
       }
-      setBootstrapped(true);
     })();
   }, []);
 
@@ -98,6 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await clearTokens();
     setRole(null);
     setUserState(null);
+    // Keep the catalog browsable after logout by re-establishing a guest token.
+    await ensureGuestSession();
   }, []);
 
   const refreshMe = useCallback(async () => {

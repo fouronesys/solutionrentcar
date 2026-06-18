@@ -1,7 +1,8 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
-import { getTokens, saveTokens, clearTokens } from "@/auth/storage";
+import { getTokens, saveTokens, clearTokens, getGuestTokens, saveGuestTokens } from "@/auth/storage";
+import { GUEST_USERNAME, GUEST_PASSWORD, guestEnabled } from "@/auth/guest";
 import type { ApiResponse, Tokens } from "./types";
 
 function resolveBaseUrl(): string {
@@ -90,11 +91,49 @@ async function tryRefresh(): Promise<Tokens | null> {
   return pendingRefresh;
 }
 
+let pendingGuest: Promise<Tokens | null> | null = null;
+
+async function tryGuestLogin(): Promise<Tokens | null> {
+  if (!guestEnabled) return null;
+  if (pendingGuest) return pendingGuest;
+  pendingGuest = (async () => {
+    try {
+      const res = await raw.post<ApiResponse<{ tokens: Tokens }>>("/auth/login", {
+        username: GUEST_USERNAME,
+        password: GUEST_PASSWORD,
+        role: "client",
+      });
+      const data = res.data as ApiResponse<{ tokens: Tokens }> | undefined;
+      if (data && typeof data === "object" && (data as { ok?: boolean }).ok) {
+        const tokens = (data as { ok: true; data: { tokens: Tokens } }).data.tokens;
+        await saveGuestTokens(tokens);
+        return tokens;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      pendingGuest = null;
+    }
+  })();
+  return pendingGuest;
+}
+
+// Ensures a guest token exists so the catalog is browsable without a real login.
+export async function ensureGuestSession(): Promise<boolean> {
+  if (!guestEnabled) return false;
+  const existing = await getGuestTokens();
+  if (existing?.access_token) return true;
+  const t = await tryGuestLogin();
+  return !!t;
+}
+
 raw.interceptors.request.use(async (config) => {
-  const tokens = await getTokens();
-  if (tokens?.access_token) {
+  let access = (await getTokens())?.access_token;
+  if (!access) access = (await getGuestTokens())?.access_token;
+  if (access) {
     config.headers = config.headers ?? {};
-    (config.headers as Record<string, string>).Authorization = `Bearer ${tokens.access_token}`;
+    (config.headers as Record<string, string>).Authorization = `Bearer ${access}`;
   }
   return config;
 });
@@ -137,6 +176,28 @@ function mapNonJsonError(status: number): ApiError {
   return new ApiError("service_unavailable", "service_unavailable", status);
 }
 
+async function retryWithToken<T>(
+  method: "get" | "post" | "put" | "patch" | "delete",
+  path: string,
+  body: unknown,
+  params: Record<string, unknown> | undefined,
+  token: string,
+): Promise<T> {
+  const retry = await raw.request<ApiResponse<T>>({
+    method,
+    url: path,
+    data: body,
+    params,
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const retryPayload = retry.data as ApiResponse<T> | string;
+  if (typeof retryPayload === "object" && retryPayload && "ok" in retryPayload) {
+    if (retryPayload.ok) return retryPayload.data;
+    throw new ApiError(retryPayload.error.code, retryPayload.error.message, retry.status);
+  }
+  throw mapNonJsonError(retry.status);
+}
+
 async function call<T>(
   method: "get" | "post" | "put" | "patch" | "delete",
   path: string,
@@ -165,23 +226,20 @@ async function call<T>(
 
   // Token refresh on 401 (except for auth endpoints themselves).
   if (status === 401 && !path.includes("/auth/")) {
-    const refreshed = await tryRefresh();
-    if (refreshed) {
-      const retry = await raw.request<ApiResponse<T>>({
-        method,
-        url: path,
-        data: body,
-        params,
-        headers: { Authorization: `Bearer ${refreshed.access_token}` },
-      });
-      const retryPayload = retry.data as ApiResponse<T> | string;
-      if (typeof retryPayload === "object" && retryPayload && "ok" in retryPayload) {
-        if (retryPayload.ok) return retryPayload.data;
-        throw new ApiError(retryPayload.error.code, retryPayload.error.message, retry.status);
+    const real = await getTokens();
+    if (real?.refresh_token) {
+      const refreshed = await tryRefresh();
+      if (refreshed) {
+        return await retryWithToken<T>(method, path, body, params, refreshed.access_token);
       }
-      throw mapNonJsonError(retry.status);
+      await clearTokens();
+    } else {
+      // No real session: guest token missing or expired — re-acquire and retry once.
+      const g = await tryGuestLogin();
+      if (g) {
+        return await retryWithToken<T>(method, path, body, params, g.access_token);
+      }
     }
-    await clearTokens();
   }
 
   // Proper JSON envelope from the API.

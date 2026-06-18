@@ -5,6 +5,7 @@ import type { Profile, Role, Tokens } from "@/api/types";
 
 const TOKEN_KEY = "src_tokens_v1";
 const PROFILE_KEY = "src_profile_v1";
+const GUEST_TOKEN_KEY = "src_guest_tokens_v1";
 
 const isWeb = Platform.OS === "web";
 
@@ -48,6 +49,22 @@ export async function clearTokens() {
   await delItem(TOKEN_KEY);
   await delItem(PROFILE_KEY);
   emitAuthReset();
+}
+
+export async function saveGuestTokens(tokens: Tokens) {
+  await setItem(GUEST_TOKEN_KEY, JSON.stringify(tokens));
+}
+export async function getGuestTokens(): Promise<Tokens | null> {
+  const raw = await getItem(GUEST_TOKEN_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as Tokens;
+  } catch {
+    return null;
+  }
+}
+export async function clearGuestTokens() {
+  await delItem(GUEST_TOKEN_KEY);
 }
 
 export async function saveProfile(role: Role, profile: Profile) {

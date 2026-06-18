@@ -15,8 +15,9 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { api, ApiError } from "@/api/client";
+import { useAuth } from "@/auth/AuthContext";
 import type { Car, Insurance } from "@/api/types";
-import { colors } from "@/theme/colors";
+import { colors, radius } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
 
@@ -49,9 +50,136 @@ function fmt(d: Date) {
   });
 }
 
+function LoginRequired() {
+  const { loginClient, registerClient } = useAuth();
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if (!phone.trim() || !password.trim()) {
+      Alert.alert(t("login.errors.empty"));
+      return;
+    }
+    if (mode === "register") {
+      if (!name.trim()) {
+        Alert.alert(t("register.errors.required"));
+        return;
+      }
+      if (password.length < 6) {
+        Alert.alert(t("register.errors.passwordShort"));
+        return;
+      }
+      if (password !== confirm) {
+        Alert.alert(t("register.errors.passwordMismatch"));
+        return;
+      }
+    }
+    setLoading(true);
+    try {
+      if (mode === "login") {
+        await loginClient(phone.trim(), password);
+      } else {
+        await registerClient({
+          name: name.trim(),
+          lastname: lastname.trim() || undefined,
+          phone: phone.trim(),
+          email: email.trim() || undefined,
+          password,
+        });
+      }
+    } catch (e) {
+      Alert.alert(e instanceof ApiError ? e.message : t("login.errors.invalid"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <Text style={styles.authTitle}>{t("login.requiredTitle")}</Text>
+      <Text style={styles.authSub}>{t("login.requiredSubtitle")}</Text>
+
+      <View style={styles.authToggle}>
+        <Pressable
+          onPress={() => setMode("login")}
+          style={[styles.authTab, mode === "login" && styles.authTabActive]}
+        >
+          <Text style={[styles.authTabText, mode === "login" && styles.authTabTextActive]}>
+            {t("login.goToLogin")}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setMode("register")}
+          style={[styles.authTab, mode === "register" && styles.authTabActive]}
+        >
+          <Text style={[styles.authTabText, mode === "register" && styles.authTabTextActive]}>
+            {t("login.createAccount")}
+          </Text>
+        </Pressable>
+      </View>
+
+      {mode === "register" ? (
+        <View style={{ flexDirection: "row" }}>
+          <View style={{ flex: 1, marginRight: 8 }}>
+            <Input label={t("register.name")} value={name} onChangeText={setName} autoCapitalize="words" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Input label={t("register.lastname")} value={lastname} onChangeText={setLastname} autoCapitalize="words" />
+          </View>
+        </View>
+      ) : null}
+      <Input
+        label={t("login.client.phone")}
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        autoCapitalize="none"
+        placeholder="809-000-0000"
+      />
+      {mode === "register" ? (
+        <Input
+          label={t("register.email")}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      ) : null}
+      <Input
+        label={t("login.client.password")}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        placeholder="••••••••"
+      />
+      {mode === "register" ? (
+        <Input
+          label={t("register.passwordConfirm")}
+          value={confirm}
+          onChangeText={setConfirm}
+          secureTextEntry
+        />
+      ) : null}
+      <Button
+        title={mode === "login" ? t("login.client.submit") : t("register.submit")}
+        onPress={submit}
+        loading={loading}
+      />
+    </Card>
+  );
+}
+
 export default function BookCar() {
   const params = useLocalSearchParams<{ carId: string; start?: string; end?: string }>();
   const router = useRouter();
+  const { role } = useAuth();
+  const needsLogin = role !== "client";
 
   const [car, setCar] = useState<Car | null>(null);
   const [start, setStart] = useState<Date>(parseDbDate(params.start) ?? defaultStart());
@@ -174,6 +302,19 @@ export default function BookCar() {
       setLoading(false);
     }
   };
+
+  if (needsLogin) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <Stack.Screen options={{ headerShown: true, title: t("booking.title") }} />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
+            <LoginRequired />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -478,4 +619,17 @@ const styles = StyleSheet.create({
   k: { color: colors.textMuted, fontSize: 13 },
   v: { color: colors.text, fontSize: 14 },
   hint: { color: colors.textMuted, fontSize: 12, marginTop: 10, textAlign: "center", fontStyle: "italic" },
+  authTitle: { fontSize: 18, fontWeight: "700", color: colors.text, textAlign: "center", marginTop: 4 },
+  authSub: { fontSize: 13, color: colors.textMuted, textAlign: "center", marginTop: 6, marginBottom: 16, lineHeight: 18 },
+  authToggle: {
+    flexDirection: "row",
+    backgroundColor: colors.border,
+    borderRadius: radius.md,
+    padding: 3,
+    marginBottom: 16,
+  },
+  authTab: { flex: 1, paddingVertical: 10, alignItems: "center", borderRadius: radius.sm },
+  authTabActive: { backgroundColor: "#fff" },
+  authTabText: { fontSize: 13, color: colors.textMuted, fontWeight: "600" },
+  authTabTextActive: { color: colors.text, fontWeight: "700" },
 });
