@@ -1,40 +1,42 @@
 import React from "react";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { Tabs } from "expo-router";
-import { Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { colors } from "@/theme/colors";
+import { Ionicons } from "@expo/vector-icons";
+import { colors, font } from "@/theme/colors";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
 
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
+function Icon({
+  name,
+  focused,
+}: {
+  name: keyof typeof Ionicons.glyphMap;
+  focused: boolean;
+}) {
   return (
-    <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>{label}</Text>
+    <View style={styles.tabItem}>
+      <Ionicons
+        name={name}
+        size={24}
+        color={focused ? colors.primaryDark : colors.textMuted}
+      />
+    </View>
   );
 }
 
 function InboxIcon({ focused }: { focused: boolean }) {
   const { unread } = useNotificationsCtx();
   return (
-    <View>
-      <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🔔</Text>
+    <View style={styles.tabItem}>
+      <Ionicons
+        name={focused ? "notifications" : "notifications-outline"}
+        size={24}
+        color={focused ? colors.primaryDark : colors.textMuted}
+      />
       {unread > 0 && (
-        <View
-          style={{
-            position: "absolute",
-            top: -4,
-            right: -10,
-            minWidth: 16,
-            height: 16,
-            borderRadius: 8,
-            backgroundColor: colors.danger,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 4,
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>
-            {unread > 9 ? "9+" : unread}
-          </Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{unread > 9 ? "9+" : unread}</Text>
         </View>
       )}
     </View>
@@ -44,47 +46,87 @@ function InboxIcon({ focused }: { focused: boolean }) {
 export default function ClientLayout() {
   return (
     <>
-    <StatusBar style="dark" />
-    <Tabs
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: "#1A1A1A",
-        tabBarActiveTintColor: colors.primaryDark,
-      }}
-    >
-      <Tabs.Screen
-        name="cars"
-        options={{
-          title: t("tabs.cars"),
-          tabBarIcon: ({ focused }) => <TabIcon label="🚗" focused={focused} />,
+      <StatusBar style="dark" />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarShowLabel: true,
+          tabBarLabelStyle: styles.tabLabel,
+          tabBarActiveTintColor: colors.primaryDark,
+          tabBarInactiveTintColor: colors.textMuted,
+          tabBarItemStyle: { paddingTop: 8 },
         }}
-      />
-      <Tabs.Screen
-        name="bookings"
-        options={{
-          title: t("tabs.bookings"),
-          tabBarIcon: ({ focused }) => <TabIcon label="📅" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: t("tabs.notifications"),
-          tabBarIcon: ({ focused }) => <InboxIcon focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: t("tabs.profile"),
-          tabBarIcon: ({ focused }) => <TabIcon label="👤" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen name="car/[id]" options={{ href: null }} />
-      <Tabs.Screen name="book/[carId]" options={{ href: null }} />
-      <Tabs.Screen name="booking/[id]" options={{ href: null }} />
-      <Tabs.Screen name="sign/[id]" options={{ href: null }} />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="cars"
+          options={{
+            title: t("tabs.cars"),
+            tabBarIcon: ({ focused }) => (
+              <Icon name={focused ? "car-sport" : "car-sport-outline"} focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="bookings"
+          options={{
+            title: t("tabs.bookings"),
+            tabBarIcon: ({ focused }) => (
+              <Icon name={focused ? "calendar" : "calendar-outline"} focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="notifications"
+          options={{
+            title: t("tabs.notifications"),
+            tabBarIcon: ({ focused }) => <InboxIcon focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: t("tabs.profile"),
+            tabBarIcon: ({ focused }) => (
+              <Icon name={focused ? "person" : "person-outline"} focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen name="car/[id]" options={{ href: null }} />
+        <Tabs.Screen name="book/[carId]" options={{ href: null }} />
+        <Tabs.Screen name="booking/[id]" options={{ href: null }} />
+        <Tabs.Screen name="sign/[id]" options={{ href: null }} />
+      </Tabs>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    height: Platform.OS === "web" ? 84 : 88,
+    paddingBottom: Platform.OS === "web" ? 34 : 28,
+    paddingTop: 6,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  tabLabel: { fontFamily: font.semibold, fontSize: 11, marginTop: 2 },
+  tabItem: { alignItems: "center", justifyContent: "center", width: 48, height: 30 },
+  badge: {
+    position: "absolute",
+    top: -5,
+    right: 4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.danger,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: colors.card,
+  },
+  badgeText: { color: "#fff", fontSize: 9, fontFamily: font.bold },
+});

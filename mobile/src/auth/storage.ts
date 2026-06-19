@@ -28,21 +28,16 @@ export async function saveTokens(tokens: Tokens) {
 export async function getTokens(): Promise<Tokens | null> {
   const raw = await getItem(TOKEN_KEY);
   if (!raw) return null;
-  try {
-    return JSON.parse(raw) as Tokens;
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(raw) as Tokens; } catch { return null; }
 }
+
 const authResetListeners = new Set<() => void>();
 export function onAuthReset(cb: () => void): () => void {
   authResetListeners.add(cb);
   return () => authResetListeners.delete(cb);
 }
 function emitAuthReset() {
-  authResetListeners.forEach((cb) => {
-    try { cb(); } catch { /* ignore */ }
-  });
+  authResetListeners.forEach((cb) => { try { cb(); } catch { } });
 }
 
 export async function clearTokens() {
@@ -57,11 +52,7 @@ export async function saveGuestTokens(tokens: Tokens) {
 export async function getGuestTokens(): Promise<Tokens | null> {
   const raw = await getItem(GUEST_TOKEN_KEY);
   if (!raw) return null;
-  try {
-    return JSON.parse(raw) as Tokens;
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(raw) as Tokens; } catch { return null; }
 }
 export async function clearGuestTokens() {
   await delItem(GUEST_TOKEN_KEY);
@@ -73,9 +64,5 @@ export async function saveProfile(role: Role, profile: Profile) {
 export async function getProfile(): Promise<{ role: Role; profile: Profile } | null> {
   const raw = await AsyncStorage.getItem(PROFILE_KEY);
   if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(raw); } catch { return null; }
 }

@@ -16,6 +16,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/auth/AuthContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
+import { colors } from "@/theme/colors";
 import AnimatedSplash from "@/components/AnimatedSplash";
 import "@/i18n";
 
@@ -51,7 +52,7 @@ function Gate() {
   }, [bootstrapped, role, segments, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#FFFFFF" } }} />
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
   );
 }
 
@@ -59,12 +60,7 @@ function SplashOverlay() {
   const { bootstrapped } = useAuth();
   const [done, setDone] = useState(false);
   if (done) return null;
-  return (
-    <>
-      <StatusBar style="light" />
-      <AnimatedSplash appReady={bootstrapped} onFinish={() => setDone(true)} />
-    </>
-  );
+  return <AnimatedSplash appReady={bootstrapped} onFinish={() => setDone(true)} />;
 }
 
 function UpdatesWatcher() {
@@ -109,7 +105,7 @@ export default function RootLayout() {
         <AuthProvider>
           <NotificationsProvider>
             <UpdatesWatcher />
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
             <Gate />
             <SplashOverlay />
           </NotificationsProvider>

@@ -44,9 +44,10 @@
     },
     "noAccount": "No account yet?",
     "createAccount": "Create account",
-    "goToLogin": "Sign in",
     "requiredTitle": "Sign in to continue",
-    "requiredSubtitle": "Create an account or sign in to make a booking."
+    "requiredSubtitle": "Create an account or sign in to make a booking.",
+    "goToLogin": "Sign in",
+    "goToRegister": "Create account"
   },
   "register": {
     "title": "Create account",
@@ -169,10 +170,14 @@
   },
   "payment": {
     "title": "Register payment",
+    "register": "Register payment",
     "amount": "Amount",
     "method": "Payment method",
+    "note": "Note",
     "submit": "Save payment",
-    "saved": "Payment registered"
+    "save": "Save payment",
+    "saved": "Payment registered",
+    "invalidAmount": "Enter a valid amount"
   },
   "profile": {
     "title": "Profile",

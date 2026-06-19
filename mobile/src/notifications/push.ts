@@ -26,6 +26,8 @@ export async function ensureAndroidChannel() {
 
 export async function registerForPush(): Promise<string | null> {
   if (!Device.isDevice) return null;
+  // Remote push tokens removed from Expo Go in SDK 53 (all platforms)
+  if (Constants.appOwnership === "expo") return null;
   await ensureAndroidChannel();
   const { status: existing } = await Notifications.getPermissionsAsync();
   let final = existing;
@@ -54,7 +56,7 @@ export async function registerTokenWithServer(token: string) {
       device_info: `${Device.modelName ?? "device"} ${Device.osName ?? ""} ${Device.osVersion ?? ""}`.trim(),
     });
   } catch {
-    /* swallow — retried on next launch */
+    /* swallow */
   }
 }
 

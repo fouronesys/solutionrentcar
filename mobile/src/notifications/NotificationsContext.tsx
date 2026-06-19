@@ -42,8 +42,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       tokenRef.current = token;
       await registerTokenWithServer(token);
 
-      // Handle a notification tapped while the app was fully terminated:
-      // the tap that launched the app is available here exactly once.
       const last = await Notifications.getLastNotificationResponseAsync();
       if (last && mounted) {
         const data = last.notification.request.content.data as Record<string, unknown> | undefined;
@@ -51,9 +49,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       }
     })();
 
-    const recv = Notifications.addNotificationReceivedListener(() => {
-      refreshUnread();
-    });
+    const recv = Notifications.addNotificationReceivedListener(() => { refreshUnread(); });
     const tap = Notifications.addNotificationResponseReceivedListener((resp) => {
       const data = resp.notification.request.content.data as Record<string, unknown> | undefined;
       handleTap(data, role);
@@ -61,7 +57,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     });
 
     const interval = setInterval(refreshUnread, 60_000);
-
     if (Platform.OS === "ios") Notifications.setBadgeCountAsync(0).catch(() => {});
 
     return () => {

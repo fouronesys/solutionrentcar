@@ -1,37 +1,62 @@
 import React from "react";
 import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
-import { colors, radius } from "@/theme/colors";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { colors, radius, shadow } from "@/theme/colors";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function Card({
   children,
   onPress,
   style,
+  variant = "default",
+  padding = 16,
+  elevation = "md",
 }: {
   children: React.ReactNode;
   onPress?: () => void;
   style?: ViewStyle;
+  variant?: "default" | "dark" | "flat";
+  padding?: number;
+  elevation?: "xs" | "sm" | "md" | "lg" | "none";
 }) {
-  const content = <View style={[styles.card, style]}>{children}</View>;
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  const bg =
+    variant === "dark" ? colors.darkCard :
+    variant === "flat" ? colors.borderLight :
+    colors.card;
+
+  const shadowStyle = elevation === "none" ? null : shadow[elevation];
+
+  const base: ViewStyle[] = [
+    styles.card,
+    { backgroundColor: bg, padding },
+    variant === "flat" ? styles.flatBorder : null,
+    shadowStyle,
+    style,
+  ].filter(Boolean) as ViewStyle[];
+
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
-        {content}
-      </Pressable>
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withTiming(0.985, { duration: 90 }); }}
+        onPressOut={() => { scale.value = withTiming(1, { duration: 140 }); }}
+        style={[animStyle, ...base]}
+      >
+        {children}
+      </AnimatedPressable>
     );
   }
-  return content;
+  return <View style={base}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.card,
     borderRadius: radius.lg,
-    padding: 14,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
+  flatBorder: { borderWidth: 1, borderColor: colors.border },
 });

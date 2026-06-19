@@ -1,13 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, ensureGuestSession } from "@/api/client";
-import {
-  clearTokens,
-  getProfile,
-  getTokens,
-  onAuthReset,
-  saveProfile,
-  saveTokens,
-} from "@/auth/storage";
+import { clearTokens, getProfile, getTokens, onAuthReset, saveProfile, saveTokens } from "@/auth/storage";
 import type { Profile, Role, Tokens } from "@/api/types";
 
 type LoginResult = { role: Role; user: Profile; tokens: Tokens };
@@ -39,25 +32,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      try {
-        const tokens = await getTokens();
-        const stored = await getProfile();
-        if (tokens && stored) {
-          setRole(stored.role);
-          setUserState(stored.profile);
-        } else {
-          // No real session — establish a guest token so the catalog is browsable.
-          await ensureGuestSession();
-        }
-      } finally {
-        setBootstrapped(true);
+      const tokens = await getTokens();
+      const stored = await getProfile();
+      if (tokens && stored) {
+        setRole(stored.role);
+        setUserState(stored.profile);
+      } else {
+        // No real session — establish a guest token so the catalog is browsable.
+        await ensureGuestSession();
       }
+      setBootstrapped(true);
     })();
   }, []);
 
   useEffect(() => {
-    // When the API layer wipes tokens (e.g. refresh failure), drop in-memory
-    // auth so the route gate immediately bounces the user back to "/".
     return onAuthReset(() => {
       setRole(null);
       setUserState(null);
@@ -71,36 +59,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUserState(res.user);
   }, []);
 
-  const loginStaff = useCallback(
-    async (username: string, password: string) => {
-      const res = await api.post<LoginResult>("/auth/login", { username, password, role: "staff" });
-      await finalize(res);
-    },
-    [finalize],
-  );
+  const loginStaff = useCallback(async (username: string, password: string) => {
+    const res = await api.post<LoginResult>("/auth/login", { username, password, role: "staff" });
+    await finalize(res);
+  }, [finalize]);
 
-  const loginClient = useCallback(
-    async (phone: string, password: string) => {
-      const res = await api.post<LoginResult>("/auth/login", { username: phone, password, role: "client" });
-      await finalize(res);
-    },
-    [finalize],
-  );
+  const loginClient = useCallback(async (phone: string, password: string) => {
+    const res = await api.post<LoginResult>("/auth/login", { username: phone, password, role: "client" });
+    await finalize(res);
+  }, [finalize]);
 
-  const registerClient = useCallback(
-    async (data: { name: string; lastname?: string; phone: string; email?: string; password: string }) => {
-      const res = await api.post<LoginResult>("/auth/register", data);
-      await finalize(res);
-    },
-    [finalize],
-  );
+  const registerClient = useCallback(async (data: { name: string; lastname?: string; phone: string; email?: string; password: string }) => {
+    const res = await api.post<LoginResult>("/auth/register", data);
+    await finalize(res);
+  }, [finalize]);
 
   const logout = useCallback(async () => {
-    try {
-      await api.post("/auth/logout", {});
-    } catch {
-      /* ignore */
-    }
+    try { await api.post("/auth/logout", {}); } catch { }
     await clearTokens();
     setRole(null);
     setUserState(null);
@@ -114,9 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setRole(res.role);
       setUserState(res.user);
       await saveProfile(res.role, res.user);
-    } catch {
-      /* ignore */
-    }
+    } catch { }
   }, []);
 
   const setUser = useCallback((p: Profile) => {

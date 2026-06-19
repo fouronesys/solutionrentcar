@@ -1,16 +1,80 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Card } from "@/components/Card";
-import { Loading } from "@/components/Loading";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { EmptyState } from "@/components/EmptyState";
-import { Badge } from "@/components/Badge";
-import { Input } from "@/components/Input";
+import { ListSkeleton } from "@/components/Skeleton";
 import { api, ApiError } from "@/api/client";
 import type { Booking } from "@/api/types";
-import { bookingStatus, colors } from "@/theme/colors";
+import { bookingStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { money, shortDate } from "@/utils/format";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+type StatusFilter = number | "";
+const STATUS_FILTERS: { v: StatusFilter; label: string; labelEs: string }[] = [
+  { v: "", label: "All", labelEs: "Todas" },
+  { v: 0, label: "Pending", labelEs: "Pendiente" },
+  { v: 1, label: "Confirmed", labelEs: "Confirmada" },
+  { v: 3, label: "Delivered", labelEs: "Entregada" },
+  { v: 4, label: "Returned", labelEs: "Devuelta" },
+  { v: 2, label: "Cancelled", labelEs: "Cancelada" },
+];
+
+function BookingRow({ booking, onPress }: { booking: Booking; onPress: () => void }) {
+  const s = bookingStatus[Number(booking.status ?? 0)];
+  const locale = i18n.locale === "en" ? "en" : "es";
+  const total = Number(booking.total ?? 0);
+  const paid = Number(booking.payment ?? 0);
+  const balance = Math.max(0, total - paid);
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withTiming(0.985, { duration: 90 }); }}
+      onPressOut={() => { scale.value = withTiming(1, { duration: 140 }); }}
+      style={[animStyle, styles.row]}
+    >
+      <View style={styles.rowLeft}>
+        <View style={styles.rowTop}>
+          <Text style={styles.rowCode}>#{booking.code ?? booking.id}</Text>
+          {s ? (
+            <View style={[styles.rowStatus, { backgroundColor: s.bg }]}>
+              <View style={[styles.rowStatusDot, { backgroundColor: s.color }]} />
+              <Text style={[styles.rowStatusText, { color: s.color }]}>{s[locale]}</Text>
+            </View>
+          ) : null}
+        </View>
+        <View style={styles.rowDatesRow}>
+          <Ionicons name="calendar-outline" size={13} color={colors.textMuted} />
+          <Text style={styles.rowDates}>{shortDate(booking.start_at)} → {shortDate(booking.end_at)}</Text>
+        </View>
+        <View style={styles.rowBottom}>
+          <Text style={styles.rowTotal}>{money(total)}</Text>
+          {balance > 0 ? (
+            <View style={styles.balancePill}>
+              <Text style={styles.balanceText}>
+                {locale === "en" ? "owes" : "debe"} {money(balance)}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.paidPill}>
+              <Ionicons name="checkmark-circle" size={13} color={colors.success} />
+              <Text style={styles.paidText}>{locale === "en" ? "Paid" : "Pagado"}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={colors.textFaint} />
+    </AnimatedPressable>
+  );
+}
 
 export default function StaffBookingsList() {
   const router = useRouter();
@@ -19,9 +83,8 @@ export default function StaffBookingsList() {
   const [refreshing, setRefreshing] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [q, setQ] = useState("");
-  const [status, setStatus] = useState<number | "">("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("");
+  const locale = i18n.locale === "en" ? "en" : "es";
 
   const load = useCallback(async () => {
     setErr(null);
@@ -29,8 +92,6 @@ export default function StaffBookingsList() {
       const r = await api.get<{ bookings: Booking[] }>("/bookings", {
         q: q || undefined,
         status: status === "" ? undefined : status,
-        from: from || undefined,
-        to: to || undefined,
         limit: 100,
       });
       setItems(r.bookings ?? []);
@@ -40,113 +101,224 @@ export default function StaffBookingsList() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [q, status, from, to]);
+  }, [q, status]);
 
   useEffect(() => { load(); }, [load]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  if (loading) return <Loading />;
+  const renderHeader = () => (
+    <View>
+      {/* Hero */}
+      <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+        <View style={styles.heroBrandRow}>
+          <View style={styles.heroLogo}>
+            <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
+          </View>
+          <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+        </View>
+        <Text style={styles.heroTitle}>{t("booking.myBookings")}</Text>
 
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={{ padding: 12, paddingBottom: 0 }}>
-        <Input
-          placeholder={t("common.search")}
-          value={q}
-          onChangeText={setQ}
-          autoCapitalize="none"
-          returnKeyType="search"
-          onSubmitEditing={() => load()}
-        />
-        <View style={{ flexDirection: "row" }}>
-          <View style={{ flex: 1, marginRight: 6 }}>
-            <Input
-              placeholder={`${t("common.from")} (YYYY-MM-DD)`}
-              value={from}
-              onChangeText={setFrom}
-              autoCapitalize="none"
-              returnKeyType="done"
-              onSubmitEditing={() => load()}
-            />
-          </View>
-          <View style={{ flex: 1, marginLeft: 6 }}>
-            <Input
-              placeholder={`${t("common.to")} (YYYY-MM-DD)`}
-              value={to}
-              onChangeText={setTo}
-              autoCapitalize="none"
-              returnKeyType="done"
-              onSubmitEditing={() => load()}
-            />
-          </View>
+        {/* Search */}
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            placeholder={`${t("common.search")}…`}
+            placeholderTextColor={colors.textMuted}
+            value={q}
+            onChangeText={setQ}
+            autoCapitalize="none"
+            returnKeyType="search"
+            onSubmitEditing={() => load()}
+            style={styles.searchInput}
+          />
+          {q ? (
+            <Pressable onPress={() => { setQ(""); load(); }} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
         </View>
-        <View style={styles.filters}>
-          {[
-            { v: "", label: "Todas" },
-            { v: 0, label: i18n.locale === "en" ? "Pending" : "Pendiente" },
-            { v: 1, label: i18n.locale === "en" ? "Confirmed" : "Confirmada" },
-            { v: 3, label: i18n.locale === "en" ? "Delivered" : "Entregada" },
-            { v: 4, label: i18n.locale === "en" ? "Returned" : "Devuelta" },
-            { v: 2, label: i18n.locale === "en" ? "Cancelled" : "Cancelada" },
-          ].map((f) => (
-            <Text
-              key={String(f.v)}
-              onPress={() => setStatus(f.v as number | "")}
-              style={[styles.chip, status === f.v && styles.chipActive]}
-            >
-              {f.label}
-            </Text>
-          ))}
-        </View>
-      </View>
-      {err ? <Text style={styles.err}>{err}</Text> : null}
+      </LinearGradient>
+
+      {/* Status filters */}
       <FlatList
-        contentContainerStyle={{ padding: 12 }}
-        data={items}
-        keyExtractor={(b) => String(b.id)}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />
-        }
-        ListEmptyComponent={<EmptyState title={t("booking.noneStaff")} />}
-        renderItem={({ item }) => {
-          const s = bookingStatus[Number(item.status ?? 0)];
+        horizontal
+        data={STATUS_FILTERS}
+        keyExtractor={(f) => String(f.v)}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filtersRow}
+        style={styles.filters}
+        renderItem={({ item: f }) => {
+          const active = status === f.v;
           return (
-            <Card onPress={() => router.push({ pathname: "/(staff)/booking/[id]", params: { id: String(item.id) } })}>
-              <View style={styles.row}>
-                <Text style={styles.title}>#{item.code ?? item.id}</Text>
-                {s ? <Badge label={s[i18n.locale === "en" ? "en" : "es"]} color={s.color} /> : null}
-              </View>
-              <Text style={styles.meta}>
-                {shortDate(item.start_at)} → {shortDate(item.end_at)}
+            <Pressable
+              onPress={() => setStatus(f.v)}
+              style={[styles.filterChip, active && styles.filterChipActive]}
+            >
+              <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
+                {locale === "en" ? f.label : f.labelEs}
               </Text>
-              <Text style={styles.total}>{money(item.total)}</Text>
-            </Card>
+            </Pressable>
           );
         }}
       />
+
+      {err ? (
+        <View style={styles.errBox}>
+          <Ionicons name="warning-outline" size={16} color={colors.danger} />
+          <Text style={styles.errText}>{err}</Text>
+        </View>
+      ) : null}
+
+      {!loading ? (
+        <View style={styles.countRow}>
+          <Text style={styles.countLabel}>
+            {items.length} {locale === "en" ? "bookings" : "reservas"}
+          </Text>
+        </View>
+      ) : null}
     </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.screen} edges={["top"]}>
+      <FlatList
+        contentContainerStyle={styles.list}
+        data={loading ? [] : items}
+        keyExtractor={(b) => String(b.id)}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={renderHeader}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.primaryDark} />
+        }
+        ListEmptyComponent={
+          loading ? (
+            <ListSkeleton count={4} />
+          ) : (
+            <EmptyState title={t("booking.noneStaff")} icon="bookings" />
+          )
+        }
+        renderItem={({ item }) => (
+          <BookingRow
+            booking={item}
+            onPress={() => router.push({ pathname: "/(staff)/booking/[id]", params: { id: String(item.id) } })}
+          />
+        )}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  filters: { flexDirection: "row", flexWrap: "wrap", marginTop: 4, marginBottom: 8 },
-  chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.textMuted,
-    marginRight: 6,
-    marginBottom: 6,
-    fontSize: 12,
+  screen: { flex: 1, backgroundColor: colors.bg },
+  list: { paddingBottom: 28 },
+
+  hero: {
+    paddingTop: 24,
+    paddingBottom: 22,
+    paddingHorizontal: spacing.xl,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+  },
+  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
+  heroLogo: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    backgroundColor: colors.card,
+    alignItems: "center",
+    justifyContent: "center",
     overflow: "hidden",
   },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary, color: "#1A1A1A" },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  title: { fontSize: 15, fontWeight: "700", color: colors.text, flexShrink: 1, marginRight: 8 },
-  meta: { color: colors.textMuted, fontSize: 13, marginTop: 4 },
-  total: { color: colors.primaryDark, fontWeight: "700", fontSize: 16, marginTop: 6 },
-  err: { color: colors.danger, padding: 12, textAlign: "center" },
+  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
+  heroTitle: { ...type.display, color: "#FFFFFF" },
+
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    marginTop: 18,
+    height: 50,
+    ...shadow.md,
+  },
+  searchInput: { ...type.bodyMed, color: colors.text, height: 50, flex: 1 },
+
+  filters: { maxHeight: 60 },
+  filtersRow: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md, gap: 8 },
+  filterChip: {
+    paddingHorizontal: 16,
+    height: 36,
+    justifyContent: "center",
+    borderRadius: radius.full,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadow.xs,
+  },
+  filterChipActive: { backgroundColor: colors.dark, borderColor: colors.dark },
+  filterChipText: { ...type.captionMed, color: colors.textSecondary },
+  filterChipTextActive: { color: "#fff", fontFamily: font.semibold },
+
+  errBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: spacing.lg,
+    marginTop: 4,
+    padding: 14,
+    backgroundColor: colors.dangerBg,
+    borderRadius: radius.md,
+  },
+  errText: { ...type.caption, color: colors.danger, flex: 1 },
+
+  countRow: { paddingHorizontal: spacing.lg, paddingBottom: 2 },
+  countLabel: { ...type.label, color: colors.textMuted },
+
+  row: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.lg,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    ...shadow.md,
+  },
+  rowLeft: { flex: 1 },
+  rowTop: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
+  rowCode: { ...type.h3, color: colors.text },
+  rowStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  rowStatusDot: { width: 6, height: 6, borderRadius: 3 },
+  rowStatusText: { ...type.small, fontFamily: font.semibold },
+  rowDatesRow: { flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 10 },
+  rowDates: { ...type.caption, color: colors.textMuted },
+  rowBottom: { flexDirection: "row", alignItems: "center", gap: 10 },
+  rowTotal: { ...type.h3, color: colors.text },
+  balancePill: {
+    backgroundColor: colors.dangerBg,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  balanceText: { ...type.small, color: colors.danger, fontFamily: font.semibold },
+  paidPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.successBg,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  paidText: { ...type.small, color: colors.success, fontFamily: font.semibold },
 });

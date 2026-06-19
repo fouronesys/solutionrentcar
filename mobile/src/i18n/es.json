@@ -44,9 +44,10 @@
     },
     "noAccount": "¿No tienes cuenta?",
     "createAccount": "Crear cuenta",
-    "goToLogin": "Iniciar sesión",
     "requiredTitle": "Inicia sesión para continuar",
-    "requiredSubtitle": "Crea una cuenta o inicia sesión para hacer una reserva."
+    "requiredSubtitle": "Crea una cuenta o inicia sesión para hacer una reserva.",
+    "goToLogin": "Iniciar sesión",
+    "goToRegister": "Crear cuenta"
   },
   "register": {
     "title": "Crear cuenta",
@@ -169,10 +170,14 @@
   },
   "payment": {
     "title": "Registrar pago",
+    "register": "Registrar pago",
     "amount": "Monto",
     "method": "Método de pago",
+    "note": "Nota",
     "submit": "Guardar pago",
-    "saved": "Pago registrado"
+    "save": "Guardar pago",
+    "saved": "Pago registrado",
+    "invalidAmount": "Ingresa un monto válido"
   },
   "profile": {
     "title": "Perfil",
