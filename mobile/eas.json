@@ -15,6 +15,9 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1"
+      },
       "ios": {
         "simulator": false
       }
@@ -22,6 +25,9 @@
     "production": {
       "channel": "production",
       "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1"
+      },
       "ios": {
         "image": "latest"
       }
