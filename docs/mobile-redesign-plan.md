@@ -176,27 +176,51 @@ tokens y componentes, sin corregir cada pantalla manualmente.
 **Criterio de aceptación:** existe un mapa de pantallas y estados, sin rutas
 funcionales olvidadas.
 
-### Fase 1 — Kit de marca y superficies nativas
+### ~~Fase 1 — Kit de marca y superficies nativas~~
 
+**Estado: COMPLETADA — 8 de agosto de 2026**
 **Prioridad:** P0  
 **Resultado:** Yowell es reconocible incluso antes de iniciar sesión.
 
-- Preparar los cuatro assets de marca para Expo:
+~~- Preparar los cuatro assets de marca para Expo:
   - icono principal;
   - icono adaptativo Android;
   - icono iOS;
-  - splash.
-- Sustituir el nombre “Solutions Rent Car” por “Yowell Rent-Car” en splash,
-  configuraciones visibles y textos de marca.
-- Rediseñar `AnimatedSplash` usando azul, rojo, blanco y negro, con una
-  animación breve y elegante.
-- Actualizar `StatusBar`, fondos, iconografía y colores de notificaciones.
-- Definir una cabecera de marca reutilizable para las áreas cliente y staff.
-- Revisar el nombre de la app, descripción, favicon y textos de tienda para
-  que no queden referencias a la marca anterior.
+  - splash.~~
+~~- Sustituir el nombre “Solutions Rent Car” por “Yowell Rent-Car” en splash,
+  configuraciones visibles y textos de marca.~~
+~~- Rediseñar `AnimatedSplash` usando azul, rojo, blanco y negro, con una
+  animación breve y elegante.~~
+~~- Actualizar `StatusBar`, fondos, iconografía y colores de notificaciones.~~
+~~- Definir una cabecera de marca reutilizable para las áreas cliente y staff.~~
+~~- Revisar el nombre de la app, descripción, favicon y textos de tienda para
+  que no queden referencias a la marca anterior.~~
 
-**Criterio de aceptación:** al abrir la app, instalarla o verla en una
-notificación, la identidad visible es Yowell y el logo permanece legible.
+**Entregado:**
+
+- Assets Yowell limpios y documentados en `mobile/assets/branding/`.
+- Icono principal, icono iOS, icono adaptativo Android, favicon, logo de
+  interfaz y splash reemplazados.
+- Tema actualizado a azul Yowell, rojo de acento, negro y blanco; los botones
+  primarios y sombras ya no dependen del tema dorado anterior.
+- Splash animado, cabeceras, pantallas de acceso, catálogo, reservas, perfil,
+  notificaciones, firma y agenda actualizados a “YOWELL RENT-CAR”.
+- Nombre visible de Expo, canal de notificaciones, textos de tienda y README
+  actualizados.
+- Identificadores técnicos de Expo y del paquete preservados para no romper
+  instalaciones existentes, actualizaciones OTA ni configuración de tiendas.
+
+~~**Criterio de aceptación:** al abrir la app, instalarla o verla en una
+notificación, la identidad visible es Yowell y el logo permanece legible.~~
+
+**Validación realizada:**
+
+- Dimensiones verificadas: iconos 1024 × 1024, favicon 196 × 196 y splash
+  1284 × 2778.
+- Búsqueda de referencias antiguas completada en las pantallas y recursos
+  visibles de la app móvil.
+- `mobile/app.json` conserva el `slug`, `scheme`, bundle identifiers y API
+  existentes; solo cambia el nombre visible y los assets.
 
 ### Fase 2 — Acceso y primera impresión
 

@@ -1,12 +1,12 @@
 import { TextStyle } from "react-native";
 
 export const colors = {
-  primary: "#F5B301",
-  primaryDark: "#D99A00",
-  primaryDeep: "#B37E00",
-  primaryLight: "#FFD54A",
-  primaryXLight: "#FFFBEA",
-  accent: "#141414",
+  primary: "#1828E8",
+  primaryDark: "#111B9A",
+  primaryDeep: "#0B126A",
+  primaryLight: "#5D6BFF",
+  primaryXLight: "#EEF0FF",
+  accent: "#E51018",
 
   bg: "#F7F7F6",
   bgWarm: "#FFFDF5",
@@ -22,12 +22,12 @@ export const colors = {
 
   success: "#059669",
   successBg: "#ECFDF5",
-  warning: "#D99A00",
-  warningBg: "#FFFBEA",
+  warning: "#B7791F",
+  warningBg: "#FFF7E6",
   danger: "#DC2626",
   dangerBg: "#FEF2F2",
-  info: "#3F3F46",
-  infoBg: "#F4F4F5",
+  info: "#111B9A",
+  infoBg: "#EEF0FF",
 
   dark: "#141414",
   darkDeep: "#000000",
@@ -39,13 +39,13 @@ export const colors = {
 
 // Gradients (consumed by expo-linear-gradient as readonly tuples)
 export const gradients = {
-  hero: ["#000000", "#141414", "#262626"] as const,
-  heroSoft: ["#1C1C1C", "#000000"] as const,
-  gold: ["#FFD54A", "#F5B301", "#D99A00"] as const,
-  goldSoft: ["#FFCE3A", "#F5B301"] as const,
+  hero: ["#080B2D", "#111B9A", "#1828E8"] as const,
+  heroSoft: ["#0B0B0D", "#111B9A"] as const,
+  primary: ["#5D6BFF", "#1828E8", "#111B9A"] as const,
+  primarySoft: ["#6F7BFF", "#1828E8"] as const,
   imageScrim: ["transparent", "rgba(0,0,0,0.0)", "rgba(0,0,0,0.88)"] as const,
   cardScrim: ["transparent", "rgba(0,0,0,0.78)"] as const,
-  shimmer: ["#EDEDEA", "#F6F6F4", "#EDEDEA"] as const,
+  shimmer: ["#E7E9FF", "#F7F8FF", "#E7E9FF"] as const,
 };
 
 export const radius = { xs: 6, sm: 10, md: 14, lg: 18, xl: 24, xxl: 32, full: 9999 };
@@ -111,8 +111,8 @@ export const shadow = {
     shadowRadius: 28,
     elevation: 10,
   },
-  gold: {
-    shadowColor: "#F5B301",
+  primary: {
+    shadowColor: "#1828E8",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 14,

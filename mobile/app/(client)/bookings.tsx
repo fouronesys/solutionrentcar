@@ -32,7 +32,7 @@ function Hero({ count }: { count?: number }) {
         <View style={styles.heroLogo}>
           <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
         </View>
-        <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+        <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
       </View>
       <View style={styles.heroTitleRow}>
         <Text style={styles.heroTitle}>{t("booking.myBookings")}</Text>

@@ -52,7 +52,7 @@ export default function SignScreen() {
             <View style={styles.heroLogo}>
               <Image source={require("../../../assets/images/logo.png")} style={{ width: 30, height: 30 }} resizeMode="contain" />
             </View>
-            <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+            <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
           </View>
         </View>
         <Text style={styles.heroTitle}>{t("booking.signNow")}</Text>

@@ -184,7 +184,7 @@ export default function AnimatedSplash({
 
       <View style={styles.center}>
         <View style={styles.logoZone}>
-          {/* Soft gold halo */}
+          {/* Soft Yowell-blue halo */}
           <Animated.View style={[styles.glow, glowStyle]} />
           {/* Radar pulse rings */}
           <Animated.View style={[styles.pulseRing, ringStyle]} />
@@ -205,8 +205,8 @@ export default function AnimatedSplash({
         </View>
 
         <Animated.View style={[styles.wordWrap, wordStyle]}>
-          <Text style={styles.brand}>SOLUTION RENT CAR</Text>
-          <Text style={styles.tagline}>Alquiler de vehículos</Text>
+           <Text style={styles.brand}>YOWELL RENT-CAR</Text>
+           <Text style={styles.tagline}>Alquiler de vehículos</Text>
         </Animated.View>
 
         <View style={styles.barTrack}>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     width: BAR_TRACK_W,
     height: 3,
     borderRadius: 3,
-    backgroundColor: "rgba(245,179,1,0.14)",
+     backgroundColor: "rgba(24,40,232,0.22)",
     overflow: "hidden",
   },
   barFill: {

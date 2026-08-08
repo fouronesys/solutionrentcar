@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Solutions Rent Car",
+    "name": "Yowell Rent-Car",
     "slug": "solutions-rent-car",
     "scheme": "solutionsrentcar",
     "version": "1.2.0",
@@ -60,7 +60,7 @@
         "expo-notifications",
         {
           "icon": "./assets/adaptive-icon.png",
-          "color": "#F2A900"
+          "color": "#1828E8"
         }
       ],
       [

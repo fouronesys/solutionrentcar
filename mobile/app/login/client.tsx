@@ -70,8 +70,8 @@ export default function ClientLogin() {
             <View style={styles.logoChip}>
               <Image source={require("../../assets/images/logo.png")} style={{ width: 82, height: 82 }} resizeMode="contain" />
             </View>
-            <Text style={styles.brand}>SOLUTION</Text>
-            <Text style={styles.brandAccent}>Rent Car</Text>
+            <Text style={styles.brand}>YOWELL</Text>
+            <Text style={styles.brandAccent}>Rent-Car</Text>
           </View>
 
           {/* Card */}

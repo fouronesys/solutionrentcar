@@ -228,7 +228,7 @@ export default function CarsScreen() {
           <View style={styles.heroLogo}>
             <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
           </View>
-          <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+          <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
         </View>
         <Text style={styles.heroTitle}>{t("cars.title")}</Text>
         <Text style={styles.heroSub}>
@@ -338,7 +338,7 @@ export default function CarsScreen() {
             onPress={() => { setFiltered(true); setFilterOpen(false); load(); }}
           >
             <LinearGradient
-              colors={gradients.gold}
+              colors={gradients.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: radius.md,
     overflow: "hidden",
-    ...shadow.gold,
+    ...shadow.primary,
   },
   filterApplyText: { ...type.title, color: "#1A1100", fontFamily: font.bold },
 

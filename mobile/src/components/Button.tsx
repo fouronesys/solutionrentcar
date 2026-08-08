@@ -61,7 +61,7 @@ export function Button({
   const onIn = () => { scale.value = withTiming(0.97, { duration: 90 }); };
   const onOut = () => { scale.value = withTiming(1, { duration: 130 }); };
 
-  // Primary uses a gold gradient surface
+  // Primary uses the Yowell blue gradient surface
   if (variant === "primary") {
     return (
       <AnimatedPressable
@@ -73,12 +73,12 @@ export function Button({
           animStyle,
           styles.btn,
           { height: heights[size], opacity: isDisabled ? 0.55 : 1 },
-          !isDisabled ? shadow.gold : null,
+          !isDisabled ? shadow.primary : null,
           style,
         ]}
       >
         <LinearGradient
-          colors={gradients.gold}
+          colors={gradients.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}

@@ -70,8 +70,8 @@ export default function StaffLogin() {
             <View style={styles.logoChip}>
               <Image source={require("../../assets/images/logo.png")} style={{ width: 82, height: 82 }} resizeMode="contain" />
             </View>
-            <Text style={styles.brand}>SOLUTION</Text>
-            <Text style={styles.brandAccent}>Staff</Text>
+            <Text style={styles.brand}>YOWELL</Text>
+            <Text style={styles.brandAccent}>Equipo</Text>
             <View style={styles.staffPill}>
               <Ionicons name="briefcase-outline" size={13} color="rgba(255,255,255,0.7)" />
               <Text style={styles.brandSub}>{t("login.staff.title")}</Text>

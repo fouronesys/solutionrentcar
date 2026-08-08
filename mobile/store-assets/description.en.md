@@ -1,7 +1,7 @@
-# Solutions Rent Car — store description
+# Yowell Rent-Car — store description
 
 ## Name
-Solutions Rent Car
+Yowell Rent-Car
 
 ## Subtitle (App Store, 30 chars)
 Car rentals in your pocket
@@ -10,7 +10,7 @@ Car rentals in your pocket
 Book your car, pay and manage your rentals from one mobile app.
 
 ## Full description
-Solutions Rent Car is the official mobile app of our vehicle rental company.
+Yowell Rent-Car is the official mobile app of our vehicle rental company.
 Book in seconds, get notified as your booking moves through each step, register
 payments and keep your contact info up to date.
 

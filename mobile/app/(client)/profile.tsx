@@ -74,7 +74,7 @@ export default function ProfileScreen() {
             <View style={styles.heroLogo}>
               <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
             </View>
-            <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+            <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
           </View>
           <Text style={styles.heroTitle}>{t("profile.title")}</Text>
         </LinearGradient>
@@ -153,7 +153,7 @@ export default function ProfileScreen() {
               <View style={styles.heroLogo}>
                 <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
               </View>
-              <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+              <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
             </View>
             <View style={styles.avatarSection}>
               <View style={styles.avatar}>
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     width: 64, height: 64, borderRadius: 32,
     backgroundColor: colors.primary,
     alignItems: "center", justifyContent: "center",
-    ...shadow.gold,
+    ...shadow.primary,
   },
   avatarText: { ...type.h1, color: colors.dark, fontFamily: font.extrabold },
   avatarName: { ...type.h2, color: "#FFFFFF" },

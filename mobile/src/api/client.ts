@@ -21,7 +21,7 @@ const appVersion =
 const platformLabel =
   Platform.OS === "ios" ? "iOS" : Platform.OS === "android" ? "Android" : "Web";
 
-const userAgent = `SolutionsRentCar/${appVersion} (${platformLabel}; ${Platform.Version})`;
+const userAgent = `YowellRentCar/${appVersion} (${platformLabel}; ${Platform.Version})`;
 
 function deriveOrigin(base: string): string {
   try {

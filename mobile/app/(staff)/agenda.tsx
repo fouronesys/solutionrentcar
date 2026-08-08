@@ -110,7 +110,7 @@ export default function AgendaScreen() {
         <View style={styles.heroLogo}>
           <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
         </View>
-        <Text style={styles.heroBrandLabel}>SOLUTION RENT CAR</Text>
+        <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
       </View>
       <Text style={styles.heroTitle}>{t("agenda.title")}</Text>
       <Text style={styles.heroDate}>{today}</Text>

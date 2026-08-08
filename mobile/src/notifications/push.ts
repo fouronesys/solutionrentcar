@@ -8,6 +8,8 @@ import { api } from "@/api/client";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -16,10 +18,10 @@ Notifications.setNotificationHandler({
 export async function ensureAndroidChannel() {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
+      name: "Yowell Rent-Car",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#F2A900",
+      lightColor: "#1828E8",
     });
   }
 }

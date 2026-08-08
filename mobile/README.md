@@ -1,6 +1,6 @@
-# Solutions Rent Car — Mobile App (Expo, iOS + Android)
+# Yowell Rent-Car — Mobile App (Expo, iOS + Android)
 
-Single codebase Expo / React Native app for the Solutions Rent Car platform.
+Single codebase Expo / React Native app for the Yowell Rent-Car platform.
 Talks to the `/CF-SYSTEMS/api/v1/` REST API in this repo and routes the user
 into one of two flows based on the type of session returned by `/auth/login`:
 
@@ -17,7 +17,8 @@ Cross-cutting features:
 - In-app inbox with unread badge on the tab.
 - ES / EN i18n with system-language detection (override in Profile).
 - OTA updates via `expo-updates` (EAS Update).
-- Splash + adaptive icon generated from `assets/icon.png`.
+- Yowell splash, adaptive icon and branded assets generated from the supplied
+  logo in `assets/branding/`.
 
 ## 1. Install (locally on your dev machine)
 
