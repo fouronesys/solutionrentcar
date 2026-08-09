@@ -4,18 +4,23 @@ build:
     - eas/checkout
 
     - run:
-        name: Install dependencies
-        command: npm install --legacy-peer-deps
-
-    - run:
-        name: Expo prebuild (Android)
-        command: npx expo prebuild --no-install --platform android
-
-    - run:
-        name: Build APK
+        name: Install, prebuild y build APK
         command: |
+          set -e
+          echo "== Directorio actual =="
+          pwd
+          ls -la
+          if [ ! -f package.json ]; then
+            echo "package.json no está aquí; buscando..."
+            cd "$(dirname "$(find . -maxdepth 2 -name package.json -not -path '*/node_modules/*' | head -1)")"
+            pwd
+          fi
+          npm install --legacy-peer-deps
+          echo "== Prebuild Android =="
+          ./node_modules/.bin/expo prebuild --no-install --platform android
+          echo "== Gradle assembleDebug =="
+          cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -x lint -x lintDebug
-        working_directory: android
 
     - eas/find_and_upload_build_artifacts
