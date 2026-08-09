@@ -15,7 +15,7 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "config": ".eas/build/preview-android.yml",
+      "config": "preview-android.yml",
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1"
       },
