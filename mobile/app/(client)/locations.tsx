@@ -108,48 +108,59 @@ if (Platform.OS !== "web") {
   }
 }
 
-// ─── Web map: OpenStreetMap iframe ───────────────────────────────────────────
+// ─── Web map: Leaflet (canvas, no WebGL) via srcDoc ──────────────────────────
+
+function buildLeafletHTML(branches: Branch[], selected: Branch): string {
+  const markers = branches
+    .map(
+      (b) =>
+        `L.marker([${b.lat}, ${b.lng}], {
+          icon: L.divIcon({
+            className: '',
+            html: '<div style="width:28px;height:28px;background:${b.id === selected.id ? "#E8002D" : "#1828E8"};border-radius:50% 50% 50% 0;border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>',
+            iconSize: [28,28], iconAnchor: [14,28], popupAnchor: [0,-30]
+          })
+        }).addTo(map).bindPopup('<b>${b.name}</b><br/>${b.address}');`
+    )
+    .join("\n");
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+<style>
+  html,body,#map{margin:0;padding:0;width:100%;height:100%;background:#E8EFF5}
+  .leaflet-control-zoom{display:none}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([${selected.lat},${selected.lng}],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  ${markers}
+<\/script>
+</body>
+</html>`;
+}
 
 function WebMapView({ branches, selectedId }: { branches: Branch[]; selectedId: string | null }) {
   const selected = branches.find((b) => b.id === selectedId) ?? branches[0];
   if (!selected) return null;
 
-  const region = CITY_REGIONS[selected.city] ?? { lat: selected.lat, lng: selected.lng, zoom: 13 };
-
-  // Build iframe URL with OSM and markers
-  const markers = branches
-    .map((b) => `${b.lat},${b.lng}`)
-    .join("|");
-
-  // Use OpenStreetMap embed with bounding box centered on active branch
-  const delta = 0.02;
-  const bbox = [
-    region.lng - delta,
-    region.lat - delta,
-    region.lng + delta,
-    region.lat + delta,
-  ].join(",");
-  const markerStr = branches
-    .map((b) => `${b.lat}%2C${b.lng}`)
-    .join("~");
-
-  // Use Leaflet via a known CDN embed (works without API key)
-  const iframeSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${selected.lat}%2C${selected.lng}`;
+  const html = buildLeafletHTML(branches, selected);
 
   return (
     <View style={styles.webMapWrap}>
-      {/* @ts-ignore — iframe only available on web */}
+      {/* @ts-ignore — iframe + srcDoc only available on web */}
       <iframe
-        src={iframeSrc}
-        style={{
-          width: "100%",
-          height: "100%",
-          border: "none",
-          borderRadius: 16,
-        }}
+        srcDoc={html}
+        style={{ width: "100%", height: "100%", border: "none", borderRadius: 16 }}
         title="Mapa de sucursales"
-        loading="lazy"
-        referrerPolicy="no-referrer"
+        sandbox="allow-scripts"
       />
       <View style={styles.mapOverlay}>
         <View style={styles.mapBadge}>
