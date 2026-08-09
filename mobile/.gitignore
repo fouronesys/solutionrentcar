@@ -20,3 +20,6 @@ node_modules/
 
 expo-env.d.ts
 # @end expo-cli
+# Native dirs (managed workflow - generados por prebuild)
+android/
+ios/

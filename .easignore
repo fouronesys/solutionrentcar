@@ -1,0 +1,24 @@
+# Excluir todo lo que no es la app móvil del archivo de EAS Build
+CF-SYSTEMS/
+WEB/
+A4/
+core/
+artifacts/
+*.jpg
+*.jpeg
+*.png
+!mobile/assets/**
+*.sql
+*.zip
+*.tar.gz
+.local/
+.cache/
+.config/
+.aider*
+node_modules/
+mobile/node_modules/
+mobile/android/
+mobile/ios/
+mobile/.expo/
+docs/
+start.sh
