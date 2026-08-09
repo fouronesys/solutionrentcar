@@ -1,7 +1,9 @@
-const appJson = require("./app.json");
 const { withGradleProperties } = require("@expo/config-plugins");
 
-// Config plugin to increase JVM memory for Gradle (prevents OOM on CI with Reanimated 4 / CMake)
+/**
+ * Config plugin: aumenta la memoria JVM de Gradle para evitar OOM
+ * en builds con Reanimated 4 / CMake (tanto en CI como localmente).
+ */
 function withJvmArgs(config) {
   return withGradleProperties(config, (cfg) => {
     const props = cfg.modResults;
@@ -19,20 +21,4 @@ function withJvmArgs(config) {
   });
 }
 
-module.exports = () => {
-  const expo = appJson.expo;
-  const googleServicesFile =
-    process.env.GOOGLE_SERVICES_JSON || expo.android?.googleServicesFile || "./google-services.json";
-
-  let config = {
-    ...expo,
-    android: {
-      ...expo.android,
-      googleServicesFile,
-    },
-  };
-
-  config = withJvmArgs(config);
-
-  return config;
-};
+module.exports = withJvmArgs;
