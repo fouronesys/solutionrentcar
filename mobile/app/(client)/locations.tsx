@@ -1,14 +1,11 @@
 /**
- * Ubicaciones — locations / branches screen.
- * Mirrors the design from the Yowell reference screenshots:
- *   - White header with logo
- *   - "PUNTOS YOWELL" eyebrow + bold heading
- *   - Search bar
- *   - Placeholder map area
- *   - City filter pills (dark active)
- *   - Location cards with red icon, address, hours, directions CTA
+ * Ubicaciones — pantalla de sucursales con mapa real.
+ *
+ * Estrategia cross-platform:
+ *   • Native (iOS/Android): MapView de react-native-maps
+ *   • Web (Replit preview): iframe de OpenStreetMap/Leaflet (sin API key)
  */
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Linking,
   Platform,
@@ -22,9 +19,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import * as Location from "expo-location";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n } from "@/i18n";
+
+// ─── Branch data ────────────────────────────────────────────────────────────
 
 interface Branch {
   id: string;
@@ -33,8 +33,8 @@ interface Branch {
   address: string;
   hours: string;
   phone?: string;
-  lat?: number;
-  lng?: number;
+  lat: number;
+  lng: number;
   distanceKm?: number;
 }
 
@@ -45,8 +45,9 @@ const BRANCHES: Branch[] = [
     name: "Santo Domingo",
     address: "Av. Abraham Lincoln 1003",
     hours: "08:00 – 20:00",
-    phone: "+1 809-000-0000",
-    distanceKm: 1.8,
+    phone: "+1 849-564-4488",
+    lat: 18.4764,
+    lng: -69.9312,
   },
   {
     id: "sd-gazcue",
@@ -54,8 +55,9 @@ const BRANCHES: Branch[] = [
     name: "Santo Domingo – Gazcue",
     address: "Av. Independencia 456",
     hours: "08:00 – 20:00",
-    phone: "+1 809-000-0001",
-    distanceKm: 3.2,
+    phone: "+1 849-564-4488",
+    lat: 18.4721,
+    lng: -69.9019,
   },
   {
     id: "punta-cana",
@@ -64,7 +66,8 @@ const BRANCHES: Branch[] = [
     address: "Terminal Internacional AILA",
     hours: "06:00 – 22:00",
     phone: "+1 809-000-0002",
-    distanceKm: 185,
+    lat: 18.5674,
+    lng: -68.3597,
   },
   {
     id: "santiago",
@@ -73,11 +76,184 @@ const BRANCHES: Branch[] = [
     address: "Calle del Sol 78",
     hours: "08:00 – 20:00",
     phone: "+1 809-000-0003",
-    distanceKm: 155,
+    lat: 19.4517,
+    lng: -70.6970,
   },
 ];
 
 const CITIES = ["Santo Domingo", "Punta Cana", "Santiago"];
+
+// ─── City center coordinates ─────────────────────────────────────────────────
+
+const CITY_REGIONS: Record<string, { lat: number; lng: number; zoom: number }> = {
+  "Santo Domingo": { lat: 18.4735, lng: -69.9312, zoom: 13 },
+  "Punta Cana":    { lat: 18.5674, lng: -68.3597, zoom: 13 },
+  "Santiago":      { lat: 19.4517, lng: -70.6970, zoom: 13 },
+};
+
+// ─── Native map (react-native-maps) — lazy import so web doesn't crash ──────
+
+let MapView: any = null;
+let Marker: any = null;
+let PROVIDER_DEFAULT: any = null;
+
+if (Platform.OS !== "web") {
+  try {
+    const maps = require("react-native-maps");
+    MapView = maps.default;
+    Marker = maps.Marker;
+    PROVIDER_DEFAULT = maps.PROVIDER_DEFAULT;
+  } catch (_) {
+    // react-native-maps not available in this environment
+  }
+}
+
+// ─── Web map: OpenStreetMap iframe ───────────────────────────────────────────
+
+function WebMapView({ branches, selectedId }: { branches: Branch[]; selectedId: string | null }) {
+  const selected = branches.find((b) => b.id === selectedId) ?? branches[0];
+  if (!selected) return null;
+
+  const region = CITY_REGIONS[selected.city] ?? { lat: selected.lat, lng: selected.lng, zoom: 13 };
+
+  // Build iframe URL with OSM and markers
+  const markers = branches
+    .map((b) => `${b.lat},${b.lng}`)
+    .join("|");
+
+  // Use OpenStreetMap embed with bounding box centered on active branch
+  const delta = 0.02;
+  const bbox = [
+    region.lng - delta,
+    region.lat - delta,
+    region.lng + delta,
+    region.lat + delta,
+  ].join(",");
+  const markerStr = branches
+    .map((b) => `${b.lat}%2C${b.lng}`)
+    .join("~");
+
+  // Use Leaflet via a known CDN embed (works without API key)
+  const iframeSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${selected.lat}%2C${selected.lng}`;
+
+  return (
+    <View style={styles.webMapWrap}>
+      {/* @ts-ignore — iframe only available on web */}
+      <iframe
+        src={iframeSrc}
+        style={{
+          width: "100%",
+          height: "100%",
+          border: "none",
+          borderRadius: 16,
+        }}
+        title="Mapa de sucursales"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+      <View style={styles.mapOverlay}>
+        <View style={styles.mapBadge}>
+          <Ionicons name="location" size={14} color={colors.cta} />
+          <Text style={styles.mapBadgeText}>{selected.name}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ─── Native MapView component ─────────────────────────────────────────────────
+
+function NativeMapView({
+  branches,
+  selectedId,
+  onMarkerPress,
+}: {
+  branches: Branch[];
+  selectedId: string | null;
+  onMarkerPress: (id: string) => void;
+}) {
+  const mapRef = useRef<any>(null);
+  const selected = branches.find((b) => b.id === selectedId) ?? branches[0];
+  const region = selected
+    ? {
+        latitude: selected.lat,
+        longitude: selected.lng,
+        latitudeDelta: 0.04,
+        longitudeDelta: 0.04,
+      }
+    : undefined;
+
+  useEffect(() => {
+    if (!selected || !mapRef.current) return;
+    mapRef.current.animateToRegion(
+      {
+        latitude: selected.lat,
+        longitude: selected.lng,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      },
+      600
+    );
+  }, [selected?.id]);
+
+  if (!MapView) {
+    return (
+      <View style={[styles.mapBox, styles.mapFallback]}>
+        <Ionicons name="map-outline" size={32} color={colors.textFaint} />
+        <Text style={styles.mapFallbackText}>Mapa no disponible</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.nativeMapWrap}>
+      <MapView
+        ref={mapRef}
+        style={styles.nativeMap}
+        initialRegion={region}
+        showsUserLocation
+        showsMyLocationButton={false}
+        showsCompass={false}
+        rotateEnabled={false}
+      >
+        {branches.map((b) => (
+          <Marker
+            key={b.id}
+            coordinate={{ latitude: b.lat, longitude: b.lng }}
+            title={b.name}
+            description={b.address}
+            pinColor={b.id === selectedId ? colors.cta : colors.primary}
+            onPress={() => onMarkerPress(b.id)}
+          />
+        ))}
+      </MapView>
+
+      {/* My location button */}
+      <Pressable style={styles.locationBtn} onPress={() => requestLocation(mapRef)}>
+        <Ionicons name="locate" size={18} color={colors.text} />
+      </Pressable>
+    </View>
+  );
+}
+
+async function requestLocation(mapRef: React.RefObject<any>) {
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") return;
+    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+    mapRef.current?.animateToRegion(
+      {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      },
+      800
+    );
+  } catch (_) {}
+}
+
+// ─── Main screen ─────────────────────────────────────────────────────────────
 
 export default function LocationsScreen() {
   const locale = i18n.locale === "en" ? "en" : "es";
@@ -94,13 +270,18 @@ export default function LocationsScreen() {
   );
 
   const openMaps = (b: Branch) => {
-    const query = encodeURIComponent(b.address);
-    const url =
-      Platform.OS === "ios"
-        ? `maps:?q=${query}`
-        : `geo:0,0?q=${query}`;
+    const query = encodeURIComponent(`${b.lat},${b.lng}`);
+    const label = encodeURIComponent(b.name);
+    let url: string;
+    if (Platform.OS === "ios") {
+      url = `maps:?q=${label}&ll=${b.lat},${b.lng}`;
+    } else if (Platform.OS === "android") {
+      url = `geo:${b.lat},${b.lng}?q=${b.lat},${b.lng}(${label})`;
+    } else {
+      url = `https://www.openstreetmap.org/?mlat=${b.lat}&mlon=${b.lng}&zoom=16`;
+    }
     Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://maps.google.com/maps?q=${query}`);
+      Linking.openURL(`https://www.openstreetmap.org/?mlat=${b.lat}&mlon=${b.lng}&zoom=16`);
     });
   };
 
@@ -145,24 +326,16 @@ export default function LocationsScreen() {
           ) : null}
         </View>
 
-        {/* Map placeholder */}
-        <View style={styles.mapBox}>
-          <View style={styles.mapPin1}>
-            <Ionicons name="location" size={24} color={colors.cta} />
-          </View>
-          <View style={styles.mapPin2}>
-            <Ionicons name="location" size={20} color={colors.primary} />
-          </View>
-          <View style={styles.mapPin3}>
-            <Ionicons name="location" size={20} color={colors.primary} />
-          </View>
-          <Pressable style={styles.mapCovBtn}>
-            <Ionicons name="navigate-outline" size={14} color={colors.text} />
-            <Text style={styles.mapCovText}>
-              {locale === "en" ? "Coverage map" : "Mapa de cobertura"}
-            </Text>
-          </Pressable>
-        </View>
+        {/* MAP — real implementation */}
+        {Platform.OS === "web" ? (
+          <WebMapView branches={filtered.length ? filtered : BRANCHES} selectedId={selected} />
+        ) : (
+          <NativeMapView
+            branches={filtered.length ? filtered : BRANCHES}
+            selectedId={selected}
+            onMarkerPress={(id) => setSelected(id)}
+          />
+        )}
 
         {/* City pills */}
         <ScrollView
@@ -173,12 +346,14 @@ export default function LocationsScreen() {
           {CITIES.map((c) => (
             <Pressable
               key={c}
-              onPress={() => { setCity(c); setSelected(null); }}
+              onPress={() => {
+                setCity(c);
+                const first = BRANCHES.find((b) => b.city === c);
+                setSelected(first?.id ?? null);
+              }}
               style={[styles.pill, c === city && styles.pillActive]}
             >
-              <Text style={[styles.pillText, c === city && styles.pillTextActive]}>
-                {c}
-              </Text>
+              <Text style={[styles.pillText, c === city && styles.pillTextActive]}>{c}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -200,9 +375,7 @@ export default function LocationsScreen() {
                 <Text style={styles.branchName}>{b.name}</Text>
                 {b.distanceKm !== undefined ? (
                   <Text style={styles.branchDist}>
-                    {b.distanceKm < 10
-                      ? `${b.distanceKm} km`
-                      : `${Math.round(b.distanceKm)} km`}
+                    {b.distanceKm < 10 ? `${b.distanceKm} km` : `${Math.round(b.distanceKm)} km`}
                   </Text>
                 ) : null}
               </View>
@@ -222,6 +395,12 @@ export default function LocationsScreen() {
                   {locale === "en" ? "Open today" : "Abierto hoy"} · {b.hours}
                 </Text>
               </View>
+              <View style={styles.branchMetaRow}>
+                <Ionicons name="navigate-outline" size={14} color={colors.textMuted} />
+                <Text style={styles.branchMetaText}>
+                  {b.lat.toFixed(4)}, {b.lng.toFixed(4)}
+                </Text>
+              </View>
             </View>
 
             <View style={styles.branchActions}>
@@ -239,9 +418,6 @@ export default function LocationsScreen() {
                   <Ionicons name="call-outline" size={18} color={colors.cta} />
                 </Pressable>
               ) : null}
-              <Pressable style={styles.iconBtn} onPress={() => openMaps(b)}>
-                <Ionicons name="open-outline" size={18} color={colors.text} />
-              </Pressable>
             </View>
           </View>
         ))}
@@ -258,6 +434,8 @@ export default function LocationsScreen() {
     </SafeAreaView>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
@@ -283,7 +461,61 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontFamily: font.medium, fontSize: 15, color: colors.text },
 
-  // Map placeholder
+  // Web map
+  webMapWrap: {
+    marginHorizontal: spacing.xl,
+    height: 200,
+    borderRadius: radius.xl,
+    marginBottom: spacing.lg,
+    overflow: "hidden",
+    position: "relative",
+    ...shadow.sm,
+  },
+  mapOverlay: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    right: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  mapBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: radius.full,
+    ...shadow.xs,
+  },
+  mapBadgeText: { ...type.captionMed, color: colors.text },
+
+  // Native map
+  nativeMapWrap: {
+    marginHorizontal: spacing.xl,
+    height: 220,
+    borderRadius: radius.xl,
+    marginBottom: spacing.lg,
+    overflow: "hidden",
+    ...shadow.sm,
+    position: "relative",
+  },
+  nativeMap: { ...StyleSheet.absoluteFillObject },
+  locationBtn: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.card,
+    alignItems: "center",
+    justifyContent: "center",
+    ...shadow.sm,
+  },
+
+  // Fallback
   mapBox: {
     marginHorizontal: spacing.xl,
     height: 160,
@@ -291,27 +523,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     marginBottom: spacing.lg,
     overflow: "hidden",
-    position: "relative",
     alignItems: "center",
     justifyContent: "center",
   },
-  mapPin1: { position: "absolute", top: 55, left: 75 },
-  mapPin2: { position: "absolute", top: 35, right: 65 },
-  mapPin3: { position: "absolute", bottom: 45, right: 110 },
-  mapCovBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: "rgba(255,255,255,0.88)",
-    borderRadius: radius.full,
-    position: "absolute",
-    bottom: 12,
-    left: 12,
-    ...shadow.xs,
-  },
-  mapCovText: { ...type.captionMed, color: colors.text },
+  mapFallback: { backgroundColor: colors.borderLight, gap: 10 },
+  mapFallbackText: { ...type.caption, color: colors.textMuted },
 
   pillsRow: { paddingHorizontal: spacing.xl, gap: 8, marginBottom: spacing.lg },
   pill: {
