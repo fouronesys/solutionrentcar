@@ -6,18 +6,16 @@ build:
     - run:
         name: Install dependencies
         command: npm install --legacy-peer-deps
-        working_directory: mobile
 
     - run:
         name: Expo prebuild (Android)
         command: npx expo prebuild --no-install --platform android
-        working_directory: mobile
 
     - run:
         name: Build APK
         command: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -x lint -x lintDebug
-        working_directory: mobile/android
+        working_directory: android
 
     - eas/find_and_upload_build_artifacts
