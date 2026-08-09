@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, Platform, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   Easing,
@@ -38,6 +38,14 @@ export default function AnimatedSplash({
   minDuration = 1900,
   maxDuration = 6000,
 }: Props) {
+  // Web: runOnJS callbacks inside Reanimated exit animations don't fire reliably.
+  // Skip the custom splash entirely — the OS native splash already hides itself.
+  useEffect(() => {
+    if (Platform.OS === "web") { onFinish(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  if (Platform.OS === "web") return null;
+
   const [minElapsed, setMinElapsed] = useState(false);
   const [forced, setForced] = useState(false);
   const exiting = useRef(false);
