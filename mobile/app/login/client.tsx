@@ -1,3 +1,6 @@
+/**
+ * Login de clientes — diseño limpio blanco + rojo.
+ */
 import React, { useState } from "react";
 import {
   Alert,
@@ -18,14 +21,14 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiError } from "@/api/client";
-import { colors, font, radius, type } from "@/theme/colors";
+import { colors, font, radius, shadow, type } from "@/theme/colors";
 import { t } from "@/i18n";
 
 function loginErrorMessage(e: unknown): string {
   if (e instanceof ApiError) {
     switch (e.code) {
       case "network_unreachable": return t("login.errors.network");
-      case "service_blocked": return t("login.errors.blocked");
+      case "service_blocked":     return t("login.errors.blocked");
       case "service_unavailable": return t("login.errors.unavailable");
       case "invalid_credentials": return t("login.errors.invalid");
       default: return e.message || t("login.errors.invalid");
@@ -42,10 +45,7 @@ export default function ClientLogin() {
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!phone.trim() || !password.trim()) {
-      Alert.alert(t("login.errors.empty"));
-      return;
-    }
+    if (!phone.trim() || !password.trim()) { Alert.alert(t("login.errors.empty")); return; }
     setLoading(true);
     try {
       await loginClient(phone.trim(), password.trim());
@@ -59,22 +59,32 @@ export default function ClientLogin() {
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {/* Hero */}
-          <View style={styles.hero}>
-            <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
-              <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
-            </Pressable>
-            <View style={styles.logoChip}>
-              <Image source={require("../../assets/images/logo.png")} style={{ width: 82, height: 82 }} resizeMode="contain" />
+        <ScrollView
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Back */}
+          <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+
+          {/* Logo + brand */}
+          <View style={styles.brandBlock}>
+            <View style={styles.logoWrap}>
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 80, height: 80 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.brand}>YOWELL</Text>
-            <Text style={styles.brandAccent}>Rent-Car</Text>
+            <Text style={styles.brandSub}>Rent-Car</Text>
           </View>
 
-          {/* Card */}
+          {/* Form card */}
           <View style={styles.card}>
             <Text style={styles.title}>{t("login.client.title")}</Text>
             <Text style={styles.subtitle}>{t("login.requiredSubtitle")}</Text>
@@ -101,7 +111,13 @@ export default function ClientLogin() {
               />
             </View>
 
-            <Button title={t("login.client.submit")} icon="log-in-outline" onPress={submit} loading={loading} size="lg" />
+            <Button
+              title={t("login.client.submit")}
+              icon="log-in-outline"
+              onPress={submit}
+              loading={loading}
+              size="lg"
+            />
 
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
@@ -124,48 +140,39 @@ export default function ClientLogin() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.dark },
-  body: { flexGrow: 1 },
-  hero: {
-    alignItems: "center",
-    paddingTop: 36,
-    paddingBottom: 36,
-    paddingHorizontal: 20,
-  },
+  screen: { flex: 1, backgroundColor: colors.bg },
+  body: { flexGrow: 1, padding: 20 },
+
   backBtn: {
-    position: "absolute",
-    left: 16,
-    top: 24,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: colors.card,
+    alignItems: "center", justifyContent: "center",
+    ...shadow.xs,
+    marginBottom: 8,
   },
-  logoChip: {
-    width: 90,
-    height: 90,
+
+  brandBlock: { alignItems: "center", paddingVertical: 32 },
+  logoWrap: {
+    width: 96, height: 96,
     borderRadius: radius.xl,
     backgroundColor: colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
+    alignItems: "center", justifyContent: "center",
+    marginBottom: 14,
+    ...shadow.md,
     overflow: "hidden",
   },
-  brand: { ...type.label, color: "rgba(255,255,255,0.7)", letterSpacing: 3 },
-  brandAccent: { ...type.h1, color: colors.primary, marginTop: 2 },
+  brand: { ...type.label, color: colors.textSecondary, letterSpacing: 3, marginBottom: 4 },
+  brandSub: { ...type.h2, color: colors.text },
+
   card: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    borderTopLeftRadius: radius.xxl,
-    borderTopRightRadius: radius.xxl,
-    padding: 20,
+    backgroundColor: colors.card,
+    borderRadius: radius.xxl,
+    padding: 24,
     paddingTop: 28,
-    minHeight: 400,
+    ...shadow.lg,
   },
   title: { ...type.h1, color: colors.text, marginBottom: 6 },
-  subtitle: { ...type.callout, color: colors.textMuted, marginBottom: 28 },
+  subtitle: { ...type.callout, color: colors.textMuted, marginBottom: 24 },
   form: { marginBottom: 8 },
   divider: { flexDirection: "row", alignItems: "center", marginVertical: 20 },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },

@@ -1,7 +1,10 @@
+/**
+ * Mis reservas — client bookings list.
+ * White header pattern (no gradient), card list.
+ */
 import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
-  Image,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -11,59 +14,41 @@ import {
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { EmptyState } from "@/components/EmptyState";
 import { RowSkeleton } from "@/components/Skeleton";
 import { Button } from "@/components/Button";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
 import type { Booking } from "@/api/types";
-import { bookingStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { bookingStatus, colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { money, shortDate } from "@/utils/format";
 import { useAuth } from "@/auth/AuthContext";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function Hero({ count }: { count?: number }) {
-  return (
-    <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-      <View style={styles.heroBrandRow}>
-        <View style={styles.heroLogo}>
-          <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
-        </View>
-        <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
-      </View>
-      <View style={styles.heroTitleRow}>
-        <Text style={styles.heroTitle}>{t("booking.myBookings")}</Text>
-        {typeof count === "number" ? (
-          <View style={styles.heroCount}>
-            <Text style={styles.heroCountText}>{count}</Text>
-          </View>
-        ) : null}
-      </View>
-      <Text style={styles.heroSub}>
-        {i18n.locale === "en"
-          ? "Track and manage your reservations."
-          : "Sigue y administra tus reservas."}
-      </Text>
-    </LinearGradient>
-  );
-}
-
 function LoginPrompt() {
   const router = useRouter();
+  const locale = i18n.locale === "en" ? "en" : "es";
   return (
     <View style={styles.prompt}>
       <View style={styles.promptIcon}>
-        <Ionicons name="calendar-outline" size={36} color={colors.primaryDark} />
+        <Ionicons name="calendar-outline" size={36} color={colors.cta} />
       </View>
       <Text style={styles.promptTitle}>{t("login.requiredTitle")}</Text>
       <Text style={styles.promptSub}>{t("login.requiredSubtitle")}</Text>
-      <Button title={t("login.goToLogin")} onPress={() => router.push("/login/client")} style={{ marginBottom: 12, alignSelf: "stretch" }} size="lg" icon="log-in-outline" />
+      <Button
+        title={t("login.goToLogin")}
+        onPress={() => router.push("/login/client")}
+        style={{ marginBottom: 12, alignSelf: "stretch" }}
+        size="lg"
+        icon="log-in-outline"
+      />
       <Pressable onPress={() => router.push("/register/client")}>
         <Text style={styles.registerLink}>
-          {t("login.noAccount")} <Text style={styles.registerLinkBold}>{t("login.createAccount")}</Text>
+          {t("login.noAccount")}{" "}
+          <Text style={styles.registerLinkBold}>{t("login.createAccount")}</Text>
         </Text>
       </Pressable>
     </View>
@@ -76,6 +61,7 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
   const total = Number(booking.total ?? 0);
   const paid = Number(booking.payment ?? 0);
   const balance = Math.max(0, total - paid);
+  const car = (booking as any).car;
 
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -89,10 +75,17 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
     >
       <View style={styles.cardHeader}>
         <View style={{ flex: 1 }}>
+          {car ? (
+            <Text style={styles.cardCarName} numberOfLines={1}>
+              {car.brand ? `${car.brand} ` : ""}{car.name ?? car.model ?? ""}
+            </Text>
+          ) : null}
           <Text style={styles.cardCode}>#{booking.code ?? booking.id}</Text>
           <View style={styles.cardDatesRow}>
             <Ionicons name="calendar-outline" size={13} color={colors.textMuted} />
-            <Text style={styles.cardDates}>{shortDate(booking.start_at)} → {shortDate(booking.end_at)}</Text>
+            <Text style={styles.cardDates}>
+              {shortDate(booking.start_at)} → {shortDate(booking.end_at)}
+            </Text>
           </View>
         </View>
         {s ? (
@@ -102,7 +95,9 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
           </View>
         ) : null}
       </View>
+
       <View style={styles.cardDivider} />
+
       <View style={styles.cardFooter}>
         <View style={styles.cardAmount}>
           <Text style={styles.amountLabel}>{t("booking.total")}</Text>
@@ -132,6 +127,7 @@ export default function BookingsList() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const locale = i18n.locale === "en" ? "en" : "es";
 
   const load = useCallback(async () => {
     if (!role) return;
@@ -154,16 +150,19 @@ export default function BookingsList() {
 
   useFocusEffect(useCallback(() => { if (role) load(); }, [role, load]));
 
+  const showSkeleton = !bootstrapped || (!!role && loading);
+
   if (bootstrapped && !role) {
     return (
       <SafeAreaView style={styles.screen} edges={["top"]}>
-        <Hero />
+        <ScreenHeader
+          title={t("booking.myBookings")}
+          subtitle={locale === "en" ? "Track your reservations." : "Sigue tus reservas."}
+        />
         <LoginPrompt />
       </SafeAreaView>
     );
   }
-
-  const showSkeleton = !bootstrapped || (!!role && loading);
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
@@ -174,38 +173,51 @@ export default function BookingsList() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
-            <Hero count={loading ? undefined : items.length} />
-            {err ? (
-              <View style={styles.errBox}>
-                <Ionicons name="warning-outline" size={16} color={colors.danger} />
-                <Text style={styles.errText}>{err}</Text>
-              </View>
-            ) : null}
+            <ScreenHeader
+              title={t("booking.myBookings")}
+              subtitle={locale === "en" ? "Track your reservations." : "Sigue tus reservas."}
+            />
+            <View style={styles.listMeta}>
+              {!loading && (
+                <Text style={styles.countText}>
+                  {items.length} {locale === "en" ? "reservations" : "reservas"}
+                </Text>
+              )}
+              {err ? (
+                <View style={styles.errBox}>
+                  <Ionicons name="warning-outline" size={16} color={colors.danger} />
+                  <Text style={styles.errText}>{err}</Text>
+                </View>
+              ) : null}
+            </View>
           </View>
         }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => { setRefreshing(true); load(); }}
-            tintColor={colors.primaryDark}
+            tintColor={colors.cta}
           />
         }
         ListEmptyComponent={
-          loading ? (
+          showSkeleton ? (
             <View style={styles.skeletonWrap}>
-              <RowSkeleton />
-              <RowSkeleton />
-              <RowSkeleton />
-              <RowSkeleton />
+              {[0, 1, 2, 3].map((i) => <RowSkeleton key={i} />)}
             </View>
           ) : (
-            <EmptyState title={t("booking.noneClient")} subtitle={t("cars.title")} icon="bookings" />
+            <EmptyState
+              title={t("booking.noneClient")}
+              subtitle={locale === "en" ? "Browse cars to make a reservation." : "Explora los autos para hacer una reserva."}
+              icon="bookings"
+            />
           )
         }
         renderItem={({ item }) => (
           <BookingCard
             booking={item}
-            onPress={() => router.push({ pathname: "/(client)/booking/[id]", params: { id: String(item.id) } })}
+            onPress={() =>
+              router.push({ pathname: "/(client)/booking/[id]", params: { id: String(item.id) } })
+            }
           />
         )}
       />
@@ -216,57 +228,28 @@ export default function BookingsList() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   list: { paddingBottom: 28 },
-
-  hero: {
-    paddingTop: 24,
-    paddingBottom: 22,
-    paddingHorizontal: spacing.xl,
-    borderBottomLeftRadius: radius.xxl,
-    borderBottomRightRadius: radius.xxl,
-  },
-  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
-  heroLogo: {
-    width: 36, height: 36, borderRadius: radius.sm,
-    backgroundColor: colors.card,
-    alignItems: "center", justifyContent: "center",
-    overflow: "hidden",
-  },
-  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
-  heroTitleRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  heroTitle: { ...type.display, color: "#FFFFFF" },
-  heroCount: {
-    minWidth: 28,
-    paddingHorizontal: 9,
-    height: 26,
-    borderRadius: radius.full,
-    backgroundColor: "rgba(245,158,11,0.22)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  heroCountText: { ...type.captionMed, color: colors.primaryLight },
-  heroSub: { ...type.callout, color: "rgba(255,255,255,0.6)", marginTop: 4 },
+  listMeta: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.sm },
+  countText: { ...type.label, color: colors.textMuted },
 
   errBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     padding: 14,
     backgroundColor: colors.dangerBg,
     borderRadius: radius.md,
   },
   errText: { ...type.caption, color: colors.danger, flex: 1 },
-
   skeletonWrap: { paddingTop: spacing.lg },
 
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,
-    marginHorizontal: spacing.lg,
+    marginHorizontal: spacing.xl,
     marginTop: spacing.md,
     overflow: "hidden",
-    ...shadow.md,
+    ...shadow.sm,
   },
   cardHeader: {
     flexDirection: "row",
@@ -275,7 +258,8 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: spacing.md,
   },
-  cardCode: { ...type.h3, color: colors.text },
+  cardCarName: { ...type.title, color: colors.text, marginBottom: 2 },
+  cardCode: { ...type.caption, color: colors.textMuted },
   cardDatesRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 4 },
   cardDates: { ...type.caption, color: colors.textMuted },
   statusPill: {
@@ -313,13 +297,12 @@ const styles = StyleSheet.create({
   prompt: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xxl },
   promptIcon: {
     width: 88, height: 88, borderRadius: radius.full,
-    backgroundColor: colors.primaryXLight,
-    borderWidth: 1, borderColor: colors.primaryLight,
-    alignItems: "center", justifyContent: "center",
-    marginBottom: 20,
+    backgroundColor: colors.ctaXLight,
+    borderWidth: 1, borderColor: colors.ctaLight,
+    alignItems: "center", justifyContent: "center", marginBottom: 20,
   },
   promptTitle: { ...type.h2, color: colors.text, textAlign: "center", marginBottom: 8 },
   promptSub: { ...type.callout, color: colors.textMuted, textAlign: "center", marginBottom: 28, lineHeight: 20 },
   registerLink: { ...type.callout, color: colors.textMuted },
-  registerLinkBold: { color: colors.primaryDark, fontFamily: font.bold },
+  registerLinkBold: { color: colors.cta, fontFamily: font.bold },
 });

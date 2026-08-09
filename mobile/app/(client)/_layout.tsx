@@ -7,7 +7,7 @@ import { colors, font } from "@/theme/colors";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
 
-function Icon({
+function TabIcon({
   name,
   focused,
 }: {
@@ -19,20 +19,20 @@ function Icon({
       <Ionicons
         name={name}
         size={24}
-        color={focused ? colors.primaryDark : colors.textMuted}
+        color={focused ? colors.cta : colors.textMuted}
       />
     </View>
   );
 }
 
-function InboxIcon({ focused }: { focused: boolean }) {
+function BellTabIcon({ focused }: { focused: boolean }) {
   const { unread } = useNotificationsCtx();
   return (
     <View style={styles.tabItem}>
       <Ionicons
         name={focused ? "notifications" : "notifications-outline"}
         size={24}
-        color={focused ? colors.primaryDark : colors.textMuted}
+        color={focused ? colors.cta : colors.textMuted}
       />
       {unread > 0 && (
         <View style={styles.badge}>
@@ -53,45 +53,58 @@ export default function ClientLayout() {
           tabBarStyle: styles.tabBar,
           tabBarShowLabel: true,
           tabBarLabelStyle: styles.tabLabel,
-          tabBarActiveTintColor: colors.primaryDark,
+          tabBarActiveTintColor: colors.cta,
           tabBarInactiveTintColor: colors.textMuted,
-          tabBarItemStyle: { paddingTop: 8 },
+          tabBarItemStyle: { paddingTop: 6 },
         }}
       >
+        {/* Inicio */}
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Inicio",
+            tabBarIcon: ({ focused }) => (
+              <TabIcon name={focused ? "home" : "home-outline"} focused={focused} />
+            ),
+          }}
+        />
+
+        {/* Autos */}
         <Tabs.Screen
           name="cars"
           options={{
             title: t("tabs.cars"),
             tabBarIcon: ({ focused }) => (
-              <Icon name={focused ? "car-sport" : "car-sport-outline"} focused={focused} />
+              <TabIcon name={focused ? "car-sport" : "car-sport-outline"} focused={focused} />
             ),
           }}
         />
+
+        {/* Ubicaciones */}
         <Tabs.Screen
-          name="bookings"
+          name="locations"
           options={{
-            title: t("tabs.bookings"),
+            title: "Ubicaciones",
             tabBarIcon: ({ focused }) => (
-              <Icon name={focused ? "calendar" : "calendar-outline"} focused={focused} />
+              <TabIcon name={focused ? "location" : "location-outline"} focused={focused} />
             ),
           }}
         />
-        <Tabs.Screen
-          name="notifications"
-          options={{
-            title: t("tabs.notifications"),
-            tabBarIcon: ({ focused }) => <InboxIcon focused={focused} />,
-          }}
-        />
+
+        {/* Perfil */}
         <Tabs.Screen
           name="profile"
           options={{
             title: t("tabs.profile"),
             tabBarIcon: ({ focused }) => (
-              <Icon name={focused ? "person" : "person-outline"} focused={focused} />
+              <TabIcon name={focused ? "person" : "person-outline"} focused={focused} />
             ),
           }}
         />
+
+        {/* Hidden routes */}
+        <Tabs.Screen name="bookings" options={{ href: null }} />
+        <Tabs.Screen name="notifications" options={{ href: null }} />
         <Tabs.Screen name="car/[id]" options={{ href: null }} />
         <Tabs.Screen name="book/[carId]" options={{ href: null }} />
         <Tabs.Screen name="booking/[id]" options={{ href: null }} />
@@ -121,7 +134,7 @@ const styles = StyleSheet.create({
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: colors.danger,
+    backgroundColor: colors.cta,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,

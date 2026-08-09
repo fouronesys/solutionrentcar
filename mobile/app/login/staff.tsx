@@ -1,3 +1,6 @@
+/**
+ * Login de staff — diseño limpio blanco + oscuro.
+ */
 import React, { useState } from "react";
 import {
   Alert,
@@ -18,14 +21,14 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiError } from "@/api/client";
-import { colors, radius, type } from "@/theme/colors";
+import { colors, font, radius, shadow, type } from "@/theme/colors";
 import { t } from "@/i18n";
 
 function loginErrorMessage(e: unknown): string {
   if (e instanceof ApiError) {
     switch (e.code) {
       case "network_unreachable": return t("login.errors.network");
-      case "service_blocked": return t("login.errors.blocked");
+      case "service_blocked":     return t("login.errors.blocked");
       case "service_unavailable": return t("login.errors.unavailable");
       case "invalid_credentials": return t("login.errors.invalid");
       default: return e.message || t("login.errors.invalid");
@@ -42,10 +45,7 @@ export default function StaffLogin() {
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!user.trim() || !password.trim()) {
-      Alert.alert(t("login.errors.empty"));
-      return;
-    }
+    if (!user.trim() || !password.trim()) { Alert.alert(t("login.errors.empty")); return; }
     setLoading(true);
     try {
       await loginStaff(user.trim(), password);
@@ -59,26 +59,36 @@ export default function StaffLogin() {
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {/* Hero */}
-          <View style={styles.hero}>
-            <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
-              <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
-            </Pressable>
-            <View style={styles.logoChip}>
-              <Image source={require("../../assets/images/logo.png")} style={{ width: 82, height: 82 }} resizeMode="contain" />
+        <ScrollView
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Back */}
+          <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+
+          {/* Brand block */}
+          <View style={styles.brandBlock}>
+            <View style={styles.logoWrap}>
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={{ width: 80, height: 80 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.brand}>YOWELL</Text>
-            <Text style={styles.brandAccent}>Equipo</Text>
+            <Text style={styles.brandSub}>Equipo</Text>
             <View style={styles.staffPill}>
-              <Ionicons name="briefcase-outline" size={13} color="rgba(255,255,255,0.7)" />
-              <Text style={styles.brandSub}>{t("login.staff.title")}</Text>
+              <Ionicons name="briefcase-outline" size={13} color={colors.textSecondary} />
+              <Text style={styles.staffPillText}>{t("login.staff.title")}</Text>
             </View>
           </View>
 
-          {/* Card */}
+          {/* Form card */}
           <View style={styles.card}>
             <Text style={styles.title}>{t("login.staff.title")}</Text>
 
@@ -104,9 +114,19 @@ export default function StaffLogin() {
               />
             </View>
 
-            <Button title={t("login.staff.submit")} icon="log-in-outline" onPress={submit} loading={loading} size="lg" variant="dark" />
+            <Button
+              title={t("login.staff.submit")}
+              icon="log-in-outline"
+              onPress={submit}
+              loading={loading}
+              size="lg"
+              variant="dark"
+            />
 
-            <Pressable onPress={() => router.push("/(client)/cars")} style={styles.skipWrap}>
+            <Pressable
+              onPress={() => router.push("/(client)/cars")}
+              style={styles.skipWrap}
+            >
               <Ionicons name="car-sport-outline" size={16} color={colors.textMuted} />
               <Text style={styles.skipText}>{t("cars.title")}</Text>
             </Pressable>
@@ -118,59 +138,58 @@ export default function StaffLogin() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.dark },
-  body: { flexGrow: 1 },
-  hero: {
-    alignItems: "center",
-    paddingTop: 36,
-    paddingBottom: 36,
-    paddingHorizontal: 20,
-  },
+  screen: { flex: 1, backgroundColor: colors.bg },
+  body: { flexGrow: 1, padding: 20 },
+
   backBtn: {
-    position: "absolute",
-    left: 16,
-    top: 24,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: colors.card,
+    alignItems: "center", justifyContent: "center",
+    ...shadow.xs,
+    marginBottom: 8,
   },
-  logoChip: {
-    width: 90,
-    height: 90,
+
+  brandBlock: { alignItems: "center", paddingVertical: 32 },
+  logoWrap: {
+    width: 96, height: 96,
     borderRadius: radius.xl,
     backgroundColor: colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
+    alignItems: "center", justifyContent: "center",
+    marginBottom: 14,
+    ...shadow.md,
     overflow: "hidden",
   },
-  brand: { ...type.label, color: "rgba(255,255,255,0.6)", letterSpacing: 3 },
-  brandAccent: { ...type.h1, color: colors.primary, marginTop: 2 },
+  brand: { ...type.label, color: colors.textSecondary, letterSpacing: 3, marginBottom: 4 },
+  brandSub: { ...type.h2, color: colors.text, marginBottom: 10 },
   staffPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginTop: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    backgroundColor: colors.card,
     borderRadius: radius.full,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  brandSub: { ...type.caption, color: "rgba(255,255,255,0.6)" },
+  staffPillText: { ...type.captionMed, color: colors.textSecondary },
+
   card: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    borderTopLeftRadius: radius.xxl,
-    borderTopRightRadius: radius.xxl,
-    padding: 20,
+    backgroundColor: colors.card,
+    borderRadius: radius.xxl,
+    padding: 24,
     paddingTop: 28,
-    minHeight: 360,
+    ...shadow.lg,
   },
   title: { ...type.h1, color: colors.text, marginBottom: 24 },
   form: { marginBottom: 8 },
-  skipWrap: { marginTop: 24, paddingVertical: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  skipWrap: {
+    marginTop: 24,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
   skipText: { ...type.bodyMed, color: colors.textMuted },
 });

@@ -1,25 +1,36 @@
 import { TextStyle } from "react-native";
 
 export const colors = {
-  primary: "#1828E8",
+  // ─── Brand ────────────────────────────────────────────────────────────────
+  primary: "#1828E8",        // blue – informational / links
   primaryDark: "#111B9A",
   primaryDeep: "#0B126A",
   primaryLight: "#5D6BFF",
   primaryXLight: "#EEF0FF",
-  accent: "#E51018",
 
-  bg: "#F7F7F6",
+  cta: "#E8002D",            // RED – primary CTA / active states / tabs
+  ctaDark: "#B5001F",
+  ctaLight: "#FF4060",
+  ctaXLight: "#FFECEF",
+
+  accent: "#E8002D",         // alias → same as cta for backwards compat
+
+  // ─── Backgrounds ─────────────────────────────────────────────────────────
+  bg: "#F2F3F5",             // screen background (cool light gray)
   bgWarm: "#FFFDF5",
   card: "#FFFFFF",
 
+  // ─── Text ─────────────────────────────────────────────────────────────────
   text: "#0A0A0A",
   textSecondary: "#52525B",
   textMuted: "#A1A1AA",
   textFaint: "#D4D4D8",
 
+  // ─── Borders ──────────────────────────────────────────────────────────────
   border: "#E6E6E3",
   borderLight: "#F2F2F0",
 
+  // ─── Semantic ─────────────────────────────────────────────────────────────
   success: "#059669",
   successBg: "#ECFDF5",
   warning: "#B7791F",
@@ -29,15 +40,16 @@ export const colors = {
   info: "#111B9A",
   infoBg: "#EEF0FF",
 
+  // ─── Dark surfaces ────────────────────────────────────────────────────────
   dark: "#141414",
   darkDeep: "#000000",
-  darkCard: "#1C1C1C",
+  darkCard: "#111827",       // dark navy for route/highlight cards
   darkBorder: "#2A2A2A",
   onDark: "#FAFAFA",
   onDarkMuted: "#A1A1AA",
 };
 
-// Gradients (consumed by expo-linear-gradient as readonly tuples)
+// Gradients (kept for AnimatedSplash; screens no longer use hero gradients)
 export const gradients = {
   hero: ["#080B2D", "#111B9A", "#1828E8"] as const,
   heroSoft: ["#0B0B0D", "#111B9A"] as const,
@@ -111,25 +123,32 @@ export const shadow = {
     shadowRadius: 28,
     elevation: 10,
   },
-  primary: {
-    shadowColor: "#1828E8",
+  cta: {
+    shadowColor: "#E8002D",
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.30,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+  primary: {
+    shadowColor: "#E8002D",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.30,
     shadowRadius: 14,
     elevation: 6,
   },
 };
 
 export const bookingStatus: Record<number, { en: string; es: string; color: string; bg: string }> = {
-  0: { en: "Pending", es: "Pendiente", color: "#D97706", bg: "#FFFBEB" },
-  1: { en: "Confirmed", es: "Confirmada", color: "#0A0A0A", bg: "#F4F4F5" },
-  2: { en: "Cancelled", es: "Cancelada", color: "#DC2626", bg: "#FEF2F2" },
-  3: { en: "Delivered", es: "Entregada", color: "#059669", bg: "#ECFDF5" },
-  4: { en: "Returned", es: "Devuelta", color: "#71717A", bg: "#F4F4F5" },
+  0: { en: "Pending",   es: "Pendiente",  color: "#D97706", bg: "#FFFBEB" },
+  1: { en: "Confirmed", es: "Confirmada", color: "#059669", bg: "#ECFDF5" },
+  2: { en: "Cancelled", es: "Cancelada",  color: "#DC2626", bg: "#FEF2F2" },
+  3: { en: "Delivered", es: "Entregada",  color: "#1828E8", bg: "#EEF0FF" },
+  4: { en: "Returned",  es: "Devuelta",   color: "#71717A", bg: "#F4F4F5" },
 };
 
 export const carStatus: Record<number, { en: string; es: string; color: string; bg: string }> = {
-  0: { en: "Available", es: "Disponible", color: "#059669", bg: "#ECFDF5" },
-  1: { en: "In use", es: "En uso", color: "#D97706", bg: "#FFFBEB" },
-  2: { en: "Maintenance", es: "Mantenimiento", color: "#3F3F46", bg: "#F4F4F5" },
+  0: { en: "Available",    es: "Disponible",    color: "#059669", bg: "#ECFDF5" },
+  1: { en: "In use",       es: "En uso",        color: "#D97706", bg: "#FFFBEB" },
+  2: { en: "Maintenance",  es: "Mantenimiento", color: "#3F3F46", bg: "#F4F4F5" },
 };

@@ -7,20 +7,10 @@ import { colors, font } from "@/theme/colors";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
 
-function Icon({
-  name,
-  focused,
-}: {
-  name: keyof typeof Ionicons.glyphMap;
-  focused: boolean;
-}) {
+function TabIcon({ name, focused }: { name: keyof typeof Ionicons.glyphMap; focused: boolean }) {
   return (
     <View style={styles.tabItem}>
-      <Ionicons
-        name={name}
-        size={24}
-        color={focused ? colors.primaryDark : colors.textMuted}
-      />
+      <Ionicons name={name} size={24} color={focused ? colors.cta : colors.textMuted} />
     </View>
   );
 }
@@ -32,7 +22,7 @@ function InboxIcon({ focused }: { focused: boolean }) {
       <Ionicons
         name={focused ? "notifications" : "notifications-outline"}
         size={24}
-        color={focused ? colors.primaryDark : colors.textMuted}
+        color={focused ? colors.cta : colors.textMuted}
       />
       {unread > 0 && (
         <View style={styles.badge}>
@@ -53,9 +43,9 @@ export default function StaffLayout() {
           tabBarStyle: styles.tabBar,
           tabBarShowLabel: true,
           tabBarLabelStyle: styles.tabLabel,
-          tabBarActiveTintColor: colors.primaryDark,
+          tabBarActiveTintColor: colors.cta,
           tabBarInactiveTintColor: colors.textMuted,
-          tabBarItemStyle: { paddingTop: 8 },
+          tabBarItemStyle: { paddingTop: 6 },
         }}
       >
         <Tabs.Screen
@@ -63,7 +53,7 @@ export default function StaffLayout() {
           options={{
             title: t("tabs.agenda"),
             tabBarIcon: ({ focused }) => (
-              <Icon name={focused ? "calendar" : "calendar-outline"} focused={focused} />
+              <TabIcon name={focused ? "calendar" : "calendar-outline"} focused={focused} />
             ),
           }}
         />
@@ -72,7 +62,7 @@ export default function StaffLayout() {
           options={{
             title: t("tabs.bookings"),
             tabBarIcon: ({ focused }) => (
-              <Icon name={focused ? "receipt" : "receipt-outline"} focused={focused} />
+              <TabIcon name={focused ? "receipt" : "receipt-outline"} focused={focused} />
             ),
           }}
         />
@@ -88,7 +78,7 @@ export default function StaffLayout() {
           options={{
             title: t("tabs.profile"),
             tabBarIcon: ({ focused }) => (
-              <Icon name={focused ? "person" : "person-outline"} focused={focused} />
+              <TabIcon name={focused ? "person" : "person-outline"} focused={focused} />
             ),
           }}
         />
@@ -119,7 +109,7 @@ const styles = StyleSheet.create({
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: colors.danger,
+    backgroundColor: colors.cta,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,

@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { EmptyState } from "@/components/EmptyState";
 import { RowSkeleton } from "@/components/Skeleton";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
 import type { Agenda, AgendaItem } from "@/api/types";
-import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { i18n, t } from "@/i18n";
 import { dateTime, todayIso } from "@/utils/format";
 
@@ -62,8 +62,8 @@ function AgendaCard({
           </View>
         ) : null}
         <View style={styles.agendaMetaRow}>
-          <Ionicons name="time-outline" size={13} color={colors.primaryDark} />
-          <Text style={[styles.agendaMeta, { color: colors.primaryDark, fontFamily: font.semibold }]}>
+          <Ionicons name="time-outline" size={13} color={colors.cta} />
+          <Text style={[styles.agendaMeta, { color: colors.cta, fontFamily: font.semibold }]}>
             {dateTime(isDelivery ? item.booking.start_at : item.booking.end_at)}
           </Text>
         </View>
@@ -104,30 +104,23 @@ export default function AgendaScreen() {
     weekday: "long", day: "numeric", month: "long",
   });
 
-  const renderHero = () => (
-    <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-      <View style={styles.heroBrandRow}>
-        <View style={styles.heroLogo}>
-          <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
-        </View>
-        <Text style={styles.heroBrandLabel}>YOWELL RENT-CAR</Text>
-      </View>
-      <Text style={styles.heroTitle}>{t("agenda.title")}</Text>
-      <Text style={styles.heroDate}>{today}</Text>
-    </LinearGradient>
-  );
-
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
+      <ScreenHeader
+        title={t("agenda.title")}
+        subtitle={today}
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.primaryDark} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => { setRefreshing(true); load(); }}
+            tintColor={colors.cta}
+          />
         }
       >
-        {renderHero()}
-
         {err ? (
           <View style={styles.errBox}>
             <Ionicons name="warning-outline" size={16} color={colors.danger} />
@@ -209,27 +202,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   scrollContent: { paddingBottom: 32 },
 
-  hero: {
-    paddingTop: 24,
-    paddingBottom: 26,
-    paddingHorizontal: spacing.xl,
-    borderBottomLeftRadius: radius.xxl,
-    borderBottomRightRadius: radius.xxl,
-  },
-  heroBrandRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 18 },
-  heroLogo: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    backgroundColor: colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  heroBrandLabel: { ...type.label, color: "rgba(255,255,255,0.65)" },
-  heroTitle: { ...type.display, color: "#FFFFFF" },
-  heroDate: { ...type.callout, color: "rgba(255,255,255,0.6)", marginTop: 4, textTransform: "capitalize" },
-
   errBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -241,7 +213,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   errText: { ...type.caption, color: colors.danger, flex: 1 },
-
   body: { padding: spacing.lg },
 
   statsRow: { flexDirection: "row", gap: 12, marginBottom: spacing.xl },
@@ -250,15 +221,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: spacing.lg,
-    ...shadow.md,
+    ...shadow.sm,
   },
   statIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
+    width: 38, height: 38, borderRadius: radius.full,
+    alignItems: "center", justifyContent: "center", marginBottom: 12,
   },
   statNum: { ...type.display, color: colors.text },
   statLabel: { ...type.captionMed, color: colors.textMuted, marginTop: 2 },
@@ -275,25 +242,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    ...shadow.md,
+    ...shadow.sm,
   },
   agendaIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: radius.md,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 46, height: 46, borderRadius: radius.md,
+    alignItems: "center", justifyContent: "center",
   },
   agendaBody: { flex: 1 },
   agendaTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 },
   agendaCode: { ...type.h3, color: colors.text },
   typePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: radius.full,
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 9, paddingVertical: 4, borderRadius: radius.full,
   },
   typeDot: { width: 6, height: 6, borderRadius: 3 },
   typePillText: { ...type.small, fontFamily: font.semibold },

@@ -17,7 +17,7 @@ export function Input({
 }) {
   const [focused, setFocused] = useState(false);
 
-  const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
+  const borderColor = error ? colors.danger : focused ? colors.cta : colors.border;
 
   return (
     <View style={[{ marginBottom: 16 }, containerStyle]}>
@@ -33,7 +33,7 @@ export function Input({
           <Ionicons
             name={icon}
             size={18}
-            color={focused ? colors.primaryDark : colors.textMuted}
+            color={focused ? colors.cta : colors.textMuted}
             style={styles.icon}
           />
         ) : null}
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   wrapFocused: {
-    backgroundColor: colors.primaryXLight,
+    backgroundColor: colors.ctaXLight,
   },
   icon: { position: "absolute", left: 14, zIndex: 1 },
   input: {
