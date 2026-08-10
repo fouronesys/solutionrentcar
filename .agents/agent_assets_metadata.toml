@@ -50,3 +50,17 @@ uri = "file://store-assets/appstore-ios-6.7/appstore-icon-1024.png"
 type = "image"
 title = "Icono App Store (1024×1024)"
 description = "PNG de 1024×1024, el mismo icono iOS del build. Apple lo toma del binario, pero sirve como referencia o para App Store Connect si te lo pide."
+
+[[outputs]]
+id = "YloXhB5SfX1k2pfeLi8jF"
+uri = "file://store-assets/icon-512-white.png"
+type = "image"
+title = "Icono 512 — fondo blanco"
+description = "Escudo Yowell sobre blanco, acorde a la marca (blanco + rojo). Recomendado para Play Store."
+
+[[outputs]]
+id = "9Z5S2XXc-cJFhJzLEK3_C"
+uri = "file://store-assets/icon-512-dark.png"
+type = "image"
+title = "Icono 512 — fondo oscuro"
+description = "Escudo Yowell sobre degradado oscuro, a juego con el tema dark de la app."
