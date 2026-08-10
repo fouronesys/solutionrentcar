@@ -64,3 +64,10 @@ uri = "file://store-assets/icon-512-dark.png"
 type = "image"
 title = "Icono 512 — fondo oscuro"
 description = "Escudo Yowell sobre degradado oscuro, a juego con el tema dark de la app."
+
+[[outputs]]
+id = "trbdBv7etq3ZHTg5ndWdf"
+uri = "file://store-assets/yowell-iconos.zip"
+type = "unspecified"
+title = "Iconos Yowell (zip)"
+description = "Los dos iconos 512×512 (fondo blanco y fondo oscuro) en un solo zip."
