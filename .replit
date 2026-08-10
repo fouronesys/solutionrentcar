@@ -53,3 +53,9 @@ outputType = "console"
 task = "shell.exec"
 args = "cd /home/runner/workspace/mobile && EXPO_NO_DOCTOR=1 npx expo start --web --port 3000 --no-dev 2>&1"
 waitForPort = 3000
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_GUEST_PASSWORD = "8090000000"
+EXPO_PUBLIC_GUEST_USERNAME = "8090000000"

@@ -29,3 +29,10 @@ id = "Du4BghnTvBLZn4oGhMm64"
 uri = "file://attached_assets/store_assets/playstore_feature_1024x500.png"
 type = "image"
 title = "Play Store Feature Graphic — 1024x500"
+
+[[outputs]]
+id = "EEna8hjcasHteKZfFisNM"
+uri = "file://store-assets/yowell-store-screenshots.zip"
+type = "unspecified"
+title = "Screenshots para App Store y Google Play"
+description = "8 capturas por tienda (tema oscuro y claro, en español) en los tamaños oficiales: iOS 1290×2796 (iPhone 6.7\") y Android 1080×1920, más el feature graphic 1024×500 para Google Play."
