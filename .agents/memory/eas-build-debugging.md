@@ -8,3 +8,5 @@ description: Diagnóstico de builds EAS Android para la app móvil (custom workf
 - El proyecto usa custom build workflow en `mobile/.eas/build/preview-android.yml`; EAS trata `mobile/` como raíz del proyecto, así que las rutas del yml son relativas a `mobile/` (no prefijar `mobile/`).
 - Las carpetas nativas `android/`/`ios` commiteadas hacen que EAS detecte "bare workflow" y rechace `runtimeVersion: {policy}`; deben quedar fuera del repo (managed workflow, prebuild las genera).
 - El agente puede correr comandos EAS de solo lectura (`build:list`, `build:view`) con `EXPO_TOKEN`; los builds los lanza el usuario.
+- Para producción se eliminó `package-lock.json` y se generó `yarn.lock` en `mobile/` → EAS elige yarn por defecto y evita el crash de npm sin necesitar custom workflow (el perfil production usa el build estándar con credenciales gestionadas; solo preview usa el yml custom).
+- Credenciales de producción (keystore Android + cert Apple) ya existen en los servidores EAS (hubo builds production exitosos); `--non-interactive` funciona.
