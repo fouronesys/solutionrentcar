@@ -1,1 +1,2 @@
 - [EAS build debugging](eas-build-debugging.md) — cómo bajar logs de builds EAS y el fix del crash de npm en el builder.
+- [Git push quirks](git-push-quirks.md) — gitPush callback es la única vía de push pero puede fallar UNKNOWN; commit por shell requiere identidad inline.
