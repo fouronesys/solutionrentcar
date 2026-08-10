@@ -15,7 +15,10 @@ build:
             cd "$(dirname "$(find . -maxdepth 2 -name package.json -not -path '*/node_modules/*' | head -1)")"
             pwd
           fi
-          npm install --legacy-peer-deps
+          echo "== Instalando dependencias con yarn =="
+          rm -f package-lock.json
+          yarn install --network-timeout 300000 || npm install --legacy-peer-deps --no-audit --no-fund
+          test -x ./node_modules/.bin/expo || { echo "ERROR: expo no quedó instalado"; exit 1; }
           echo "== Prebuild Android =="
           ./node_modules/.bin/expo prebuild --no-install --platform android
           echo "== Gradle assembleDebug =="
