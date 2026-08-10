@@ -1,0 +1,1 @@
+- [EAS build debugging](eas-build-debugging.md) — cómo bajar logs de builds EAS y el fix del crash de npm en el builder.
