@@ -2,8 +2,9 @@
  * Ubicaciones — pantalla de sucursales con mapa real.
  *
  * Estrategia cross-platform:
- *   • Native (iOS/Android): MapView de react-native-maps
- *   • Web (Replit preview): iframe de OpenStreetMap/Leaflet (sin API key)
+ *   • Native (iOS/Android): WebView con Leaflet + teselas de Mapbox
+ *   • Web (Replit preview): iframe con el mismo HTML de Leaflet
+ * Sin módulos nativos de mapas: evita crashes por falta de API keys nativas.
  */
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -91,24 +92,28 @@ const CITY_REGIONS: Record<string, { lat: number; lng: number; zoom: number }> =
   "Santiago":      { lat: 19.4517, lng: -70.6970, zoom: 13 },
 };
 
-// ─── Native map (react-native-maps) — lazy import so web doesn't crash ──────
+// ─── Native map: WebView (lazy import so web doesn't crash) ─────────────────
 
-let MapView: any = null;
-let Marker: any = null;
-let PROVIDER_DEFAULT: any = null;
+let RNWebView: any = null;
 
 if (Platform.OS !== "web") {
   try {
-    const maps = require("react-native-maps");
-    MapView = maps.default;
-    Marker = maps.Marker;
-    PROVIDER_DEFAULT = maps.PROVIDER_DEFAULT;
+    RNWebView = require("react-native-webview").WebView;
   } catch (_) {
-    // react-native-maps not available in this environment
+    // react-native-webview not available in this environment
   }
 }
 
-// ─── Web map: Leaflet (canvas, no WebGL) via srcDoc ──────────────────────────
+// ─── Leaflet map HTML (Mapbox tiles si hay token, OSM como fallback) ─────────
+
+const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "";
+
+function tileLayerJS(): string {
+  if (MAPBOX_TOKEN) {
+    return `L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}@2x?access_token=${MAPBOX_TOKEN}',{maxZoom:19,tileSize:512,zoomOffset:-1}).addTo(map);`;
+  }
+  return `L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);`;
+}
 
 function buildLeafletHTML(branches: Branch[], selected: Branch): string {
   const markers = branches
@@ -120,7 +125,7 @@ function buildLeafletHTML(branches: Branch[], selected: Branch): string {
             html: '<div style="width:28px;height:28px;background:${b.id === selected.id ? "#E8002D" : "#1828E8"};border-radius:50% 50% 50% 0;border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>',
             iconSize: [28,28], iconAnchor: [14,28], popupAnchor: [0,-30]
           })
-        }).addTo(map).bindPopup('<b>${b.name}</b><br/>${b.address}');`
+        }).addTo(map).bindPopup('<b>${b.name}</b><br/>${b.address}').on('click', function(){ if(window.ReactNativeWebView){ window.ReactNativeWebView.postMessage('${b.id}'); } });`
     )
     .join("\n");
 
@@ -140,7 +145,7 @@ function buildLeafletHTML(branches: Branch[], selected: Branch): string {
 <div id="map"></div>
 <script>
   var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([${selected.lat},${selected.lng}],13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  ${tileLayerJS()}
   ${markers}
 <\/script>
 </body>
@@ -183,31 +188,17 @@ function NativeMapView({
   selectedId: string | null;
   onMarkerPress: (id: string) => void;
 }) {
-  const mapRef = useRef<any>(null);
+  const webRef = useRef<any>(null);
   const selected = branches.find((b) => b.id === selectedId) ?? branches[0];
-  const region = selected
-    ? {
-        latitude: selected.lat,
-        longitude: selected.lng,
-        latitudeDelta: 0.04,
-        longitudeDelta: 0.04,
-      }
-    : undefined;
 
   useEffect(() => {
-    if (!selected || !mapRef.current) return;
-    mapRef.current.animateToRegion(
-      {
-        latitude: selected.lat,
-        longitude: selected.lng,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      },
-      600
+    if (!selected || !webRef.current) return;
+    webRef.current.injectJavaScript(
+      `map.setView([${selected.lat},${selected.lng}],14,{animate:true}); true;`
     );
   }, [selected?.id]);
 
-  if (!MapView) {
+  if (!RNWebView || !selected) {
     return (
       <View style={[styles.mapBox, styles.mapFallback]}>
         <Ionicons name="map-outline" size={32} color={colors.textFaint} />
@@ -218,48 +209,34 @@ function NativeMapView({
 
   return (
     <View style={styles.nativeMapWrap}>
-      <MapView
-        ref={mapRef}
+      <RNWebView
+        ref={webRef}
+        originWhitelist={["*"]}
+        source={{ html: buildLeafletHTML(branches, selected) }}
         style={styles.nativeMap}
-        initialRegion={region}
-        showsUserLocation
-        showsMyLocationButton={false}
-        showsCompass={false}
-        rotateEnabled={false}
-      >
-        {branches.map((b) => (
-          <Marker
-            key={b.id}
-            coordinate={{ latitude: b.lat, longitude: b.lng }}
-            title={b.name}
-            description={b.address}
-            pinColor={b.id === selectedId ? colors.cta : colors.primary}
-            onPress={() => onMarkerPress(b.id)}
-          />
-        ))}
-      </MapView>
+        javaScriptEnabled
+        domStorageEnabled
+        onMessage={(e: any) => {
+          const id = e?.nativeEvent?.data;
+          if (id) onMarkerPress(String(id));
+        }}
+      />
 
       {/* My location button */}
-      <Pressable style={styles.locationBtn} onPress={() => requestLocation(mapRef)}>
+      <Pressable style={styles.locationBtn} onPress={() => requestLocation(webRef)}>
         <Ionicons name="locate" size={18} color={colors.text} />
       </Pressable>
     </View>
   );
 }
 
-async function requestLocation(mapRef: React.RefObject<any>) {
+async function requestLocation(webRef: React.RefObject<any>) {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") return;
     const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    mapRef.current?.animateToRegion(
-      {
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      },
-      800
+    webRef.current?.injectJavaScript(
+      `map.setView([${loc.coords.latitude},${loc.coords.longitude}],15,{animate:true}); true;`
     );
   } catch (_) {}
 }
