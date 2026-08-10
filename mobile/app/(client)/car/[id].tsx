@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,6 +35,9 @@ export default function CarDetail() {
       try {
         const r = await api.get<{ car: Car }>(`/cars/${id}`);
         setCar(r.car);
+        // Prefetch remaining gallery photos so swapping is instant
+        const extra = r.car.images?.slice(1) ?? [];
+        if (extra.length) Image.prefetch(extra).catch(() => {});
       } catch (e) {
         setErr(e instanceof ApiError ? e.message : t("common.error"));
       }
@@ -76,7 +79,13 @@ export default function CarDetail() {
         {/* Image gallery */}
         <View style={styles.gallery}>
           {gallery.length > 0 ? (
-            <Image source={{ uri: gallery[imgIndex] }} style={styles.galleryImg} resizeMode="cover" />
+            <Image
+              source={{ uri: gallery[imgIndex] }}
+              style={styles.galleryImg}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="memory-disk"
+            />
           ) : (
             <View style={[styles.galleryImg, styles.galleryPlaceholder]}>
               <Ionicons name="car-sport" size={72} color={colors.textFaint} />

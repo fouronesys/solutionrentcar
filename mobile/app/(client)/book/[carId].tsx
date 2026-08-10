@@ -8,7 +8,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -239,7 +239,7 @@ export default function BookScreen() {
         <Image
           source={require("../../../assets/images/logo.png")}
           style={styles.headerLogo}
-          resizeMode="contain"
+          contentFit="contain"
         />
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>
@@ -363,7 +363,7 @@ export default function BookScreen() {
               {car ? (
                 <View style={styles.carCard}>
                   {car.image ? (
-                    <Image source={{ uri: car.image }} style={styles.carImg} resizeMode="cover" />
+                    <Image source={{ uri: car.image }} style={styles.carImg} contentFit="cover" transition={150} cachePolicy="memory-disk" />
                   ) : (
                     <View style={styles.carImgPlaceholder}>
                       <Ionicons name="car-sport" size={32} color={colors.textFaint} />

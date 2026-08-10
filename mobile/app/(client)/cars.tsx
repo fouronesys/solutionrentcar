@@ -5,7 +5,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
-  Image,
   Platform,
   Pressable,
   RefreshControl,
@@ -16,6 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -51,7 +51,7 @@ function fmtTime(d: Date) {
 // Static categories – filtered client-side by transmission / type fields.
 const CATEGORIES = ["Todos", "SUV", "Sedán", "Económico"];
 
-function CarCard({ car, onPress, index }: { car: Car; onPress: () => void; index: number }) {
+const CarCard = React.memo(function CarCard({ car, onPress, index }: { car: Car; onPress: () => void; index: number }) {
   const s = carStatus[Number(car.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
   const scale = useSharedValue(1);
@@ -80,7 +80,14 @@ function CarCard({ car, onPress, index }: { car: Car; onPress: () => void; index
       {/* Image */}
       <View style={styles.imageBox}>
         {car.image ? (
-          <Image source={{ uri: car.image }} style={styles.carImg} resizeMode="cover" />
+          <Image
+            source={{ uri: car.image }}
+            style={styles.carImg}
+            contentFit="cover"
+            transition={180}
+            cachePolicy="memory-disk"
+            recyclingKey={String(car.id ?? car.image)}
+          />
         ) : (
           <View style={[styles.carImg, styles.imgPlaceholder]}>
             <Ionicons name="car-sport" size={52} color={colors.textFaint} />
@@ -127,7 +134,7 @@ function CarCard({ car, onPress, index }: { car: Car; onPress: () => void; index
       </View>
     </AnimatedPressable>
   );
-}
+});
 
 export default function CarsScreen() {
   const router = useRouter();

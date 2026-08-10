@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -103,7 +104,7 @@ export default function BookingDetailScreen() {
         {/* Car banner */}
         <View style={styles.carBanner}>
           {car?.image ? (
-            <Image source={{ uri: car.image }} style={styles.carImg} resizeMode="cover" />
+            <Image source={{ uri: car.image }} style={styles.carImg} contentFit="cover" transition={150} cachePolicy="memory-disk" />
           ) : (
             <View style={[styles.carImg, styles.carImgPlaceholder]}>
               <Ionicons name="car-sport" size={64} color={colors.textFaint} />
@@ -183,7 +184,7 @@ export default function BookingDetailScreen() {
           {/* Signature */}
           {booking.signature ? (
             <Section title={t("booking.signed")}>
-              <Image source={{ uri: booking.signature }} style={styles.sigImg} resizeMode="contain" />
+              <Image source={{ uri: booking.signature }} style={styles.sigImg} contentFit="contain" cachePolicy="memory-disk" />
             </Section>
           ) : role === "client" && isActive ? (
             <Section title={t("booking.needsSignature")}>

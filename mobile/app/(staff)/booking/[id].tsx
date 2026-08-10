@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -115,7 +116,7 @@ export default function StaffBookingDetail() {
         {car ? (
           <View style={styles.carBanner}>
             {car.image ? (
-              <Image source={{ uri: car.image }} style={styles.carImg} resizeMode="cover" />
+              <Image source={{ uri: car.image }} style={styles.carImg} contentFit="cover" transition={150} cachePolicy="memory-disk" />
             ) : (
               <View style={[styles.carImg, styles.carImgPlaceholder]}>
                 <Ionicons name="car-sport" size={56} color={colors.textFaint} />
