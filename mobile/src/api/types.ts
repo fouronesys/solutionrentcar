@@ -36,6 +36,7 @@ export type Profile = {
   license?: string;
   image?: string;
   documents?: ClientDocuments;
+  created_at?: string;
 };
 
 export type Car = {
@@ -48,6 +49,7 @@ export type Car = {
   plate?: string;
   color?: string;
   seat?: string | number;
+  type?: string;
   transmission?: string;
   transmission_id?: number;
   fuel?: string;

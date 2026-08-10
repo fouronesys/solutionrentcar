@@ -48,16 +48,38 @@ function fmtTime(d: Date) {
     hour: "2-digit", minute: "2-digit",
   });
 }
+// Same formula as the booking screen: ceil of hours/24, min 1.
+function daysBetween(a: Date, b: Date) {
+  return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / 86400000));
+}
 
 // Static categories – filtered client-side by transmission / type fields.
 const CATEGORIES = ["Todos", "SUV", "Sedán", "Económico"];
 
-const CarCard = React.memo(function CarCard({ car, onPress, index }: { car: Car; onPress: () => void; index: number }) {
+const CarCard = React.memo(function CarCard({
+  car,
+  onPress,
+  index,
+  filtered,
+  days,
+}: {
+  car: Car;
+  onPress: () => void;
+  index: number;
+  filtered: boolean;
+  days: number;
+}) {
   const styles = useThemedStyles(makeStyles);
-  const s = carStatus[Number(car.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  // Availability: status 0 = available. When a date range is applied, every
+  // returned car is available for those dates, so force the available chip.
+  const available = filtered || Number(car.status ?? 0) === 0;
+  const chipStatus = carStatus[0];
+  const perDay = Number(car.price_day ?? car.price ?? 0);
+  const total = perDay * days;
 
   // Simple "featured" badge for the first two cards
   const badge = index === 0
@@ -117,6 +139,15 @@ const CarCard = React.memo(function CarCard({ car, onPress, index }: { car: Car;
           {specs ? (
             <Text style={styles.carSpecs} numberOfLines={1}>{specs}</Text>
           ) : null}
+          {/* Availability chip */}
+          <View style={[styles.availChip, available ? styles.availChipOn : styles.availChipOff]}>
+            {available ? (
+              <View style={[styles.availDot, { backgroundColor: chipStatus.color }]} />
+            ) : null}
+            <Text style={[styles.availText, available ? styles.availTextOn : styles.availTextOff]}>
+              {available ? t("cars.available") : t("cars.unavailable")}
+            </Text>
+          </View>
           {/* Rating (mock) */}
           <View style={styles.ratingRow}>
             <Text style={styles.starIcon}>★</Text>
@@ -126,6 +157,11 @@ const CarCard = React.memo(function CarCard({ car, onPress, index }: { car: Car;
         <View style={styles.priceBlock}>
           <Text style={styles.priceAmount}>{money(car.price_day ?? car.price)}</Text>
           <Text style={styles.pricePer}>{t("cars.perDay")}</Text>
+          {filtered ? (
+            <Text style={styles.priceTotal} numberOfLines={2}>
+              {t("cars.totalForDays", { count: days, total: money(total) })}
+            </Text>
+          ) : null}
           <Pressable onPress={onPress} style={styles.pickBtn}>
             <Text style={styles.pickBtnText}>
               {i18n.locale === "en" ? "Choose" : "Elegir"}
@@ -159,6 +195,7 @@ export default function CarsScreen() {
   const [showTime, setShowTime] = useState(false);
 
   const locale = i18n.locale === "en" ? "en" : "es";
+  const days = useMemo(() => daysBetween(start, end), [start, end]);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -409,6 +446,8 @@ export default function CarsScreen() {
           <CarCard
             car={item}
             index={index}
+            filtered={filtered}
+            days={days}
             onPress={() => {
               if (filtered) {
                 router.push({
@@ -599,6 +638,24 @@ const makeStyles = () => StyleSheet.create({
   carBrand: { ...type.label, color: colors.textMuted, marginBottom: 3, fontSize: 10 },
   carModel: { ...type.h3, color: colors.text },
   carSpecs: { ...type.caption, color: colors.textSecondary, marginTop: 2 },
+  availChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 5,
+    marginTop: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  availChipOn: { backgroundColor: carStatus[0].bg, borderColor: carStatus[0].bg },
+  availChipOff: { backgroundColor: colors.cardAlt, borderColor: colors.border },
+  availDot: { width: 7, height: 7, borderRadius: 4 },
+  availText: { ...type.small, fontSize: 11 },
+  availTextOn: { color: carStatus[0].color },
+  availTextOff: { color: colors.textMuted },
+  priceTotal: { ...type.small, color: colors.textSecondary, textAlign: "right", maxWidth: 130 },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 6 },
   starIcon: { fontSize: 14, color: "#F59E0B" },
   ratingText: { ...type.captionMed, color: colors.text },

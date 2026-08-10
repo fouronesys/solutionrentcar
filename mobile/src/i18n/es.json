@@ -84,7 +84,41 @@
     "pickup": "Recogida",
     "dropoff": "Devolución",
     "applyFilter": "Buscar disponibles",
-    "clearFilter": "Quitar filtro"
+    "clearFilter": "Quitar filtro",
+    "available": "Disponible",
+    "unavailable": "No disp.",
+    "totalForDays": {
+      "one": "%{total} total por %{count} día",
+      "other": "%{total} total por %{count} días"
+    }
+  },
+  "book": {
+    "success": "¡Reserva creada!",
+    "pickupRequired": "Ingresa el lugar de recogida",
+    "ctaNow": "Reservar ahora",
+    "guestSection": "TUS DATOS",
+    "guestName": "Nombre",
+    "guestLastname": "Apellido",
+    "guestPhone": "Teléfono",
+    "guestEmail": "Correo",
+    "guestPassword": "Contraseña",
+    "guestPasswordHelp": "para acceder a tus reservas luego",
+    "guestInfoTitle": "Aún no tienes cuenta",
+    "guestInfoBody": "Llena tus datos; al tocar Reservar crearemos tu cuenta automáticamente.",
+    "guestHaveAccount": "¿Ya tienes cuenta?",
+    "guestSignIn": "Inicia sesión",
+    "guestNameRequired": "Ingresa tu nombre",
+    "guestPhoneRequired": "Ingresa tu teléfono",
+    "guestPasswordRequired": "Ingresa una contraseña",
+    "guestPasswordShort": "La contraseña debe tener al menos 6 caracteres",
+    "guestPasswordSameAsPhone": "La contraseña no puede ser igual al teléfono",
+    "guestRegisterError": "No pudimos crear tu cuenta. Revisa tus datos.",
+    "guestPhoneTaken": "Ese teléfono ya está registrado. Inicia sesión para continuar.",
+    "guestLoginError": "Creamos tu cuenta pero no pudimos iniciar sesión. Intenta iniciar sesión.",
+    "whatsappTitle": "Tu reserva se confirma por WhatsApp",
+    "whatsappBody": "No pagas nada en la app — coordinamos disponibilidad y la entrega contigo.",
+    "confirmWhatsapp": "Confirmar por WhatsApp",
+    "whatsappMessage": "Hola, quiero confirmar mi reserva %{code} del %{car} del %{start} al %{end}."
   },
   "booking": {
     "title": "Nueva reserva",

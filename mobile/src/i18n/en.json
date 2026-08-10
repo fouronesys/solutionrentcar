@@ -84,7 +84,41 @@
     "pickup": "Pick-up",
     "dropoff": "Return",
     "applyFilter": "Find available",
-    "clearFilter": "Clear filter"
+    "clearFilter": "Clear filter",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "totalForDays": {
+      "one": "%{total} total for %{count} day",
+      "other": "%{total} total for %{count} days"
+    }
+  },
+  "book": {
+    "success": "Booking created!",
+    "pickupRequired": "Enter the pickup location",
+    "ctaNow": "Book now",
+    "guestSection": "YOUR DETAILS",
+    "guestName": "First name",
+    "guestLastname": "Last name",
+    "guestPhone": "Phone",
+    "guestEmail": "Email",
+    "guestPassword": "Password",
+    "guestPasswordHelp": "to access your bookings later",
+    "guestInfoTitle": "You don't have an account yet",
+    "guestInfoBody": "Fill in your details; when you tap Book we'll create your account automatically.",
+    "guestHaveAccount": "Already have an account?",
+    "guestSignIn": "Sign in",
+    "guestNameRequired": "Enter your name",
+    "guestPhoneRequired": "Enter your phone",
+    "guestPasswordRequired": "Enter a password",
+    "guestPasswordShort": "Password must be at least 6 characters",
+    "guestPasswordSameAsPhone": "Password cannot be the same as your phone number",
+    "guestRegisterError": "We couldn't create your account. Check your details.",
+    "guestPhoneTaken": "That phone is already registered. Sign in to continue.",
+    "guestLoginError": "We created your account but couldn't sign you in. Try signing in.",
+    "whatsappTitle": "Your booking is confirmed via WhatsApp",
+    "whatsappBody": "You pay nothing in the app — we coordinate availability and handover with you.",
+    "confirmWhatsapp": "Confirm via WhatsApp",
+    "whatsappMessage": "Hi, I'd like to confirm my booking %{code} for the %{car} from %{start} to %{end}."
   },
   "booking": {
     "title": "New booking",

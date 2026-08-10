@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -32,6 +33,7 @@ import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
+import { whatsappUrl } from "@/config/contact";
 
 function defaultStart() {
   const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); return d;
@@ -51,81 +53,6 @@ function daysBetween(a: Date, b: Date) {
   return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / 86400000));
 }
 
-// ─── Inline auth guard ──────────────────────────────────────────────────────
-function LoginRequired({ onSuccess }: { onSuccess: () => void }) {
-  const { role, loginClient, registerClient } = useAuth();
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [lastname, setLastname] = useState("");
-  const [email, setEmail] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const styles = useThemedStyles(makeStyles);
-
-  useEffect(() => { if (role === "client") onSuccess(); }, [role, onSuccess]);
-
-  const submit = async () => {
-    if (!phone.trim() || !password.trim()) { Alert.alert(t("login.errors.empty")); return; }
-    if (mode === "register") {
-      if (!name.trim()) { Alert.alert(t("register.errors.required")); return; }
-      if (password.length < 6) { Alert.alert(t("register.errors.passwordShort")); return; }
-      if (password !== confirm) { Alert.alert(t("register.errors.passwordMismatch")); return; }
-    }
-    setLoading(true);
-    try {
-      if (mode === "login") {
-        await loginClient(phone.trim(), password);
-      } else {
-        await registerClient({ name: name.trim(), lastname: lastname.trim() || undefined, phone: phone.trim(), email: email.trim() || undefined, password });
-      }
-    } catch (e) {
-      Alert.alert(e instanceof ApiError ? e.message : t("login.errors.invalid"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Card style={styles.authCard} padding={spacing.xl} elevation="lg">
-      <View style={styles.authIconWrap}>
-        <Ionicons name="lock-closed" size={28} color={colors.cta} />
-      </View>
-      <Text style={styles.authTitle}>{t("login.requiredTitle")}</Text>
-      <Text style={styles.authSub}>{t("login.requiredSubtitle")}</Text>
-      <View style={styles.authToggle}>
-        {(["login", "register"] as const).map((m) => (
-          <Pressable key={m} onPress={() => setMode(m)} style={[styles.authTab, mode === m && styles.authTabActive]}>
-            <Text style={[styles.authTabText, mode === m && styles.authTabTextActive]}>
-              {m === "login" ? t("login.goToLogin") : t("login.createAccount")}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-      {mode === "register" && (
-        <View style={styles.nameRow}>
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <Input label={t("register.name")} value={name} onChangeText={setName} autoCapitalize="words" icon="person-outline" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Input label={t("register.lastname")} value={lastname} onChangeText={setLastname} autoCapitalize="words" />
-          </View>
-        </View>
-      )}
-      <Input label={t("login.client.phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoCapitalize="none" placeholder="809-000-0000" icon="call-outline" />
-      {mode === "register" && (
-        <Input label={t("register.email")} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholder="opcional" icon="mail-outline" />
-      )}
-      <Input label={t("login.client.password")} value={password} onChangeText={setPassword} secureTextEntry placeholder="••••••••" icon="lock-closed-outline" />
-      {mode === "register" && (
-        <Input label={t("register.passwordConfirm")} value={confirm} onChangeText={setConfirm} secureTextEntry placeholder="Repite la contraseña" icon="lock-closed-outline" />
-      )}
-      <Button title={mode === "login" ? t("login.client.submit") : t("register.submit")} onPress={submit} loading={loading} size="lg" icon="arrow-forward" iconRight />
-    </Card>
-  );
-}
-
 // ─── Main booking screen ────────────────────────────────────────────────────
 export default function BookScreen() {
   const { carId, start: paramStart, end: paramEnd } = useLocalSearchParams<{
@@ -133,7 +60,7 @@ export default function BookScreen() {
   }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { role } = useAuth();
+  const { role, registerClient } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
   const styles = useThemedStyles(makeStyles);
   const { isDark } = useTheme();
@@ -152,9 +79,14 @@ export default function BookScreen() {
   const [placeEnd, setPlaceEnd] = useState("");
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [authDone, setAuthDone] = useState(role === "client");
 
-  useEffect(() => { if (role === "client") setAuthDone(true); }, [role]);
+  // Guest checkout (book without a prior account)
+  const isGuest = role !== "client";
+  const [gName, setGName] = useState("");
+  const [gLastname, setGLastname] = useState("");
+  const [gPhone, setGPhone] = useState("");
+  const [gEmail, setGEmail] = useState("");
+  const [gPassword, setGPassword] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -199,10 +131,63 @@ export default function BookScreen() {
     }
   };
 
+  const goToLogin = () => router.push("/login/client");
+
+  const registerGuest = async (): Promise<boolean> => {
+    // Validate guest fields
+    if (!gName.trim()) { Alert.alert(t("book.guestNameRequired")); return false; }
+    if (!gPhone.trim()) { Alert.alert(t("book.guestPhoneRequired")); return false; }
+    if (!gPassword.trim()) { Alert.alert(t("book.guestPasswordRequired")); return false; }
+    if (gPassword.length < 6) { Alert.alert(t("book.guestPasswordShort")); return false; }
+    // Reject a password identical to the phone (compare digits only).
+    if (gPassword.replace(/\D/g, "") === gPhone.replace(/\D/g, "") && gPhone.replace(/\D/g, "") !== "") {
+      Alert.alert(t("book.guestPasswordSameAsPhone")); return false;
+    }
+
+    // Create the account. POST /auth/register returns {role,user,tokens};
+    // registerClient adopts that session directly (saves tokens + sets role),
+    // so there is no separate login step that could fail or match a wrong account.
+    try {
+      await registerClient({
+        name: gName.trim(),
+        lastname: gLastname.trim() || undefined,
+        phone: gPhone.trim(),
+        email: gEmail.trim() || undefined,
+        password: gPassword,
+      });
+    } catch (e) {
+      if (e instanceof ApiError) {
+        const msg = e.message?.toLowerCase() ?? "";
+        const phoneTaken =
+          /(exist|regist|taken|duplicat|already)/.test(msg) ||
+          /(tel[eé]fono|correo|usuario)/.test(msg);
+        Alert.alert(
+          phoneTaken ? t("book.guestPhoneTaken") : (e.message || t("book.guestRegisterError")),
+          undefined,
+          phoneTaken
+            ? [
+                { text: t("common.cancel"), style: "cancel" },
+                { text: t("book.guestSignIn"), onPress: goToLogin },
+              ]
+            : undefined,
+        );
+      } else {
+        Alert.alert(t("book.guestRegisterError"));
+      }
+      return false;
+    }
+    return true;
+  };
+
   const submit = async () => {
     if (!placeStart.trim()) { Alert.alert(t("book.pickupRequired")); return; }
     setSubmitting(true);
     try {
+      // Guest checkout: create account + sign in before booking
+      if (isGuest) {
+        const ok = await registerGuest();
+        if (!ok) { setSubmitting(false); return; }
+      }
       const r = await api.post<{ booking_id: number }>("/bookings", {
         car_id: Number(carId),
         start_at: toDbDateTime(start),
@@ -285,12 +270,19 @@ export default function BookScreen() {
             </View>
           ) : null}
 
-          {!authDone ? (
-            <LoginRequired onSuccess={() => setAuthDone(true)} />
-          ) : (
-            <>
-              {/* RUTA — dark card */}
-              <View style={styles.rutaCard}>
+          {/* WhatsApp trust banner */}
+          <View style={styles.waBanner}>
+            <View style={styles.waIconWrap}>
+              <Ionicons name="logo-whatsapp" size={20} color={colors.card} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.waTitle}>{t("book.whatsappTitle")}</Text>
+              <Text style={styles.waBody}>{t("book.whatsappBody")}</Text>
+            </View>
+          </View>
+
+          {/* RUTA — dark card */}
+          <View style={styles.rutaCard}>
                 <Text style={styles.rutaLabel}>
                   {locale === "en" ? "ROUTE" : "RUTA"}
                 </Text>
@@ -473,20 +465,81 @@ export default function BookScreen() {
                 </View>
               </Card>
 
-              {/* CTA */}
-              <Button
-                title={locale === "en" ? "CONFIRM BOOKING" : "CONFIRMAR RESERVA"}
-                onPress={submit}
-                loading={submitting}
-                size="lg"
-                icon="chevron-forward"
-                iconRight
-                style={styles.ctaBtn}
-              />
-            </>
-          )}
+              {/* Guest checkout — "Tus datos" */}
+              {isGuest ? (
+                <>
+                  <Card style={styles.section} elevation="sm">
+                    <View style={styles.sectionLabelRow}>
+                      <Ionicons name="person-outline" size={14} color={colors.cta} />
+                      <Text style={styles.sectionLabelText}>{t("book.guestSection")}</Text>
+                    </View>
+                    <View style={styles.nameRow}>
+                      <View style={{ flex: 1, marginRight: 8 }}>
+                        <Input label={t("book.guestName")} value={gName} onChangeText={setGName} autoCapitalize="words" icon="person-outline" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Input label={t("book.guestLastname")} value={gLastname} onChangeText={setGLastname} autoCapitalize="words" icon="people-outline" />
+                      </View>
+                    </View>
+                    <Input
+                      label={t("book.guestPhone")}
+                      value={gPhone}
+                      onChangeText={setGPhone}
+                      keyboardType="phone-pad"
+                      autoCapitalize="none"
+                      placeholder="809-000-0000"
+                      icon="call-outline"
+                    />
+                    <Input
+                      label={t("book.guestEmail")}
+                      value={gEmail}
+                      onChangeText={setGEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      placeholder={locale === "en" ? "optional" : "opcional"}
+                      icon="mail-outline"
+                    />
+                    <Input
+                      label={t("book.guestPassword")}
+                      value={gPassword}
+                      onChangeText={setGPassword}
+                      secureTextEntry
+                      placeholder="••••••••"
+                      icon="lock-closed-outline"
+                    />
+                    <Text style={styles.guestHelp}>{t("book.guestPasswordHelp")}</Text>
+                  </Card>
+
+                  {/* Guest info card */}
+                  <View style={styles.guestInfoCard}>
+                    <Ionicons name="information-circle-outline" size={18} color={colors.info} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.guestInfoTitle}>{t("book.guestInfoTitle")}</Text>
+                      <Text style={styles.guestInfoBody}>{t("book.guestInfoBody")}</Text>
+                      <Pressable onPress={goToLogin} hitSlop={6} style={styles.guestLoginLink}>
+                        <Text style={styles.guestLoginText}>
+                          {t("book.guestHaveAccount")} <Text style={styles.guestLoginTextBold}>{t("book.guestSignIn")}</Text>
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </>
+              ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Sticky bottom CTA */}
+      <View style={[styles.stickyBar, { paddingBottom: insets.bottom + 12 }]}>
+        <Button
+          title={`${t("book.ctaNow")} · ${money(total)}`}
+          onPress={submit}
+          loading={submitting}
+          size="lg"
+          icon="chevron-forward"
+          iconRight
+          style={styles.ctaBtn}
+        />
+      </View>
     </View>
   );
 }
@@ -513,7 +566,7 @@ const makeStyles = () => StyleSheet.create({
   headerTitle: { fontFamily: font.bold, fontSize: 16, color: colors.text, letterSpacing: -0.2 },
   headerSub: { fontFamily: font.regular, fontSize: 12, color: colors.textMuted, marginTop: 1 },
 
-  body: { padding: spacing.lg, paddingBottom: 48 },
+  body: { padding: spacing.lg, paddingBottom: 120 },
 
   // Step indicator
   stepBlock: { marginBottom: spacing.lg },
@@ -635,24 +688,55 @@ const makeStyles = () => StyleSheet.create({
   },
   textarea: { padding: 14, minHeight: 80, ...type.body, color: colors.text },
 
-  ctaBtn: { marginTop: spacing.sm, borderRadius: radius.lg, height: 58 },
+  ctaBtn: { borderRadius: radius.lg, height: 58 },
 
-  // Auth card
-  authCard: { borderTopWidth: 4, borderTopColor: colors.cta, marginBottom: spacing.md },
-  authIconWrap: {
-    alignSelf: "center", width: 64, height: 64, borderRadius: radius.full,
-    backgroundColor: colors.ctaXLight, borderWidth: 1, borderColor: colors.ctaLight,
-    alignItems: "center", justifyContent: "center", marginBottom: 14,
+  // Sticky bottom CTA bar
+  stickyBar: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: 12,
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    ...shadow.lg,
   },
-  authTitle: { ...type.h2, color: colors.text, textAlign: "center", marginBottom: 4 },
-  authSub: { ...type.caption, color: colors.textMuted, textAlign: "center", marginBottom: 20, lineHeight: 18 },
-  authToggle: {
-    flexDirection: "row", backgroundColor: colors.borderLight,
-    borderRadius: radius.md, padding: 3, marginBottom: 20,
+
+  // WhatsApp trust banner
+  waBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    marginBottom: spacing.md,
+    backgroundColor: colors.successBg,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.success,
   },
-  authTab: { flex: 1, paddingVertical: 10, alignItems: "center", borderRadius: radius.sm },
-  authTabActive: { backgroundColor: colors.card, ...shadow.sm },
-  authTabText: { ...type.captionMed, color: colors.textMuted },
-  authTabTextActive: { color: colors.text, fontFamily: font.bold },
+  waIconWrap: {
+    width: 38, height: 38, borderRadius: radius.full,
+    backgroundColor: "#25D366",
+    alignItems: "center", justifyContent: "center",
+  },
+  waTitle: { ...type.captionMed, color: colors.success, fontFamily: font.bold },
+  waBody: { ...type.small, color: colors.textSecondary, marginTop: 2, lineHeight: 16 },
+
+  // Guest checkout
+  guestHelp: { ...type.small, color: colors.textMuted, marginTop: -4 },
+  guestInfoCard: {
+    flexDirection: "row",
+    gap: 10,
+    padding: 14,
+    marginBottom: spacing.md,
+    backgroundColor: colors.tint,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.tintBorder,
+  },
+  guestInfoTitle: { ...type.captionMed, color: colors.text, fontFamily: font.bold },
+  guestInfoBody: { ...type.small, color: colors.textSecondary, marginTop: 2, lineHeight: 16 },
+  guestLoginLink: { marginTop: 8 },
+  guestLoginText: { ...type.small, color: colors.textMuted },
+  guestLoginTextBold: { color: colors.cta, fontFamily: font.bold },
+
   nameRow: { flexDirection: "row" },
 });

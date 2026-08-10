@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,11 +11,12 @@ import { Card } from "@/components/Card";
 import { Loading } from "@/components/Loading";
 import { api, ApiError } from "@/api/client";
 import type { BookingDetail, Payment } from "@/api/types";
-import { bookingStatus, colors, font, gradients, radius, spacing, type } from "@/theme/colors";
+import { bookingStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
 import { useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { dateTime, money } from "@/utils/format";
 import { useAuth } from "@/auth/AuthContext";
+import { whatsappUrl } from "@/config/contact";
 
 function InfoRow({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value?: string | number }) {
   const styles = useThemedStyles(makeStyles);
@@ -79,6 +80,22 @@ export default function BookingDetailScreen() {
         },
       },
     ]);
+  };
+
+  const confirmWhatsapp = () => {
+    if (!detail) return;
+    const { booking, car } = detail;
+    const code = booking.code ?? String(booking.id);
+    const carName = car ? `${car.brand ? `${car.brand} ` : ""}${car.name ?? car.model ?? ""}`.trim() : "";
+    const message = t("book.whatsappMessage", {
+      code,
+      car: carName,
+      start: dateTime(booking.start_at),
+      end: dateTime(booking.end_at),
+    });
+    Linking.openURL(whatsappUrl(message)).catch(() =>
+      Alert.alert(t("common.error")),
+    );
   };
 
   if (err) return (
@@ -156,6 +173,12 @@ export default function BookingDetailScreen() {
               </Text>
             </View>
           </Card>
+
+          {/* WhatsApp confirmation */}
+          <Pressable style={styles.waButton} onPress={confirmWhatsapp}>
+            <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+            <Text style={styles.waButtonText}>{t("book.confirmWhatsapp")}</Text>
+          </Pressable>
 
           {/* Details */}
           <Section title={locale === "en" ? "Booking Details" : "Detalles"}>
@@ -297,4 +320,18 @@ const makeStyles = () => StyleSheet.create({
 
   sigImg: { width: "100%", height: 130, backgroundColor: colors.borderLight, borderRadius: radius.md },
   actionsSection: { paddingHorizontal: spacing.lg, marginTop: 4 },
+
+  waButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    height: 54,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    backgroundColor: "#25D366",
+    borderRadius: radius.lg,
+    ...shadow.md,
+  },
+  waButtonText: { ...type.title, color: "#FFFFFF", fontFamily: font.bold },
 });
