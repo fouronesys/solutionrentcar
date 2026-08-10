@@ -24,6 +24,6 @@ build:
           echo "== Gradle assembleDebug =="
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -x lint -x lintDebug
+          ./gradlew assembleRelease --no-daemon -x lint
 
     - eas/find_and_upload_build_artifacts
