@@ -63,6 +63,7 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const { role, registerClient } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
+  const placesY = useRef(0);
   const styles = useThemedStyles(makeStyles);
   const { isDark } = useTheme();
 
@@ -292,7 +293,7 @@ export default function BookScreen() {
                 {/* Pickup location */}
                 <Pressable
                   style={styles.rutaLocationRow}
-                  onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
+                  onPress={() => scrollRef.current?.scrollTo({ y: placesY.current, animated: true })}
                 >
                   <View style={styles.rutaIconRed}>
                     <Ionicons name="location" size={16} color="#FFFFFF" />
@@ -386,6 +387,7 @@ export default function BookScreen() {
               ) : null}
 
               {/* Locations */}
+              <View onLayout={(e) => { placesY.current = Math.max(0, e.nativeEvent.layout.y - 12); }}>
               <Card style={styles.section} elevation="sm">
                 <View style={styles.sectionLabelRow}>
                   <Ionicons name="location-outline" size={14} color={colors.cta} />
@@ -471,6 +473,7 @@ export default function BookScreen() {
                   </>
                 ) : null}
               </Card>
+              </View>
 
               {/* Price summary */}
               <View style={styles.summaryCard}>
