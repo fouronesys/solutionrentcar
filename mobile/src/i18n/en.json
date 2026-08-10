@@ -96,6 +96,8 @@
     "success": "Booking created!",
     "pickupRequired": "Enter the pickup location",
     "ctaNow": "Book now",
+    "suggestionsLabel": "Suggestions",
+    "sameReturn": "Return to the same place",
     "guestSection": "YOUR DETAILS",
     "guestName": "First name",
     "guestLastname": "Last name",
@@ -236,5 +238,16 @@
     "cancelled": "Cancelled",
     "delivered": "Delivered",
     "returned": "Returned"
+  },
+  "home": {
+    "guestBannerText": "Create your account and book in minutes.",
+    "guestBannerCta": "Get started",
+    "featuredTitle": "Featured",
+    "featuredEmpty": "No cars available right now",
+    "perDay": "/day",
+    "exploreFleet": "Explore the fleet",
+    "exploreFleetSub": "See every available car",
+    "ourLocations": "Our locations",
+    "ourLocationsSub": "Find the nearest branch"
   }
 }

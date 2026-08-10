@@ -4,7 +4,6 @@
  */
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Image,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -16,14 +15,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { Button } from "@/components/Button";
 import { BellButton, ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
+import { Image as ExpoImage } from "expo-image";
 import { useAuth } from "@/auth/AuthContext";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { bookingStatus, colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { useThemedStyles, useTheme } from "@/theme/ThemeContext";
-import type { Booking } from "@/api/types";
+import type { Booking, Car } from "@/api/types";
 import { i18n, t } from "@/i18n";
 import { money, shortDate } from "@/utils/format";
 
@@ -102,19 +101,26 @@ export default function HomeScreen() {
   const { user, role } = useAuth();
   const { unread } = useNotificationsCtx();
   const [upcoming, setUpcoming] = useState<Booking | null>(null);
+  const [featured, setFeatured] = useState<Car[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const isGuest = !role;
 
   const load = useCallback(async () => {
-    if (!role) return;
     try {
-      const r = await api.get<{ bookings: Booking[] }>("/bookings", { limit: 1, status: 1 });
-      setUpcoming(r.bookings?.[0] ?? null);
+      if (isGuest) {
+        // Guests: show a "Destacados" carousel of available cars.
+        const r = await api.get<{ cars: Car[] }>("/cars", { limit: 5, status: 0 });
+        setFeatured(r.cars ?? []);
+      } else {
+        const r = await api.get<{ bookings: Booking[] }>("/bookings", { limit: 1, status: 1 });
+        setUpcoming(r.bookings?.[0] ?? null);
+      }
     } catch {
       // silent
     } finally {
       setRefreshing(false);
     }
-  }, [role]);
+  }, [isGuest]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -168,16 +174,86 @@ export default function HomeScreen() {
               {locale === "en" ? "Available now" : "Disponibles ahora"}
             </Text>
           </Pressable>
-          <Pressable style={styles.ctaCardDark} onPress={() => router.push("/(client)/bookings")}>
-            <Ionicons name="calendar-outline" size={28} color={colors.onDark} />
-            <Text style={styles.ctaCardDarkTitle}>
-              {locale === "en" ? "My bookings" : "Mis reservas"}
-            </Text>
-            <Text style={styles.ctaCardDarkSub}>
-              {locale === "en" ? "Track & manage" : "Seguimiento"}
-            </Text>
-          </Pressable>
+          {isGuest ? (
+            <Pressable style={styles.ctaCardDark} onPress={() => router.push("/(client)/locations")}>
+              <Ionicons name="location-outline" size={28} color={colors.onDark} />
+              <Text style={styles.ctaCardDarkTitle}>{t("home.ourLocations")}</Text>
+              <Text style={styles.ctaCardDarkSub}>{t("home.ourLocationsSub")}</Text>
+            </Pressable>
+          ) : (
+            <Pressable style={styles.ctaCardDark} onPress={() => router.push("/(client)/bookings")}>
+              <Ionicons name="calendar-outline" size={28} color={colors.onDark} />
+              <Text style={styles.ctaCardDarkTitle}>
+                {locale === "en" ? "My bookings" : "Mis reservas"}
+              </Text>
+              <Text style={styles.ctaCardDarkSub}>
+                {locale === "en" ? "Track & manage" : "Seguimiento"}
+              </Text>
+            </Pressable>
+          )}
         </View>
+
+        {/* Guest banner — compact */}
+        {isGuest ? (
+          <View style={styles.guestBanner}>
+            <Ionicons name="sparkles-outline" size={20} color={colors.cta} />
+            <Text style={styles.guestBannerText} numberOfLines={2}>
+              {t("home.guestBannerText")}
+            </Text>
+            <Pressable style={styles.guestBannerBtn} onPress={() => router.push("/login/client")}>
+              <Text style={styles.guestBannerBtnText}>{t("home.guestBannerCta")}</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {/* Destacados — featured carousel (guests) */}
+        {isGuest ? (
+          <View style={styles.sectionNoPad}>
+            <Text style={styles.sectionTitlePad}>{t("home.featuredTitle")}</Text>
+            {featured.length ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.featuredRow}
+              >
+                {featured.map((car) => (
+                  <Pressable
+                    key={car.id}
+                    style={styles.featuredCard}
+                    onPress={() =>
+                      router.push({ pathname: "/(client)/car/[id]", params: { id: String(car.id) } })
+                    }
+                  >
+                    {car.image ? (
+                      <ExpoImage
+                        source={{ uri: car.image }}
+                        style={styles.featuredImg}
+                        contentFit="cover"
+                        transition={150}
+                        cachePolicy="memory-disk"
+                      />
+                    ) : (
+                      <View style={styles.featuredImgPlaceholder}>
+                        <Ionicons name="car-sport" size={30} color={colors.textFaint} />
+                      </View>
+                    )}
+                    <Text style={styles.featuredName} numberOfLines={1}>
+                      {car.brand ? `${car.brand} ` : ""}{car.name ?? car.model ?? ""}
+                    </Text>
+                    <View style={styles.featuredPriceRow}>
+                      <Text style={styles.featuredPrice}>
+                        {money(Number(car.price_day ?? car.price ?? 0))}
+                      </Text>
+                      <Text style={styles.featuredPer}>{t("home.perDay")}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            ) : (
+              <Text style={styles.featuredEmpty}>{t("home.featuredEmpty")}</Text>
+            )}
+          </View>
+        ) : null}
 
         {/* Upcoming booking */}
         {upcoming ? (
@@ -189,54 +265,47 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {/* Guest CTA */}
-        {!role ? (
-          <View style={styles.guestCard}>
-            <View style={styles.guestIconWrap}>
-              <Ionicons name="person-outline" size={32} color={colors.cta} />
-            </View>
-            <Text style={styles.guestTitle}>
-              {locale === "en" ? "Create an account" : "Crea tu cuenta"}
-            </Text>
-            <Text style={styles.guestSub}>
-              {locale === "en"
-                ? "Sign in to book a vehicle and manage your reservations."
-                : "Inicia sesión para hacer una reserva y gestionar tus rentas."}
-            </Text>
-            <Button
-              title={locale === "en" ? "Get started" : "Empezar"}
-              onPress={() => router.push("/login/client")}
-              size="lg"
-              style={{ marginTop: 16 }}
-            />
-          </View>
-        ) : null}
-
         {/* Quick links */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {locale === "en" ? "Quick access" : "Acceso rápido"}
           </Text>
-          {[
-            {
-              icon: "location-outline" as const,
-              label: locale === "en" ? "Our locations" : "Nuestras ubicaciones",
-              sub: locale === "en" ? "Find the nearest branch" : "Sucursal más cercana",
-              route: "/(client)/locations" as const,
-            },
-            {
-              icon: "document-text-outline" as const,
-              label: locale === "en" ? "My bookings" : "Mis reservas",
-              sub: locale === "en" ? "View all reservations" : "Ver todas las reservas",
-              route: "/(client)/bookings" as const,
-            },
-            {
-              icon: "notifications-outline" as const,
-              label: locale === "en" ? "Notifications" : "Notificaciones",
-              sub: locale === "en" ? "Updates and alerts" : "Avisos y actualizaciones",
-              route: "/(client)/notifications" as const,
-            },
-          ].map((item) => (
+          {(isGuest
+            ? [
+                {
+                  icon: "location-outline" as const,
+                  label: t("home.ourLocations"),
+                  sub: t("home.ourLocationsSub"),
+                  route: "/(client)/locations" as const,
+                },
+                {
+                  icon: "car-sport-outline" as const,
+                  label: t("home.exploreFleet"),
+                  sub: t("home.exploreFleetSub"),
+                  route: "/(client)/cars" as const,
+                },
+              ]
+            : [
+                {
+                  icon: "location-outline" as const,
+                  label: locale === "en" ? "Our locations" : "Nuestras ubicaciones",
+                  sub: locale === "en" ? "Find the nearest branch" : "Sucursal más cercana",
+                  route: "/(client)/locations" as const,
+                },
+                {
+                  icon: "document-text-outline" as const,
+                  label: locale === "en" ? "My bookings" : "Mis reservas",
+                  sub: locale === "en" ? "View all reservations" : "Ver todas las reservas",
+                  route: "/(client)/bookings" as const,
+                },
+                {
+                  icon: "notifications-outline" as const,
+                  label: locale === "en" ? "Notifications" : "Notificaciones",
+                  sub: locale === "en" ? "Updates and alerts" : "Avisos y actualizaciones",
+                  route: "/(client)/notifications" as const,
+                },
+              ]
+          ).map((item) => (
             <Pressable
               key={item.route}
               style={styles.quickRow}
@@ -331,29 +400,56 @@ const makeStyles = () => StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Guest card
-  guestCard: {
-    backgroundColor: colors.card,
+  // Guest banner — compact
+  guestBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: colors.ctaXLight,
     marginHorizontal: spacing.xl,
     marginBottom: spacing.xl,
-    borderRadius: radius.xl,
-    padding: spacing.xl,
-    alignItems: "center",
-    ...shadow.sm,
-  },
-  guestIconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.full,
-    backgroundColor: colors.ctaXLight,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 14,
+    borderRadius: radius.lg,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: colors.ctaLight,
   },
-  guestTitle: { ...type.h3, color: colors.text, textAlign: "center", marginBottom: 6 },
-  guestSub: { ...type.callout, color: colors.textMuted, textAlign: "center", lineHeight: 20 },
+  guestBannerText: { ...type.callout, color: colors.text, flex: 1 },
+  guestBannerBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    backgroundColor: colors.cta,
+    ...shadow.cta,
+  },
+  guestBannerBtnText: { ...type.captionMed, color: "#FFFFFF", fontFamily: font.bold },
+
+  // Featured carousel
+  sectionNoPad: { marginBottom: spacing.xl },
+  sectionTitlePad: { ...type.h3, color: colors.text, marginBottom: 12, paddingHorizontal: spacing.xl },
+  featuredRow: { gap: 12, paddingHorizontal: spacing.xl },
+  featuredCard: {
+    width: 180,
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: 10,
+    ...shadow.sm,
+  },
+  featuredImg: { width: "100%", height: 100, borderRadius: radius.md, marginBottom: 8 },
+  featuredImgPlaceholder: {
+    width: "100%",
+    height: 100,
+    borderRadius: radius.md,
+    marginBottom: 8,
+    backgroundColor: colors.borderLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  featuredName: { ...type.bodyMed, color: colors.text },
+  featuredPriceRow: { flexDirection: "row", alignItems: "baseline", marginTop: 4 },
+  featuredPrice: { fontFamily: font.extrabold, fontSize: 16, color: colors.text },
+  featuredPer: { ...type.caption, color: colors.textMuted, marginLeft: 2 },
+  featuredEmpty: { ...type.callout, color: colors.textMuted, paddingHorizontal: spacing.xl },
 
   // Quick links
   quickRow: {

@@ -34,6 +34,7 @@ import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
 import { whatsappUrl } from "@/config/contact";
+import { PICKUP_SUGGESTIONS } from "@/config/locations";
 
 function defaultStart() {
   const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); return d;
@@ -77,6 +78,7 @@ export default function BookScreen() {
 
   const [placeStart, setPlaceStart] = useState("");
   const [placeEnd, setPlaceEnd] = useState("");
+  const [sameReturn, setSameReturn] = useState(true);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -193,7 +195,7 @@ export default function BookScreen() {
         start_at: toDbDateTime(start),
         end_at: toDbDateTime(end),
         place_start: placeStart.trim(),
-        place_end: placeEnd.trim() || placeStart.trim(),
+        place_end: sameReturn ? placeStart.trim() : (placeEnd.trim() || placeStart.trim()),
         comment: comment.trim() || undefined,
       });
       Alert.alert(t("book.success"), undefined, [{
@@ -398,13 +400,76 @@ export default function BookScreen() {
                   icon="navigate-outline"
                   placeholder={locale === "en" ? "Airport, hotel, address…" : "Aeropuerto, hotel, dirección…"}
                 />
-                <Input
-                  label={t("booking.placeEnd")}
-                  value={placeEnd}
-                  onChangeText={setPlaceEnd}
-                  icon="flag-outline"
-                  placeholder={locale === "en" ? "Same as pickup if empty" : "Igual al de recogida si está vacío"}
-                />
+                {/* Pickup suggestion chips */}
+                <Text style={styles.chipsLabel}>{t("book.suggestionsLabel")}</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={styles.chipsRow}
+                >
+                  {PICKUP_SUGGESTIONS.map((s) => {
+                    const active = placeStart === s.value;
+                    return (
+                      <Pressable
+                        key={s.id}
+                        onPress={() => setPlaceStart(s.value)}
+                        style={[styles.chip, active && styles.chipActive]}
+                      >
+                        <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                          {s.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                {/* Same-place-for-return toggle */}
+                <Pressable
+                  style={styles.sameReturnRow}
+                  onPress={() => setSameReturn((v) => !v)}
+                  hitSlop={6}
+                >
+                  <View style={[styles.checkbox, sameReturn && styles.checkboxOn]}>
+                    {sameReturn ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}
+                  </View>
+                  <Text style={styles.sameReturnText}>{t("book.sameReturn")}</Text>
+                </Pressable>
+
+                {/* Return field + chips — only when returning elsewhere */}
+                {!sameReturn ? (
+                  <>
+                    <Input
+                      label={t("booking.placeEnd")}
+                      value={placeEnd}
+                      onChangeText={setPlaceEnd}
+                      icon="flag-outline"
+                      placeholder={locale === "en" ? "Same as pickup if empty" : "Igual al de recogida si está vacío"}
+                    />
+                    <Text style={styles.chipsLabel}>{t("book.suggestionsLabel")}</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      keyboardShouldPersistTaps="handled"
+                      contentContainerStyle={styles.chipsRow}
+                    >
+                      {PICKUP_SUGGESTIONS.map((s) => {
+                        const active = placeEnd === s.value;
+                        return (
+                          <Pressable
+                            key={s.id}
+                            onPress={() => setPlaceEnd(s.value)}
+                            style={[styles.chip, active && styles.chipActive]}
+                          >
+                            <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                              {s.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </>
+                ) : null}
               </Card>
 
               {/* Price summary */}
@@ -657,6 +722,32 @@ const makeStyles = () => StyleSheet.create({
   section: { marginBottom: spacing.md },
   sectionLabelRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 14 },
   sectionLabelText: { ...type.label, color: colors.textMuted },
+
+  // Location suggestion chips
+  chipsLabel: { ...type.small, color: colors.textMuted, marginTop: 10, marginBottom: 8 },
+  chipsRow: { gap: 8, paddingRight: 4 },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    backgroundColor: colors.bg,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  chipActive: { backgroundColor: colors.ctaXLight, borderColor: colors.cta },
+  chipText: { ...type.small, color: colors.textSecondary, fontFamily: font.medium },
+  chipTextActive: { color: colors.cta, fontFamily: font.bold },
+
+  // Same-place-for-return toggle
+  sameReturnRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 },
+  checkbox: {
+    width: 22, height: 22, borderRadius: radius.sm,
+    borderWidth: 1.5, borderColor: colors.border,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: colors.bg,
+  },
+  checkboxOn: { backgroundColor: colors.cta, borderColor: colors.cta },
+  sameReturnText: { ...type.callout, color: colors.text },
 
   // Summary card
   summaryCard: {

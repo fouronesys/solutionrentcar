@@ -25,65 +25,7 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { useThemedStyles, useTheme } from "@/theme/ThemeContext";
 import { i18n } from "@/i18n";
-
-// ─── Branch data ────────────────────────────────────────────────────────────
-
-interface Branch {
-  id: string;
-  city: string;
-  name: string;
-  address: string;
-  hours: string;
-  phone?: string;
-  lat: number;
-  lng: number;
-  distanceKm?: number;
-}
-
-const BRANCHES: Branch[] = [
-  {
-    id: "sd-piantini",
-    city: "Santo Domingo",
-    name: "Santo Domingo",
-    address: "Av. Abraham Lincoln 1003",
-    hours: "08:00 – 20:00",
-    phone: "+1 849-564-4488",
-    lat: 18.4764,
-    lng: -69.9312,
-  },
-  {
-    id: "sd-gazcue",
-    city: "Santo Domingo",
-    name: "Santo Domingo – Gazcue",
-    address: "Av. Independencia 456",
-    hours: "08:00 – 20:00",
-    phone: "+1 849-564-4488",
-    lat: 18.4721,
-    lng: -69.9019,
-  },
-  {
-    id: "punta-cana",
-    city: "Punta Cana",
-    name: "Punta Cana – Aeropuerto",
-    address: "Terminal Internacional AILA",
-    hours: "06:00 – 22:00",
-    phone: "+1 809-000-0002",
-    lat: 18.5674,
-    lng: -68.3597,
-  },
-  {
-    id: "santiago",
-    city: "Santiago",
-    name: "Santiago – Centro",
-    address: "Calle del Sol 78",
-    hours: "08:00 – 20:00",
-    phone: "+1 809-000-0003",
-    lat: 19.4517,
-    lng: -70.6970,
-  },
-];
-
-const CITIES = ["Santo Domingo", "Punta Cana", "Santiago"];
+import { BRANCHES, CITIES, type Branch } from "@/config/locations";
 
 // ─── City center coordinates ─────────────────────────────────────────────────
 

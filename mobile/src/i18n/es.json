@@ -96,6 +96,8 @@
     "success": "¡Reserva creada!",
     "pickupRequired": "Ingresa el lugar de recogida",
     "ctaNow": "Reservar ahora",
+    "suggestionsLabel": "Sugerencias",
+    "sameReturn": "Devolver en el mismo lugar",
     "guestSection": "TUS DATOS",
     "guestName": "Nombre",
     "guestLastname": "Apellido",
@@ -236,5 +238,16 @@
     "cancelled": "Cancelada",
     "delivered": "Entregada",
     "returned": "Devuelta"
+  },
+  "home": {
+    "guestBannerText": "Crea tu cuenta y reserva en minutos.",
+    "guestBannerCta": "Empezar",
+    "featuredTitle": "Destacados",
+    "featuredEmpty": "No hay autos disponibles por ahora",
+    "perDay": "/día",
+    "exploreFleet": "Explorar flota",
+    "exploreFleetSub": "Mira todos los autos disponibles",
+    "ourLocations": "Nuestras ubicaciones",
+    "ourLocationsSub": "Sucursal más cercana"
   }
 }
