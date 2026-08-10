@@ -36,3 +36,17 @@ uri = "file://store-assets/yowell-store-screenshots.zip"
 type = "unspecified"
 title = "Screenshots para App Store y Google Play"
 description = "8 capturas por tienda (tema oscuro y claro, en español) en los tamaños oficiales: iOS 1290×2796 (iPhone 6.7\") y Android 1080×1920, más el feature graphic 1024×500 para Google Play."
+
+[[outputs]]
+id = "BPXR5TQKB3B432nBhokMS"
+uri = "file://store-assets/googleplay-phone/play-store-icon-512.png"
+type = "image"
+title = "Icono Google Play (512×512)"
+description = "PNG de 512×512 para el icono de la ficha en Play Console."
+
+[[outputs]]
+id = "0Qsr8K3b8VXTW-Z1qBp9R"
+uri = "file://store-assets/appstore-ios-6.7/appstore-icon-1024.png"
+type = "image"
+title = "Icono App Store (1024×1024)"
+description = "PNG de 1024×1024, el mismo icono iOS del build. Apple lo toma del binario, pero sirve como referencia o para App Store Connect si te lo pide."
