@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, radius, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   cars: "car-sport-outline",
@@ -23,6 +24,7 @@ export function EmptyState({
   subtitle?: string;
   icon?: string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const name = (icon && ICONS[icon]) || ICONS.default;
   return (
     <View style={styles.box}>
@@ -35,7 +37,7 @@ export function EmptyState({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   box: { paddingVertical: 60, paddingHorizontal: 32, alignItems: "center" },
   iconWrap: {
     width: 84,

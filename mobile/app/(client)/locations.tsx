@@ -23,6 +23,7 @@ import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles, useTheme } from "@/theme/ThemeContext";
 import { i18n } from "@/i18n";
 
 // ─── Branch data ────────────────────────────────────────────────────────────
@@ -153,6 +154,7 @@ function buildLeafletHTML(branches: Branch[], selected: Branch): string {
 }
 
 function WebMapView({ branches, selectedId }: { branches: Branch[]; selectedId: string | null }) {
+  const styles = useThemedStyles(makeStyles);
   const selected = branches.find((b) => b.id === selectedId) ?? branches[0];
   if (!selected) return null;
 
@@ -188,6 +190,7 @@ function NativeMapView({
   selectedId: string | null;
   onMarkerPress: (id: string) => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const webRef = useRef<any>(null);
   const selected = branches.find((b) => b.id === selectedId) ?? branches[0];
 
@@ -244,6 +247,8 @@ async function requestLocation(webRef: React.RefObject<any>) {
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 export default function LocationsScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const { isDark } = useTheme();
   const locale = i18n.locale === "en" ? "en" : "es";
   const [q, setQ] = useState("");
   const [city, setCity] = useState(CITIES[0]);
@@ -275,7 +280,7 @@ export default function LocationsScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <ScreenHeader
         title={locale === "en" ? "Where we are" : "Dónde estamos"}
         subtitle={locale === "en" ? "Branches across the island" : "Bases locales en toda la isla"}
@@ -425,7 +430,7 @@ export default function LocationsScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   body: { paddingBottom: 40 },
 

@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/Button";
 import { api, ApiError } from "@/api/client";
 import { colors, font, gradients, radius, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { t } from "@/i18n";
 
 export default function SignScreen() {
@@ -17,6 +18,7 @@ export default function SignScreen() {
   const insets = useSafeAreaInsets();
   const sigRef = useRef<SignatureViewRef>(null);
   const [saving, setSaving] = useState(false);
+  const styles = useThemedStyles(makeStyles);
 
   const onSave = async (sig: string) => {
     setSaving(true);
@@ -113,7 +115,7 @@ const sigWebStyle = `
   body { background: #FAFAFA; }
 `;
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
 
   hero: {

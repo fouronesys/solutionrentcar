@@ -1,9 +1,11 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { colors, radius, shadow, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { t } from "@/i18n";
 
 export function Loading({ label, overlay }: { label?: string; overlay?: boolean }) {
+  const styles = useThemedStyles(makeStyles);
   if (overlay) {
     return (
       <View style={styles.overlay}>
@@ -22,7 +24,7 @@ export function Loading({ label, overlay }: { label?: string; overlay?: boolean 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   container: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, backgroundColor: colors.bg },
   label: { ...type.callout, color: colors.textMuted, marginTop: 14 },
   overlay: {

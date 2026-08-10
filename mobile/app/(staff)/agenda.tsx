@@ -10,6 +10,7 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
 import type { Agenda, AgendaItem } from "@/api/types";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { dateTime, todayIso } from "@/utils/format";
 
@@ -26,6 +27,7 @@ function AgendaCard({
   isDelivery: boolean;
   onPress: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const accent = isDelivery ? colors.success : colors.info;
@@ -79,6 +81,7 @@ export default function AgendaScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const styles = useThemedStyles(makeStyles);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -198,7 +201,7 @@ export default function AgendaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   scrollContent: { paddingBottom: 32 },
 

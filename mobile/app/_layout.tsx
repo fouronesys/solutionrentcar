@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/auth/AuthContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
 import { colors } from "@/theme/colors";
+import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 import AnimatedSplash from "@/components/AnimatedSplash";
 import "@/i18n";
 
@@ -51,8 +52,13 @@ function Gate() {
     }
   }, [bootstrapped, role, segments, router]);
 
+  const { mode } = useTheme();
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+    <Stack
+      // Re-keying on theme remounts every screen so themed styles rebuild.
+      key={mode}
+      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}
+    />
   );
 }
 
@@ -102,15 +108,31 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AuthProvider>
-          <NotificationsProvider>
-            <UpdatesWatcher />
-            <StatusBar style="light" />
-            <Gate />
-            <SplashOverlay />
-          </NotificationsProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <NotificationsProvider>
+              <UpdatesWatcher />
+              <ThemedStatusBar />
+              <ThemeGate>
+                <Gate />
+              </ThemeGate>
+              <SplashOverlay />
+            </NotificationsProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  return <StatusBar style={isDark ? "light" : "dark"} />;
+}
+
+/** Hold rendering until the persisted theme preference is applied, to avoid a flash of the wrong theme. */
+function ThemeGate({ children }: { children: React.ReactNode }) {
+  const { ready } = useTheme();
+  if (!ready) return null;
+  return <>{children}</>;
 }

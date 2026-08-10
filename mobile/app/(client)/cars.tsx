@@ -24,6 +24,7 @@ import { ListSkeleton } from "@/components/Skeleton";
 import { BellButton, ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
 import { carStatus, colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import type { Car } from "@/api/types";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
@@ -52,6 +53,7 @@ function fmtTime(d: Date) {
 const CATEGORIES = ["Todos", "SUV", "Sedán", "Económico"];
 
 const CarCard = React.memo(function CarCard({ car, onPress, index }: { car: Car; onPress: () => void; index: number }) {
+  const styles = useThemedStyles(makeStyles);
   const s = carStatus[Number(car.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
   const scale = useSharedValue(1);
@@ -137,6 +139,7 @@ const CarCard = React.memo(function CarCard({ car, onPress, index }: { car: Car;
 });
 
 export default function CarsScreen() {
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { unread } = useNotificationsCtx();
   const [cars, setCars] = useState<Car[]>([]);
@@ -423,7 +426,7 @@ export default function CarsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   listContent: { paddingBottom: 28 },
 

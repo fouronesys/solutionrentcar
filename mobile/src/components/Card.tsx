@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { colors, radius, shadow } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -20,6 +21,7 @@ export function Card({
   padding?: number;
   elevation?: "xs" | "sm" | "md" | "lg" | "none";
 }) {
+  const styles = useThemedStyles(makeStyles);
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
@@ -53,7 +55,7 @@ export function Card({
   return <View style={base}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   card: {
     borderRadius: radius.lg,
     marginBottom: 12,

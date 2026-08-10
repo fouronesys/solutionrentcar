@@ -9,6 +9,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { api, ApiError } from "@/api/client";
 import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { t } from "@/i18n";
 import { money } from "@/utils/format";
 
@@ -26,6 +27,7 @@ export default function PayScreen() {
   const [method, setMethod] = useState("cash");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const styles = useThemedStyles(makeStyles);
 
   const submit = async () => {
     const val = parseFloat(amount.replace(",", "."));
@@ -129,7 +131,7 @@ export default function PayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
 
   hero: {

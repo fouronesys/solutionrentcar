@@ -19,6 +19,7 @@ import { Button } from "@/components/Button";
 import { api, ApiError } from "@/api/client";
 import type { Notification } from "@/api/types";
 import { colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { t } from "@/i18n";
 import { dateTime } from "@/utils/format";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
@@ -45,6 +46,7 @@ function Hero({
   showMarkAll: boolean;
   onMarkAll: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
       <View style={styles.heroBrandRow}>
@@ -76,6 +78,7 @@ function Hero({
 
 function LoginPrompt() {
   const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.prompt}>
       <View style={styles.promptIcon}>
@@ -94,6 +97,7 @@ function LoginPrompt() {
 }
 
 function NotifCard({ item, onPress }: { item: Notification; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   const unread = !item.read_at;
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -127,6 +131,7 @@ function NotifCard({ item, onPress }: { item: Notification; onPress: () => void 
 
 export default function NotificationsScreen() {
   const { role, bootstrapped } = useAuth();
+  const styles = useThemedStyles(makeStyles);
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -217,7 +222,7 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
 
   hero: {

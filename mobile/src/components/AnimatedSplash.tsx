@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { colors, font } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 const logo = require("../../assets/images/logo.png");
 
@@ -182,6 +183,8 @@ export default function AnimatedSplash({
     transform: [{ translateX: interpolate(bar.value, [0, 1], [-BAR_W, BAR_W]) }],
   }));
 
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <Animated.View style={[StyleSheet.absoluteFill, styles.root, rootStyle]} pointerEvents="auto">
       <LinearGradient
@@ -235,7 +238,7 @@ export default function AnimatedSplash({
 const BAR_TRACK_W = 150;
 const BAR_W = BAR_TRACK_W * 0.6;
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   root: {
     zIndex: 999,
     elevation: 999,

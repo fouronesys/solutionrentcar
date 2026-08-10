@@ -28,6 +28,7 @@ import { api, ApiError } from "@/api/client";
 import { useAuth } from "@/auth/AuthContext";
 import type { ClientDocuments, Profile } from "@/api/types";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, setLocale, t } from "@/i18n";
 
 type DocKind = keyof ClientDocuments;
@@ -36,8 +37,42 @@ function DocIcons(): Record<DocKind, keyof typeof Ionicons.glyphMap> {
   return { cedula: "card-outline", license: "car-sport-outline", passport: "airplane-outline", home: "home-outline" };
 }
 
+function AppearanceSelector() {
+  const styles = useThemedStyles(makeStyles);
+  const { mode, setMode } = useTheme();
+  const locale = i18n.locale === "en" ? "en" : "es";
+  return (
+    <>
+      <Text style={styles.sectionTitle}>
+        {locale === "en" ? "APPEARANCE" : "APARIENCIA"}
+      </Text>
+      <View style={styles.langRow}>
+        {(["dark", "light"] as const).map((m) => (
+          <Pressable
+            key={m}
+            onPress={() => setMode(m)}
+            style={[styles.langBtn, mode === m && styles.langBtnActive]}
+          >
+            <Ionicons
+              name={m === "dark" ? "moon" : "sunny"}
+              size={18}
+              color={mode === m ? colors.cta : colors.textMuted}
+            />
+            <Text style={[styles.langText, mode === m && styles.langTextActive]}>
+              {m === "dark"
+                ? locale === "en" ? "Dark" : "Oscuro"
+                : locale === "en" ? "Light" : "Claro"}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+    </>
+  );
+}
+
 function LoginPrompt() {
   const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
   const locale = i18n.locale === "en" ? "en" : "es";
   return (
     <View style={styles.prompt}>
@@ -59,6 +94,8 @@ function LoginPrompt() {
 export default function ProfileScreen() {
   const { user, role, bootstrapped, logout, setUser } = useAuth();
   const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
+  const { mode, setMode } = useTheme();
   const [form, setForm] = useState<Partial<Profile>>(user ?? {});
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<DocKind | null>(null);
@@ -74,7 +111,12 @@ export default function ProfileScreen() {
           title={t("profile.title")}
           subtitle={i18n.locale === "en" ? "Your Yowell account" : "Tu cuenta Yowell"}
         />
-        <LoginPrompt />
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+          <LoginPrompt />
+          <View style={{ paddingBottom: 24 }}>
+            <AppearanceSelector />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -336,6 +378,9 @@ export default function ProfileScreen() {
             ))}
           </View>
 
+          {/* Appearance */}
+          <AppearanceSelector />
+
           {/* Sign out */}
           <Pressable style={styles.logoutRow} onPress={logout}>
             <Ionicons name="log-out-outline" size={18} color={colors.cta} />
@@ -358,7 +403,7 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   body: { paddingBottom: 48 },
 
@@ -389,20 +434,20 @@ const styles = StyleSheet.create({
   loyaltyCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EEF4FF",
+    backgroundColor: colors.tint,
     marginHorizontal: spacing.xl,
     borderRadius: radius.xl,
     padding: spacing.lg,
     marginBottom: spacing.lg,
     borderWidth: 1,
-    borderColor: "#D0DFFF",
+    borderColor: colors.tintBorder,
     ...shadow.xs,
   },
   loyaltyLeft: { flex: 1, paddingRight: 12 },
   loyaltyEyebrow: { ...type.label, color: colors.primary, fontSize: 9, letterSpacing: 0.8, marginBottom: 6 },
   loyaltyNameRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
   loyaltyName: { ...type.title, color: colors.text },
-  loyaltyBar: { height: 4, backgroundColor: "#D0DFFF", borderRadius: 2, marginBottom: 8 },
+  loyaltyBar: { height: 4, backgroundColor: colors.tintBorder, borderRadius: 2, marginBottom: 8 },
   loyaltyProgress: { height: 4, backgroundColor: colors.primary, borderRadius: 2 },
   loyaltySub: { ...type.caption, color: colors.textSecondary, lineHeight: 17 },
   loyaltyRight: { alignItems: "flex-end" },

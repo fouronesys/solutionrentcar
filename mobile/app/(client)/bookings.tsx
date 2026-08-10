@@ -22,6 +22,7 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
 import type { Booking } from "@/api/types";
 import { bookingStatus, colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { money, shortDate } from "@/utils/format";
 import { useAuth } from "@/auth/AuthContext";
@@ -30,6 +31,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function LoginPrompt() {
   const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
   const locale = i18n.locale === "en" ? "en" : "es";
   return (
     <View style={styles.prompt}>
@@ -56,6 +58,7 @@ function LoginPrompt() {
 }
 
 function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   const s = bookingStatus[Number(booking.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
   const total = Number(booking.total ?? 0);
@@ -123,6 +126,7 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
 export default function BookingsList() {
   const router = useRouter();
   const { role, bootstrapped } = useAuth();
+  const styles = useThemedStyles(makeStyles);
   const [items, setItems] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -225,7 +229,7 @@ export default function BookingsList() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   list: { paddingBottom: 28 },
   listMeta: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.sm },

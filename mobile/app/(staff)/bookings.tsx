@@ -18,6 +18,7 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { api, ApiError } from "@/api/client";
 import type { Booking } from "@/api/types";
 import { bookingStatus, colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { money, shortDate } from "@/utils/format";
 
@@ -34,6 +35,7 @@ const STATUS_FILTERS: { v: StatusFilter; label: string; labelEs: string }[] = [
 ];
 
 function BookingRow({ booking, onPress }: { booking: Booking; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   const s = bookingStatus[Number(booking.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
   const total  = Number(booking.total   ?? 0);
@@ -94,6 +96,7 @@ export default function StaffBookingsList() {
   const [q,         setQ]         = useState("");
   const [status,    setStatus]    = useState<StatusFilter>("");
   const locale = i18n.locale === "en" ? "en" : "es";
+  const styles = useThemedStyles(makeStyles);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -217,7 +220,7 @@ export default function StaffBookingsList() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   list:   { paddingBottom: 28 },
 

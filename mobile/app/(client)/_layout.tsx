@@ -4,6 +4,7 @@ import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, font } from "@/theme/colors";
+import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
 
@@ -14,6 +15,7 @@ function TabIcon({
   name: keyof typeof Ionicons.glyphMap;
   focused: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.tabItem}>
       <Ionicons
@@ -26,6 +28,7 @@ function TabIcon({
 }
 
 function BellTabIcon({ focused }: { focused: boolean }) {
+  const styles = useThemedStyles(makeStyles);
   const { unread } = useNotificationsCtx();
   return (
     <View style={styles.tabItem}>
@@ -44,9 +47,11 @@ function BellTabIcon({ focused }: { focused: boolean }) {
 }
 
 export default function ClientLayout() {
+  const styles = useThemedStyles(makeStyles);
+  const { isDark } = useTheme();
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -114,7 +119,7 @@ export default function ClientLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   tabBar: {
     backgroundColor: colors.card,
     borderTopWidth: 1,

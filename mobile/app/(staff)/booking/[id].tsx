@@ -11,10 +11,12 @@ import { Loading } from "@/components/Loading";
 import { api, ApiError } from "@/api/client";
 import type { BookingDetail, Payment } from "@/api/types";
 import { bookingStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { dateTime, money } from "@/utils/format";
 
 function InfoRow({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value?: string }) {
+  const styles = useThemedStyles(makeStyles);
   if (!value) return null;
   return (
     <View style={styles.infoRow}>
@@ -28,6 +30,7 @@ function InfoRow({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap;
 }
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{label}</Text>
@@ -44,6 +47,7 @@ export default function StaffBookingDetail() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [acting, setActing] = useState(false);
+  const styles = useThemedStyles(makeStyles);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -224,7 +228,7 @@ export default function StaffBookingDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   errContainer: { flex: 1, padding: 24, justifyContent: "center", alignItems: "center", backgroundColor: colors.bg, gap: 12 },
   errText: { ...type.body, color: colors.danger, textAlign: "center" },

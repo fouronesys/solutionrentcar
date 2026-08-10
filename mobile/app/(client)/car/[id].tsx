@@ -17,12 +17,14 @@ import { Loading } from "@/components/Loading";
 import { api, ApiError } from "@/api/client";
 import type { Car } from "@/api/types";
 import { carStatus, colors, font, gradients, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { money } from "@/utils/format";
 
 type Spec = { icon: keyof typeof Ionicons.glyphMap; value: string; label: string };
 
 export default function CarDetail() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -132,7 +134,7 @@ export default function CarDetail() {
               {specs.map((sp) => (
                 <View key={sp.label} style={styles.specCard}>
                   <View style={styles.specIconWrap}>
-                    <Ionicons name={sp.icon} size={18} color={colors.primaryDark} />
+                    <Ionicons name={sp.icon} size={18} color={colors.info} />
                   </View>
                   <Text style={styles.specValue}>{sp.value}</Text>
                   <Text style={styles.specLabel}>{sp.label}</Text>
@@ -171,7 +173,7 @@ export default function CarDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   errContainer: { flex: 1, padding: 24, justifyContent: "center", alignItems: "center", backgroundColor: colors.bg, gap: 12 },
   errText: { ...type.body, color: colors.danger, textAlign: "center" },
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
   brand: { ...type.label, color: colors.textMuted, marginBottom: 4 },
   model: { ...type.h1, color: colors.text },
   priceRow: { flexDirection: "row", alignItems: "baseline", marginTop: 10, gap: 6 },
-  price: { ...type.h1, color: colors.primaryDark, fontFamily: font.extrabold },
+  price: { ...type.h1, color: colors.info, fontFamily: font.extrabold },
   priceLabel: { ...type.callout, color: colors.textMuted },
 
   section: { paddingHorizontal: spacing.xl, paddingVertical: spacing.xl, borderTopWidth: 1, borderTopColor: colors.borderLight },

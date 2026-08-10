@@ -29,6 +29,7 @@ import { api, ApiError } from "@/api/client";
 import { useAuth } from "@/auth/AuthContext";
 import type { Car } from "@/api/types";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { i18n, t } from "@/i18n";
 import { money, toDbDateTime } from "@/utils/format";
 
@@ -61,6 +62,7 @@ function LoginRequired({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const styles = useThemedStyles(makeStyles);
 
   useEffect(() => { if (role === "client") onSuccess(); }, [role, onSuccess]);
 
@@ -133,6 +135,8 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const { role } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
+  const styles = useThemedStyles(makeStyles);
+  const { isDark } = useTheme();
 
   const [car, setCar] = useState<Car | null>(null);
   const [loadingCar, setLoadingCar] = useState(true);
@@ -229,7 +233,7 @@ export default function BookScreen() {
   return (
     <View style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
 
       {/* White header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
@@ -487,7 +491,7 @@ export default function BookScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
 
   // Header

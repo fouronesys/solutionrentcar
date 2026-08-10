@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, font, radius, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 export function Input({
   label,
@@ -15,6 +16,7 @@ export function Input({
   containerStyle?: ViewStyle;
   icon?: keyof typeof Ionicons.glyphMap;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const [focused, setFocused] = useState(false);
 
   const borderColor = error ? colors.danger : focused ? colors.cta : colors.border;
@@ -55,7 +57,7 @@ export function Input({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   label: {
     ...type.captionMed,
     color: colors.textSecondary,

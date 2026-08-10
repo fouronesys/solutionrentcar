@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { colors, font, radius, shadow } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "dark";
 type Size = "sm" | "md" | "lg";
@@ -30,6 +31,7 @@ export function Button({
   icon?: keyof typeof Ionicons.glyphMap;
   iconRight?: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
@@ -105,7 +107,7 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   btn: {
     borderRadius: radius.md,
     paddingHorizontal: 20,

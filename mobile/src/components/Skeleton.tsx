@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { colors, radius, spacing } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 export function Skeleton({
   width,
@@ -48,6 +49,7 @@ export function Skeleton({
 
 // Card-shaped placeholder matching the car list cards
 export function CarCardSkeleton() {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.card}>
       <Skeleton height={170} rounded={0} />
@@ -79,6 +81,7 @@ export function ListSkeleton({ count = 3 }: { count?: number }) {
 }
 
 export function RowSkeleton() {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.row}>
       <Skeleton width={48} height={48} rounded={radius.md} />
@@ -90,7 +93,7 @@ export function RowSkeleton() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,

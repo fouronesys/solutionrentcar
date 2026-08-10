@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { colors, font, radius } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 export function Badge({
   label,
@@ -15,6 +16,7 @@ export function Badge({
   size?: "sm" | "md";
   dot?: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const textColor = color ?? colors.primaryDark;
   const bgColor = bg ?? textColor + "1A";
 
@@ -28,7 +30,7 @@ export function Badge({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   box: {
     flexDirection: "row",
     alignItems: "center",

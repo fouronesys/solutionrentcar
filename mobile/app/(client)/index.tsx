@@ -22,11 +22,13 @@ import { api, ApiError } from "@/api/client";
 import { useAuth } from "@/auth/AuthContext";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { bookingStatus, colors, font, radius, shadow, spacing, type } from "@/theme/colors";
+import { useThemedStyles, useTheme } from "@/theme/ThemeContext";
 import type { Booking } from "@/api/types";
 import { i18n, t } from "@/i18n";
 import { money, shortDate } from "@/utils/format";
 
 function NextBookingCard({ booking }: { booking: Booking }) {
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const s = bookingStatus[Number(booking.status ?? 0)];
   const locale = i18n.locale === "en" ? "en" : "es";
@@ -94,6 +96,8 @@ function NextBookingCard({ booking }: { booking: Booking }) {
 }
 
 export default function HomeScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const { isDark } = useTheme();
   const router = useRouter();
   const { user, role } = useAuth();
   const { unread } = useNotificationsCtx();
@@ -119,7 +123,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <ScreenHeader
         title="Yowell Rent-Car"
         subtitle={locale === "en" ? "Your next move starts here." : "Tu próximo movimiento."}
@@ -254,7 +258,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   body: { paddingBottom: 40 },
 

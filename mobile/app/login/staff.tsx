@@ -22,6 +22,7 @@ import { Input } from "@/components/Input";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiError } from "@/api/client";
 import { colors, font, radius, shadow, type } from "@/theme/colors";
+import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { t } from "@/i18n";
 
 function loginErrorMessage(e: unknown): string {
@@ -43,6 +44,8 @@ export default function StaffLogin() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const styles = useThemedStyles(makeStyles);
+  const { isDark } = useTheme();
 
   const submit = async () => {
     if (!user.trim() || !password.trim()) { Alert.alert(t("login.errors.empty")); return; }
@@ -59,7 +62,7 @@ export default function StaffLogin() {
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={styles.body}
@@ -137,7 +140,7 @@ export default function StaffLogin() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   body: { flexGrow: 1, padding: 20 },
 

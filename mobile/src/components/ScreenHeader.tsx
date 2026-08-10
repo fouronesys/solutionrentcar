@@ -7,6 +7,7 @@ import { Image, Pressable, StyleSheet, Text, View, ViewStyle } from "react-nativ
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, font, radius, shadow, type } from "@/theme/colors";
+import { useThemedStyles } from "@/theme/ThemeContext";
 
 interface ScreenHeaderProps {
   title: string;
@@ -27,6 +28,7 @@ export function ScreenHeader({
   onBack,
   right,
 }: ScreenHeaderProps) {
+  const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
 
   return (
@@ -69,6 +71,7 @@ export function BellButton({
   unread?: number;
   onPress?: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable onPress={onPress} style={styles.bellBtn} hitSlop={8}>
       <Ionicons
@@ -85,7 +88,7 @@ export function BellButton({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = () => StyleSheet.create({
   bar: {
     flexDirection: "row",
     alignItems: "center",
