@@ -93,7 +93,7 @@
     }
   },
   "book": {
-    "success": "Booking created!",
+    "success": "Booking created! 🎉",
     "pickupRequired": "Enter the pickup location",
     "ctaNow": "Book now",
     "suggestionsLabel": "Suggestions",

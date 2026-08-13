@@ -16,6 +16,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/auth/AuthContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
+import { ToastProvider } from "@/components/Toast";
 import { colors } from "@/theme/colors";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 import AnimatedSplash from "@/components/AnimatedSplash";
@@ -113,9 +114,11 @@ export default function RootLayout() {
             <NotificationsProvider>
               <UpdatesWatcher />
               <ThemedStatusBar />
-              <ThemeGate>
-                <Gate />
-              </ThemeGate>
+              <ToastProvider>
+                <ThemeGate>
+                  <Gate />
+                </ThemeGate>
+              </ToastProvider>
               <SplashOverlay />
             </NotificationsProvider>
           </AuthProvider>

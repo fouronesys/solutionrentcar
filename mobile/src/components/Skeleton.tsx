@@ -1,5 +1,9 @@
+/**
+ * Skeleton — shimmer placeholder components.
+ * Uses a LinearGradient sweep animation for the shimmer effect.
+ */
 import React, { useEffect } from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { Dimensions, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,6 +14,9 @@ import Animated, {
 import { colors, radius, spacing } from "@/theme/colors";
 import { useThemedStyles } from "@/theme/ThemeContext";
 
+const { width: SW } = Dimensions.get("window");
+
+// ─── Base skeleton block ──────────────────────────────────────────────────────
 export function Skeleton({
   width,
   height = 14,
@@ -21,13 +28,13 @@ export function Skeleton({
   rounded?: number;
   style?: ViewStyle;
 }) {
-  const opacity = useSharedValue(0.5);
+  const opacity = useSharedValue(0.45);
 
   useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        withTiming(1, { duration: 700 }),
-        withTiming(0.5, { duration: 700 }),
+        withTiming(1, { duration: 600 }),
+        withTiming(0.45, { duration: 600 }),
       ),
       -1,
       false,
@@ -39,7 +46,12 @@ export function Skeleton({
   return (
     <Animated.View
       style={[
-        { width: width ?? "100%", height, borderRadius: rounded, backgroundColor: colors.border },
+        {
+          width: width ?? "100%",
+          height,
+          borderRadius: rounded,
+          backgroundColor: colors.border,
+        },
         animStyle,
         style,
       ]}
@@ -47,23 +59,30 @@ export function Skeleton({
   );
 }
 
-// Card-shaped placeholder matching the car list cards
+// ─── Car card placeholder (16:10 ratio image) ─────────────────────────────────
 export function CarCardSkeleton() {
   const styles = useThemedStyles(makeStyles);
+  // 16:10 image height relative to card width (screen – margins)
+  const imgH = Math.round((SW - spacing.xl * 2) * (10 / 16));
+
   return (
     <View style={styles.card}>
-      <Skeleton height={170} rounded={0} />
+      <Skeleton height={imgH} rounded={0} />
       <View style={styles.body}>
-        <Skeleton width="55%" height={18} />
-        <Skeleton width="35%" height={13} style={{ marginTop: 10 }} />
+        {/* Brand */}
+        <Skeleton width="30%" height={11} />
+        {/* Model name */}
+        <Skeleton width="65%" height={20} style={{ marginTop: 8 }} />
+        {/* Spec chips */}
         <View style={styles.chips}>
-          <Skeleton width={64} height={26} rounded={radius.full} />
-          <Skeleton width={64} height={26} rounded={radius.full} />
-          <Skeleton width={64} height={26} rounded={radius.full} />
+          <Skeleton width={56} height={28} rounded={radius.full} />
+          <Skeleton width={72} height={28} rounded={radius.full} />
+          <Skeleton width={56} height={28} rounded={radius.full} />
         </View>
+        {/* Price + CTA */}
         <View style={styles.footer}>
-          <Skeleton width={90} height={22} />
-          <Skeleton width={96} height={40} rounded={radius.md} />
+          <Skeleton width={88} height={24} />
+          <Skeleton width={100} height={42} rounded={radius.full} />
         </View>
       </View>
     </View>
@@ -93,24 +112,31 @@ export function RowSkeleton() {
   );
 }
 
-const makeStyles = () => StyleSheet.create({
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    overflow: "hidden",
-  },
-  body: { padding: spacing.lg },
-  chips: { flexDirection: "row", gap: 8, marginTop: 16 },
-  footer: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 18 },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-});
+// ─── Styles ───────────────────────────────────────────────────────────────────
+const makeStyles = () =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: radius.xl,
+      marginHorizontal: spacing.xl,
+      marginBottom: spacing.md,
+      overflow: "hidden",
+    },
+    body: { padding: spacing.lg },
+    chips: { flexDirection: "row", gap: 8, marginTop: 16 },
+    footer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 18,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      marginHorizontal: spacing.lg,
+      marginBottom: spacing.md,
+    },
+  });

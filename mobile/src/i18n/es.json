@@ -93,7 +93,7 @@
     }
   },
   "book": {
-    "success": "¡Reserva creada!",
+    "success": "¡Reserva creada! 🎉",
     "pickupRequired": "Ingresa el lugar de recogida",
     "ctaNow": "Reservar ahora",
     "suggestionsLabel": "Sugerencias",
