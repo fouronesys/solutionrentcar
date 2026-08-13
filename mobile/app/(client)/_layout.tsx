@@ -1,12 +1,14 @@
 import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Animated, Platform, StyleSheet, Text, View } from "react-native";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomTabBar } from "@react-navigation/bottom-tabs";
 import { colors, font } from "@/theme/colors";
 import { useTheme, useThemedStyles } from "@/theme/ThemeContext";
 import { useNotificationsCtx } from "@/notifications/NotificationsContext";
 import { t } from "@/i18n";
+import { TabBarScrollProvider, useTabBarScroll } from "@/components/TabBarScrollContext";
 
 function TabIcon({
   name,
@@ -46,7 +48,16 @@ function BellTabIcon({ focused }: { focused: boolean }) {
   );
 }
 
-export default function ClientLayout() {
+function AnimatedTabBar(props: React.ComponentProps<typeof BottomTabBar>) {
+  const { translateY } = useTabBarScroll();
+  return (
+    <Animated.View style={{ transform: [{ translateY }] }}>
+      <BottomTabBar {...props} />
+    </Animated.View>
+  );
+}
+
+function ClientTabs() {
   const styles = useThemedStyles(makeStyles);
   const { isDark } = useTheme();
   return (
@@ -62,6 +73,7 @@ export default function ClientLayout() {
           tabBarInactiveTintColor: colors.textMuted,
           tabBarItemStyle: { paddingTop: 6 },
         }}
+        tabBar={(props) => <AnimatedTabBar {...props} />}
       >
         {/* Inicio */}
         <Tabs.Screen
@@ -116,6 +128,14 @@ export default function ClientLayout() {
         <Tabs.Screen name="sign/[id]" options={{ href: null }} />
       </Tabs>
     </>
+  );
+}
+
+export default function ClientLayout() {
+  return (
+    <TabBarScrollProvider>
+      <ClientTabs />
+    </TabBarScrollProvider>
   );
 }
 

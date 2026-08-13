@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useTabBarScroll } from "@/components/TabBarScrollContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
@@ -126,6 +127,8 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
 export default function BookingsList() {
   const router = useRouter();
   const { role, bootstrapped } = useAuth();
+  const { onScroll, showTabBar } = useTabBarScroll();
+  useFocusEffect(useCallback(() => { showTabBar(); }, [showTabBar]));
   const styles = useThemedStyles(makeStyles);
   const [items, setItems] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,6 +178,8 @@ export default function BookingsList() {
         data={showSkeleton ? [] : items}
         keyExtractor={(b) => String(b.id)}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         ListHeaderComponent={
           <View>
             <ScreenHeader

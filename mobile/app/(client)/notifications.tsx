@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useTabBarScroll } from "@/components/TabBarScrollContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -131,6 +132,8 @@ function NotifCard({ item, onPress }: { item: Notification; onPress: () => void 
 
 export default function NotificationsScreen() {
   const { role, bootstrapped } = useAuth();
+  const { onScroll, showTabBar } = useTabBarScroll();
+  useFocusEffect(useCallback(() => { showTabBar(); }, [showTabBar]));
   const styles = useThemedStyles(makeStyles);
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,6 +210,8 @@ export default function NotificationsScreen() {
           data={items}
           keyExtractor={(n) => String(n.id)}
           showsVerticalScrollIndicator={false}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

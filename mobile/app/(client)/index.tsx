@@ -12,7 +12,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useTabBarScroll } from "@/components/TabBarScrollContext";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { BellButton, ScreenHeader } from "@/components/ScreenHeader";
@@ -100,6 +101,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user, role } = useAuth();
   const { unread } = useNotificationsCtx();
+  const { onScroll, showTabBar } = useTabBarScroll();
+  useFocusEffect(useCallback(() => { showTabBar(); }, [showTabBar]));
   const [upcoming, setUpcoming] = useState<Booking | null>(null);
   const [featured, setFeatured] = useState<Car[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -144,6 +147,8 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

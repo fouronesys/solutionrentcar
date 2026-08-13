@@ -15,7 +15,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useTabBarScroll } from "@/components/TabBarScrollContext";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, {
@@ -340,6 +341,8 @@ export default function CarsScreen() {
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { unread } = useNotificationsCtx();
+  const { onScroll, showTabBar } = useTabBarScroll();
+  useFocusEffect(useCallback(() => { showTabBar(); }, [showTabBar]));
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -669,6 +672,8 @@ export default function CarsScreen() {
         keyExtractor={(c) => String(c.id)}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         ListHeaderComponent={renderHeader}
         refreshControl={
           <RefreshControl

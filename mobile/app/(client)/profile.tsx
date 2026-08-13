@@ -17,7 +17,8 @@ import {
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useTabBarScroll } from "@/components/TabBarScrollContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "@/components/Button";
@@ -94,6 +95,8 @@ function LoginPrompt() {
 export default function ProfileScreen() {
   const { user, role, bootstrapped, logout, setUser } = useAuth();
   const router = useRouter();
+  const { onScroll, showTabBar } = useTabBarScroll();
+  useFocusEffect(useCallback(() => { showTabBar(); }, [showTabBar]));
   const styles = useThemedStyles(makeStyles);
   const { mode, setMode } = useTheme();
   const [form, setForm] = useState<Partial<Profile>>(user ?? {});
@@ -197,7 +200,7 @@ export default function ProfileScreen() {
         }
       />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={16}>
 
           {/* Avatar + Name row */}
           <View style={styles.avatarRow}>

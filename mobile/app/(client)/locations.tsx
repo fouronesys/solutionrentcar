@@ -6,7 +6,7 @@
  *   • Web (Replit preview): iframe con el mismo HTML de Leaflet
  * Sin módulos nativos de mapas: evita crashes por falta de API keys nativas.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Linking,
   Platform,
@@ -17,7 +17,9 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTabBarScroll } from "@/components/TabBarScrollContext";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
@@ -192,6 +194,8 @@ export default function LocationsScreen() {
   const styles = useThemedStyles(makeStyles);
   const { isDark } = useTheme();
   const locale = i18n.locale === "en" ? "en" : "es";
+  const { onScroll, showTabBar } = useTabBarScroll();
+  useFocusEffect(useCallback(() => { showTabBar(); }, [showTabBar]));
   const [q, setQ] = useState("");
   const [city, setCity] = useState(CITIES[0]);
   const [selected, setSelected] = useState<string | null>(BRANCHES[0].id);
@@ -228,7 +232,7 @@ export default function LocationsScreen() {
         subtitle={locale === "en" ? "Branches across the island" : "Bases locales en toda la isla"}
       />
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={16}>
         {/* Eyebrow + heading */}
         <View style={styles.headingBlock}>
           <Text style={styles.eyebrow}>
