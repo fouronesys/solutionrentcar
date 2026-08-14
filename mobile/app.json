@@ -38,7 +38,7 @@
         "POST_NOTIFICATIONS",
         "CAMERA"
       ],
-      "versionCode": 4
+      "versionCode": 28
     },
     "web": {
       "favicon": "./assets/favicon.png",
