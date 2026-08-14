@@ -76,36 +76,36 @@ description = "Los dos iconos 512×512 (fondo blanco y fondo oscuro) en un solo 
 id = "SVIchajeZ73f4YktPCp5Y"
 uri = "file://store-screenshots/appstore/home-1290x2796.png"
 type = "image"
-title = "App Store · Móntate y dale"
-description = "Screenshot para la ficha de la tienda"
+title = "App Store · Inicio"
+description = "Screenshot limpio, sin diseño añadido"
 
 [[outputs]]
 id = "czKD0nI5QfwPCHVfYOS1r"
 uri = "file://store-screenshots/appstore/cars-1290x2796.png"
 type = "image"
-title = "App Store · Precio claro"
-description = "Screenshot para la ficha de la tienda"
+title = "App Store · Flota"
+description = "Screenshot limpio, sin diseño añadido"
 
 [[outputs]]
 id = "xZzkRORX5vhQdaWL4WmuX"
 uri = "file://store-screenshots/appstore/car_detail-1290x2796.png"
 type = "image"
-title = "App Store · Eto' eh tuyo"
-description = "Screenshot para la ficha de la tienda"
+title = "App Store · Detalle del auto"
+description = "Screenshot limpio, sin diseño añadido"
 
 [[outputs]]
 id = "pHyj6lBupcKj0HS63t31R"
 uri = "file://store-screenshots/appstore/book_top-1290x2796.png"
 type = "image"
-title = "App Store · Reserva en un ratico"
-description = "Screenshot para la ficha de la tienda"
+title = "App Store · Reserva"
+description = "Screenshot limpio, sin diseño añadido"
 
 [[outputs]]
 id = "6TqW4EFupHc9ido9QYuSv"
 uri = "file://store-screenshots/googleplay/home-1080x1920.png"
 type = "image"
-title = "Google Play · Móntate y dale"
-description = "Screenshot para la ficha de la tienda"
+title = "Google Play · Inicio"
+description = "Screenshot limpio, sin diseño añadido"
 
 [[outputs]]
 id = "graUfW13Ks1EDoyhPOHRR"
@@ -113,3 +113,10 @@ uri = "file://store-screenshots/googleplay/book_bottom-1080x1920.png"
 type = "image"
 title = "Google Play · Confirma por WhatsApp"
 description = "Screenshot para la ficha de la tienda"
+
+[[outputs]]
+id = "l-tge4AKzy_C_dGTMiiKk"
+uri = "file://store-screenshots/googleplay/book_top-1080x1920.png"
+type = "image"
+title = "Google Play · Reserva"
+description = "Screenshot limpio, sin diseño añadido"
