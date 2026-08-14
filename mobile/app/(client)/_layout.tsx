@@ -48,8 +48,19 @@ function BellTabIcon({ focused }: { focused: boolean }) {
   );
 }
 
+// Detail routes with their own sticky bottom CTA — the overlay tab bar would
+// cover the button, so we hide the bar entirely on these screens.
+const HIDDEN_TAB_ROUTES = new Set([
+  "car/[id]",
+  "book/[carId]",
+  "booking/[id]",
+  "sign/[id]",
+]);
+
 function AnimatedTabBar(props: React.ComponentProps<typeof BottomTabBar>) {
   const { translateY } = useTabBarScroll();
+  const focusedRoute = props.state.routes[props.state.index]?.name;
+  if (focusedRoute && HIDDEN_TAB_ROUTES.has(focusedRoute)) return null;
   return (
     <Animated.View
       style={{

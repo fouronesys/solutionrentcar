@@ -51,7 +51,7 @@
   },
   "register": {
     "title": "Crear cuenta",
-    "subtitle": "Empieza a reservar en un chin",
+    "subtitle": "Empieza a reservar en un ratico",
     "name": "Nombre",
     "lastname": "Apellido",
     "phone": "Teléfono",
@@ -240,7 +240,7 @@
     "returned": "Devuelta"
   },
   "home": {
-    "guestBannerText": "Crea tu cuenta y reserva en un chin.",
+    "guestBannerText": "Crea tu cuenta y reserva en un ratico.",
     "guestBannerCta": "Dale",
     "featuredTitle": "Destacados",
     "featuredEmpty": "No hay carros disponibles ahorita",
