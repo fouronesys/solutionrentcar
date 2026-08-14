@@ -51,7 +51,15 @@ function BellTabIcon({ focused }: { focused: boolean }) {
 function AnimatedTabBar(props: React.ComponentProps<typeof BottomTabBar>) {
   const { translateY } = useTabBarScroll();
   return (
-    <Animated.View style={{ transform: [{ translateY }] }}>
+    <Animated.View
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        transform: [{ translateY }],
+      }}
+    >
       <BottomTabBar {...props} />
     </Animated.View>
   );

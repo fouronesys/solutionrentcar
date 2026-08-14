@@ -19,7 +19,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useTabBarScroll } from "@/components/TabBarScrollContext";
+import { TAB_BAR_HEIGHT, useTabBarScroll } from "@/components/TabBarScrollContext";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
@@ -232,7 +232,7 @@ export default function LocationsScreen() {
         subtitle={locale === "en" ? "Branches across the island" : "Bases locales en toda la isla"}
       />
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={16}>
+      <ScrollView contentContainerStyle={[styles.body, { paddingBottom: TAB_BAR_HEIGHT + 16 }]} showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={16}>
         {/* Eyebrow + heading */}
         <View style={styles.headingBlock}>
           <Text style={styles.eyebrow}>

@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useTabBarScroll } from "@/components/TabBarScrollContext";
+import { TAB_BAR_HEIGHT, useTabBarScroll } from "@/components/TabBarScrollContext";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { BellButton, ScreenHeader } from "@/components/ScreenHeader";
@@ -145,7 +145,7 @@ export default function HomeScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.body}
+        contentContainerStyle={[styles.body, { paddingBottom: TAB_BAR_HEIGHT + 16 }]}
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}

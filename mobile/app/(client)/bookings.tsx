@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useTabBarScroll } from "@/components/TabBarScrollContext";
+import { TAB_BAR_HEIGHT, useTabBarScroll } from "@/components/TabBarScrollContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
@@ -174,7 +174,7 @@ export default function BookingsList() {
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <FlatList
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_HEIGHT + 16 }]}
         data={showSkeleton ? [] : items}
         keyExtractor={(b) => String(b.id)}
         showsVerticalScrollIndicator={false}

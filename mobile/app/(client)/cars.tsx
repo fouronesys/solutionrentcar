@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useTabBarScroll } from "@/components/TabBarScrollContext";
+import { TAB_BAR_HEIGHT, useTabBarScroll } from "@/components/TabBarScrollContext";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, {
@@ -670,7 +670,7 @@ export default function CarsScreen() {
       <FlatList
         data={loading ? [] : displayed}
         keyExtractor={(c) => String(c.id)}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: TAB_BAR_HEIGHT + 16 }]}
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}

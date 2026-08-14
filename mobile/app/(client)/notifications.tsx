@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useTabBarScroll } from "@/components/TabBarScrollContext";
+import { TAB_BAR_HEIGHT, useTabBarScroll } from "@/components/TabBarScrollContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -206,7 +206,7 @@ export default function NotificationsScreen() {
         </View>
       ) : (
         <FlatList
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_HEIGHT + 16 }]}
           data={items}
           keyExtractor={(n) => String(n.id)}
           showsVerticalScrollIndicator={false}

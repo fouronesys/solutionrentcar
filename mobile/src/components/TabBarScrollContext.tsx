@@ -6,7 +6,8 @@
 import React, { createContext, useCallback, useContext, useRef } from "react";
 import { Animated, Platform } from "react-native";
 
-const TAB_H = Platform.OS === "web" ? 84 : 88;
+export const TAB_BAR_HEIGHT = Platform.OS === "web" ? 84 : 88;
+const TAB_H = TAB_BAR_HEIGHT;
 const THRESHOLD = 60; // don't hide until user has scrolled past this
 const DY = 5;         // minimum delta to trigger hide/show
 
