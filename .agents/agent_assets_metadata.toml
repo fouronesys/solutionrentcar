@@ -126,46 +126,46 @@ id = "7GYm9kUNHgTKKRhm6eR00"
 uri = "file://store-screenshots/appstore-diseno/home-1290x2796.png"
 type = "image"
 title = "App Store · «MUÉVETE»"
-description = "Screenshot con diseño de marca y frase secuencial"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
 
 [[outputs]]
 id = "F-zvN0Qoyn9lnC0nrYsL_"
 uri = "file://store-screenshots/appstore-diseno/cars-1290x2796.png"
 type = "image"
-title = "App Store · «A TU MANERA»"
-description = "Screenshot con diseño de marca y frase secuencial"
+title = "App Store · «A TU»"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
 
 [[outputs]]
 id = "Hm9C8_KyOWSw7X4SStsgQ"
 uri = "file://store-screenshots/appstore-diseno/car_detail-1290x2796.png"
 type = "image"
-title = "App Store · «RESERVA»"
-description = "Screenshot con diseño de marca y frase secuencial"
+title = "App Store · «MANERA»"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
 
 [[outputs]]
 id = "ZBxwYbEL_2i6DLq4J6Nc6"
 uri = "file://store-screenshots/appstore-diseno/book_top-1290x2796.png"
 type = "image"
-title = "App Store · «EN UN RATICO»"
-description = "Screenshot con diseño de marca y frase secuencial"
+title = "App Store · «CON YOWELL»"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
 
 [[outputs]]
 id = "WAP9G6-lW2aPeJXdS-qPC"
 uri = "file://store-screenshots/appstore-diseno/book_bottom-1290x2796.png"
 type = "image"
-title = "App Store · «Y DALE»"
-description = "Screenshot con diseño de marca y frase secuencial"
+title = "App Store · «RENT-CAR»"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
 
 [[outputs]]
 id = "kkD3zMSc-1wy2TONbwyXZ"
 uri = "file://store-screenshots/googleplay-diseno/home-1080x1920.png"
 type = "image"
 title = "Google Play · «MUÉVETE»"
-description = "Screenshot con diseño de marca y frase secuencial"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
 
 [[outputs]]
 id = "5Ews6EJoDbsASQIPVLIYL"
 uri = "file://store-screenshots/googleplay-diseno/book_bottom-1080x1920.png"
 type = "image"
-title = "Google Play · «Y DALE»"
-description = "Screenshot con diseño de marca y frase secuencial"
+title = "Google Play · «RENT-CAR»"
+description = "Diseño de tienda con fotos de stock y frase secuencial"
