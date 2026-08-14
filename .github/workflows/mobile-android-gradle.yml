@@ -41,6 +41,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: npm
+          cache-dependency-path: "**/package-lock.json"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -103,4 +105,3 @@ jobs:
           path: mobile/${{ steps.art.outputs.file }}
           if-no-files-found: error
           retention-days: 14
-
