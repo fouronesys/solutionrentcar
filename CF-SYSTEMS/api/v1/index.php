@@ -44,6 +44,7 @@ $handlers = [
     'payments'      => 'handlers/payments.php',
     'push'          => 'handlers/push.php',
     'catalog'       => 'handlers/catalog.php',
+    'places'        => 'handlers/places.php',
     'health'        => 'handlers/health.php',
 ];
 

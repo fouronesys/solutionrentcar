@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
+import { PlaceAutocomplete } from "@/components/PlaceAutocomplete";
 import { Loading } from "@/components/Loading";
 import { Accordion } from "@/components/Accordion";
 import { RangeCalendar } from "@/components/RangeCalendar";
@@ -483,16 +484,17 @@ export default function BookScreen() {
                   {locale === "en" ? "LOCATIONS" : "LUGARES"}
                 </Text>
               </View>
-              <Input
+              <PlaceAutocomplete
                 label={t("booking.placeStart")}
                 value={placeStart}
-                onChangeText={setPlaceStart}
+                onChange={(text) => setPlaceStart(text)}
                 icon="navigate-outline"
                 placeholder={
                   locale === "en"
                     ? "Airport, hotel, address…"
                     : "Aeropuerto, hotel, dirección…"
                 }
+                containerStyle={{ marginBottom: 16 }}
               />
               <Text style={styles.chipsLabel}>{t("book.suggestionsLabel")}</Text>
               <ScrollView
@@ -544,16 +546,17 @@ export default function BookScreen() {
 
               {!sameReturn ? (
                 <>
-                  <Input
+                  <PlaceAutocomplete
                     label={t("booking.placeEnd")}
                     value={placeEnd}
-                    onChangeText={setPlaceEnd}
+                    onChange={(text) => setPlaceEnd(text)}
                     icon="flag-outline"
                     placeholder={
                       locale === "en"
                         ? "Same as pickup if empty"
                         : "Igual al de recogida si está vacío"
                     }
+                    containerStyle={{ marginBottom: 16 }}
                   />
                   <Text style={styles.chipsLabel}>
                     {t("book.suggestionsLabel")}
