@@ -208,20 +208,32 @@ export default function LocationsScreen() {
         b.address.toLowerCase().includes(q.toLowerCase()))
   );
 
-  const openMaps = (b: Branch) => {
-    const query = encodeURIComponent(`${b.lat},${b.lng}`);
-    const label = encodeURIComponent(b.name);
-    let url: string;
-    if (Platform.OS === "ios") {
-      url = `maps:?q=${label}&ll=${b.lat},${b.lng}`;
-    } else if (Platform.OS === "android") {
-      url = `geo:${b.lat},${b.lng}?q=${b.lat},${b.lng}(${label})`;
-    } else {
-      url = `https://www.openstreetmap.org/?mlat=${b.lat}&mlon=${b.lng}&zoom=16`;
+  // Waze: deep link on native, universal link everywhere as fallback.
+  const openWaze = (b: Branch) => {
+    const webUrl = `https://waze.com/ul?ll=${b.lat},${b.lng}&navigate=yes`;
+    if (Platform.OS === "web") {
+      Linking.openURL(webUrl);
+      return;
     }
-    Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://www.openstreetmap.org/?mlat=${b.lat}&mlon=${b.lng}&zoom=16`);
-    });
+    Linking.openURL(`waze://?ll=${b.lat},${b.lng}&navigate=yes`).catch(() =>
+      Linking.openURL(webUrl),
+    );
+  };
+
+  // Google Maps: turn-by-turn directions to the branch.
+  const openGoogleMaps = (b: Branch) => {
+    const webUrl =
+      `https://www.google.com/maps/dir/?api=1` +
+      `&destination=${b.lat},${b.lng}&travelmode=driving`;
+    if (Platform.OS === "web") {
+      Linking.openURL(webUrl);
+      return;
+    }
+    const appUrl =
+      Platform.OS === "ios"
+        ? `comgooglemaps://?daddr=${b.lat},${b.lng}&directionsmode=driving`
+        : `google.navigation:q=${b.lat},${b.lng}`;
+    Linking.openURL(appUrl).catch(() => Linking.openURL(webUrl));
   };
 
   return (
@@ -343,10 +355,17 @@ export default function LocationsScreen() {
             </View>
 
             <View style={styles.branchActions}>
-              <Pressable style={styles.dirBtn} onPress={() => openMaps(b)}>
-                <Ionicons name="navigate-outline" size={16} color="#FFFFFF" />
-                <Text style={styles.dirBtnText}>
-                  {locale === "en" ? "Get directions" : "Cómo llegar"}
+              <Pressable style={styles.dirBtn} onPress={() => openWaze(b)}>
+                <Ionicons name="navigate" size={16} color="#FFFFFF" />
+                <Text style={styles.dirBtnText}>Waze</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.dirBtn, styles.dirBtnAlt]}
+                onPress={() => openGoogleMaps(b)}
+              >
+                <Ionicons name="map-outline" size={16} color={colors.cta} />
+                <Text style={[styles.dirBtnText, styles.dirBtnAltText]}>
+                  Maps
                 </Text>
               </Pressable>
               {b.phone ? (
@@ -531,6 +550,12 @@ const makeStyles = () => StyleSheet.create({
     height: 44,
   },
   dirBtnText: { ...type.captionMed, color: "#FFFFFF", fontFamily: font.bold },
+  dirBtnAlt: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: colors.cta,
+  },
+  dirBtnAltText: { color: colors.cta },
   iconBtn: {
     width: 44,
     height: 44,
