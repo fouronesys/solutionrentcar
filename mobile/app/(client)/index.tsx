@@ -135,7 +135,7 @@ export default function HomeScreen() {
       <StatusBar style={isDark ? "light" : "dark"} />
       <ScreenHeader
         title="Yowell Rent-Car"
-        subtitle={locale === "en" ? "Your next move starts here." : "Tu próximo movimiento."}
+        subtitle={locale === "en" ? "Your next move starts here." : "Móntate y dale."}
         right={
           <BellButton
             unread={unread}
@@ -160,7 +160,7 @@ export default function HomeScreen() {
         {/* Greeting */}
         <View style={styles.greetingBlock}>
           <Text style={styles.eyebrow}>
-            {locale === "en" ? "WELCOME" : "BIENVENIDO"}
+            {locale === "en" ? "WELCOME" : "KLK"}
             {firstName ? ` · ${firstName.toUpperCase()}` : ""}
           </Text>
           <Text style={styles.heading}>
@@ -173,10 +173,10 @@ export default function HomeScreen() {
           <Pressable style={styles.ctaCardRed} onPress={() => router.push("/(client)/cars")}>
             <Ionicons name="car-sport" size={28} color="#FFFFFF" />
             <Text style={styles.ctaCardRedTitle}>
-              {locale === "en" ? "Browse cars" : "Ver flota"}
+              {locale === "en" ? "Browse cars" : "Ver los carros"}
             </Text>
             <Text style={styles.ctaCardRedSub}>
-              {locale === "en" ? "Available now" : "Disponibles ahora"}
+              {locale === "en" ? "Available now" : "Ahí mismo, disponibles"}
             </Text>
           </Pressable>
           {isGuest ? (

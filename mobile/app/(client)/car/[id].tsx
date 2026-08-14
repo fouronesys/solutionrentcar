@@ -318,7 +318,7 @@ export default function CarDetail() {
         {/* ── Date range selector ───────────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {locale === "en" ? "When do you need it?" : "¿Cuándo lo necesitas?"}
+            {locale === "en" ? "When do you need it?" : "¿Pa' cuándo lo quieres?"}
           </Text>
           <Pressable
             style={styles.datePicker}

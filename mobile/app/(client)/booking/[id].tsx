@@ -151,7 +151,7 @@ function SuccessOverlay({
         </Animated.View>
 
         <Text style={styles.successTitle}>
-          {locale === "en" ? "Booking Created!" : "¡Reserva Creada!"}
+          {locale === "en" ? "Booking Created!" : "¡Tamo' ready!"}
         </Text>
         <Text style={styles.successSub}>
           {locale === "en"
