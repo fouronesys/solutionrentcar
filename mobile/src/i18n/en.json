@@ -120,7 +120,9 @@
     "whatsappTitle": "Your booking is confirmed via WhatsApp",
     "whatsappBody": "You pay nothing in the app — we coordinate availability and handover with you.",
     "confirmWhatsapp": "Confirm via WhatsApp",
-    "whatsappMessage": "Hi, I'd like to confirm my booking %{code} for the %{car} from %{start} to %{end}."
+    "whatsappMessage": "Hi, I'd like to confirm my booking %{code} for the %{car} from %{start} to %{end}.",
+    "busyConflict": "The selected dates include unavailable days. Please pick another range.",
+    "busyLegend": "Unavailable"
   },
   "booking": {
     "title": "New booking",

@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, font, radius, shadow, spacing, type } from "@/theme/colors";
 import { useThemedStyles } from "@/theme/ThemeContext";
-import { i18n } from "@/i18n";
+import { i18n, t } from "@/i18n";
 
 // ─── Locale data ─────────────────────────────────────────────────────────────
 const WD_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -71,9 +71,18 @@ interface Props {
   end: Date;
   onConfirm: (start: Date, end: Date) => void;
   onClose: () => void;
+  /** Set of day timestamps (start-of-day ms) that are unavailable. */
+  busyDays?: Set<number>;
 }
 
-export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props) {
+export function RangeCalendar({
+  visible,
+  start,
+  end,
+  onConfirm,
+  onClose,
+  busyDays,
+}: Props) {
   const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const locale = i18n.locale === "en" ? "en" : "es";
@@ -84,22 +93,46 @@ export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props
   const [lStart, setLStart] = useState(start);
   const [lEnd, setLEnd] = useState(end);
   const [selecting, setSelecting] = useState<"start" | "end">("start");
+  const [conflict, setConflict] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setLStart(start);
       setLEnd(end);
       setSelecting("start");
+      setConflict(false);
     }
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const months = useMemo(() => buildMonths(7), []);
   const todayMs = sod(new Date()).getTime();
 
+  const isBusy = useCallback(
+    (dayMs: number) => busyDays?.has(dayMs) ?? false,
+    [busyDays],
+  );
+
+  /** True if any day in [aMs, bMs] (inclusive) is busy. */
+  const rangeHasBusy = useCallback(
+    (aMs: number, bMs: number) => {
+      if (!busyDays || busyDays.size === 0) return false;
+      for (let t = aMs; t <= bMs; t += 86400000) {
+        if (busyDays.has(t)) return true;
+      }
+      return false;
+    },
+    [busyDays],
+  );
+
   const handleDay = useCallback(
     (day: Date) => {
       const d = sod(day);
       if (d.getTime() < todayMs) return;
+      if (isBusy(d.getTime())) {
+        setConflict(true);
+        return;
+      }
+      setConflict(false);
 
       if (selecting === "start") {
         const ns = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 10, 0, 0);
@@ -114,17 +147,22 @@ export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props
           setLStart(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 10, 0, 0));
           setSelecting("end");
         } else {
+          if (rangeHasBusy(sod(lStart).getTime(), d.getTime())) {
+            setConflict(true);
+            return;
+          }
           setLEnd(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 18, 0, 0));
           setSelecting("start");
         }
       }
     },
-    [selecting, lStart, lEnd, todayMs],
+    [selecting, lStart, lEnd, todayMs, isBusy, rangeHasBusy],
   );
 
   const sMs = sod(lStart).getTime();
   const eMs = sod(lEnd).getTime();
   const diffDays = Math.max(1, Math.ceil((eMs - sMs) / 86400000));
+  const selectionBlocked = rangeHasBusy(sMs, eMs);
 
   const fmtShort = (d: Date) =>
     `${d.getDate()} ${MO[d.getMonth()].slice(0, 3)}`;
@@ -206,6 +244,13 @@ export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props
             : "Toca para elegir fecha de devolución"}
         </Text>
 
+        {busyDays && busyDays.size > 0 ? (
+          <View style={styles.legendRow}>
+            <View style={styles.legendSwatch} />
+            <Text style={styles.legendText}>{t("book.busyLegend")}</Text>
+          </View>
+        ) : null}
+
         {/* ── Calendar body ────────────────────────────────────────── */}
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -233,6 +278,7 @@ export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props
                       return <View key={`e${idx}`} style={styles.cell} />;
                     const dm = sod(day).getTime();
                     const isPast = dm < todayMs;
+                    const busy = !isPast && isBusy(dm);
                     const isStart = dm === sMs;
                     const isEnd = dm === eMs;
                     const inRange = dm > sMs && dm < eMs;
@@ -242,18 +288,21 @@ export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props
                       <Pressable
                         key={dm}
                         onPress={() => !isPast && handleDay(day)}
+                        disabled={isPast || busy}
                         style={[
                           styles.cell,
                           inRange && styles.cellRange,
                           (isStart || isEnd) && styles.cellEndpoint,
                           isStart && styles.cellStartRadius,
                           isEnd && styles.cellEndRadius,
+                          busy && styles.cellBusy,
                         ]}
                       >
                         <Text
                           style={[
                             styles.cellText,
                             isPast && styles.cellTextPast,
+                            busy && styles.cellTextBusy,
                             isToday && !isStart && !isEnd && styles.cellTextToday,
                             (isStart || isEnd) && styles.cellTextSelected,
                           ]}
@@ -274,9 +323,22 @@ export function RangeCalendar({ visible, start, end, onConfirm, onClose }: Props
 
         {/* ── Confirm bar ──────────────────────────────────────────── */}
         <View style={styles.confirmBar}>
+          {conflict ? (
+            <View style={styles.conflictRow}>
+              <Ionicons name="alert-circle" size={16} color={colors.danger} />
+              <Text style={styles.conflictText}>{t("book.busyConflict")}</Text>
+            </View>
+          ) : null}
           <Pressable
-            style={styles.confirmBtn}
-            onPress={() => onConfirm(lStart, lEnd)}
+            style={[styles.confirmBtn, selectionBlocked && styles.confirmBtnDisabled]}
+            disabled={selectionBlocked}
+            onPress={() => {
+              if (rangeHasBusy(sMs, eMs)) {
+                setConflict(true);
+                return;
+              }
+              onConfirm(lStart, lEnd);
+            }}
           >
             <Ionicons name="checkmark" size={20} color="#FFF" />
             <Text style={styles.confirmText}>
@@ -373,8 +435,13 @@ const makeStyles = () =>
       borderTopRightRadius: CELL_SIZE / 2,
       borderBottomRightRadius: CELL_SIZE / 2,
     },
+    cellBusy: { opacity: 0.9 },
     cellText: { ...type.callout, color: colors.text },
     cellTextPast: { color: colors.textFaint },
+    cellTextBusy: {
+      color: colors.textFaint,
+      textDecorationLine: "line-through",
+    },
     cellTextToday: { fontFamily: font.bold, color: colors.cta },
     cellTextSelected: { color: "#FFF", fontFamily: font.bold },
     todayDot: {
@@ -405,5 +472,29 @@ const makeStyles = () =>
       gap: 10,
       ...shadow.cta,
     },
+    confirmBtnDisabled: { opacity: 0.5 },
     confirmText: { ...type.h3, color: "#FFF" },
+
+    legendRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginBottom: 10,
+    },
+    legendSwatch: {
+      width: 12,
+      height: 12,
+      borderRadius: 3,
+      backgroundColor: colors.textFaint,
+    },
+    legendText: { ...type.small, color: colors.textMuted },
+
+    conflictRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 10,
+    },
+    conflictText: { ...type.small, color: colors.danger, flex: 1 },
   });

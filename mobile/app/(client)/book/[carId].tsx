@@ -91,6 +91,7 @@ export default function BookScreen() {
     paramEnd ? new Date(paramEnd) : defaultEnd(),
   );
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [busyDays, setBusyDays] = useState<Set<number>>(new Set());
 
   const [placeStart, setPlaceStart] = useState("");
   const [placeEnd, setPlaceEnd] = useState("");
@@ -118,6 +119,43 @@ export default function BookScreen() {
       }
     })();
   }, [carId]);
+
+  // Busy days: fetch existing booking ranges so the calendar can block them.
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await api.get<{
+          busy: { start_at: string; end_at: string }[];
+        }>(`/cars/${carId}/availability`);
+        const days = new Set<number>();
+        for (const b of r.busy ?? []) {
+          const s = new Date(b.start_at.replace(" ", "T"));
+          const e = new Date(b.end_at.replace(" ", "T"));
+          if (isNaN(s.getTime()) || isNaN(e.getTime())) continue;
+          const d = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+          const endDay = new Date(e.getFullYear(), e.getMonth(), e.getDate());
+          while (d.getTime() <= endDay.getTime()) {
+            days.add(d.getTime());
+            d.setDate(d.getDate() + 1);
+          }
+        }
+        setBusyDays(days);
+      } catch {
+        // Non-blocking: calendar simply shows all days if availability fails.
+      }
+    })();
+  }, [carId]);
+
+  const rangeIsBusy = (s: Date, e: Date) => {
+    if (busyDays.size === 0) return false;
+    const d = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+    const endDay = new Date(e.getFullYear(), e.getMonth(), e.getDate());
+    while (d.getTime() <= endDay.getTime()) {
+      if (busyDays.has(d.getTime())) return true;
+      d.setDate(d.getDate() + 1);
+    }
+    return false;
+  };
 
   const days = daysBetween(start, end);
   const dailyRate = Number(car?.price_day ?? car?.price ?? 0);
@@ -184,6 +222,11 @@ export default function BookScreen() {
     if (!placeStart.trim()) {
       toast({ message: t("book.pickupRequired"), type: "error" });
       scrollRef.current?.scrollTo({ y: placesY.current, animated: true });
+      return;
+    }
+    if (rangeIsBusy(start, end)) {
+      toast({ message: t("book.busyConflict"), type: "error", duration: 5000 });
+      setCalendarOpen(true);
       return;
     }
     setSubmitting(true);
@@ -766,6 +809,7 @@ export default function BookScreen() {
         visible={calendarOpen}
         start={start}
         end={end}
+        busyDays={busyDays}
         onClose={() => setCalendarOpen(false)}
         onConfirm={(s, e) => {
           setStart(s);

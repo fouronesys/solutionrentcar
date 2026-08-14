@@ -120,7 +120,9 @@
     "whatsappTitle": "Tu reserva se confirma por WhatsApp",
     "whatsappBody": "No pagas nada en la app — coordinamos disponibilidad y la entrega contigo.",
     "confirmWhatsapp": "Confirmar por WhatsApp",
-    "whatsappMessage": "Hola, quiero confirmar mi reserva %{code} del %{car} del %{start} al %{end}."
+    "whatsappMessage": "Hola, quiero confirmar mi reserva %{code} del %{car} del %{start} al %{end}.",
+    "busyConflict": "Las fechas elegidas incluyen días ocupados. Elige otro rango.",
+    "busyLegend": "No disponible"
   },
   "booking": {
     "title": "Nueva reserva",
