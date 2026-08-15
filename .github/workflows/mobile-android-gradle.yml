@@ -41,8 +41,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: npm
-          cache-dependency-path: "**/package-lock.json"
+          cache: yarn
+          cache-dependency-path: mobile/yarn.lock
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -54,7 +54,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install JS dependencies
-        run: npm install
+        run: yarn install --frozen-lockfile
 
       - name: Decode google-services.json
         env:
