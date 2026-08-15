@@ -146,15 +146,15 @@ description = "Diseño de tienda con fotos de stock y frase secuencial"
 id = "ZBxwYbEL_2i6DLq4J6Nc6"
 uri = "file://store-screenshots/appstore-diseno/book_top-1290x2796.png"
 type = "image"
-title = "App Store · «CON YOWELL»"
-description = "Diseño de tienda con fotos de stock y frase secuencial"
+title = "App Store · «CON YOWELL» (corregido)"
+description = "Texto completo, sin cortes en los bordes"
 
 [[outputs]]
 id = "WAP9G6-lW2aPeJXdS-qPC"
 uri = "file://store-screenshots/appstore-diseno/book_bottom-1290x2796.png"
 type = "image"
-title = "App Store · «RENT-CAR»"
-description = "Diseño de tienda con fotos de stock y frase secuencial"
+title = "App Store · «RENT-CAR» (corregido)"
+description = "Texto completo, sin cortes en los bordes"
 
 [[outputs]]
 id = "kkD3zMSc-1wy2TONbwyXZ"
@@ -169,3 +169,10 @@ uri = "file://store-screenshots/googleplay-diseno/book_bottom-1080x1920.png"
 type = "image"
 title = "Google Play · «RENT-CAR»"
 description = "Diseño de tienda con fotos de stock y frase secuencial"
+
+[[outputs]]
+id = "GZXqZdk03WD-fbrBh9QdM"
+uri = "file://store-screenshots/googleplay-diseno/book_top-1080x1920.png"
+type = "image"
+title = "Google Play · «CON YOWELL» (corregido)"
+description = "Texto completo, sin cortes en los bordes"
