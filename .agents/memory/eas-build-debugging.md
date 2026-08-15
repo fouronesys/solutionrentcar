@@ -11,3 +11,5 @@ description: Diagnóstico de builds EAS Android para la app móvil (custom workf
 - Para producción se eliminó `package-lock.json` y se generó `yarn.lock` en `mobile/` → EAS elige yarn por defecto y evita el crash de npm sin necesitar custom workflow (el perfil production usa el build estándar con credenciales gestionadas; solo preview usa el yml custom).
 - Un lockfile generado dentro de Replit incrusta URLs del proxy `http://package-firewall.replit.local/npm/...`, que no resuelve en CI externo (EAS). Hay que reescribirlas a `https://registry.yarnpkg.com/` (mismo hash, solo cambia el host) después de regenerar el lockfile.
 - Credenciales de producción (keystore Android + cert Apple) ya existen en los servidores EAS (hubo builds production exitosos); `--non-interactive` funciona.
+
+- Mobile CI must stay yarn-only: workflows use `yarn install --frozen-lockfile`; `package-lock.json` must not exist (breaks EAS) and yarn.lock must not contain `package-firewall.replit.local` URLs (local yarn/npm runs reintroduce them — sed to registry.yarnpkg.com before committing). Remote pushes have re-added npm artifacts before; re-check after any pull/rebase.
