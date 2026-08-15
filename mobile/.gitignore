@@ -23,3 +23,4 @@ expo-env.d.ts
 # Native dirs (managed workflow - generados por prebuild)
 android/
 ios/
+package-lock.json
