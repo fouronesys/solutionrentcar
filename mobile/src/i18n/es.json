@@ -47,7 +47,8 @@
     "requiredTitle": "Inicia sesión para continuar",
     "requiredSubtitle": "Crea una cuenta o inicia sesión para hacer una reserva.",
     "goToLogin": "Iniciar sesión",
-    "goToRegister": "Crear cuenta"
+    "goToRegister": "Crear cuenta",
+    "staffAccess": "¿Eres del equipo? Inicia sesión aquí"
   },
   "register": {
     "title": "Crear cuenta",

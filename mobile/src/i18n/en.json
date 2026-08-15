@@ -47,7 +47,8 @@
     "requiredTitle": "Sign in to continue",
     "requiredSubtitle": "Create an account or sign in to make a booking.",
     "goToLogin": "Sign in",
-    "goToRegister": "Create account"
+    "goToRegister": "Create account",
+    "staffAccess": "Team member? Sign in here"
   },
   "register": {
     "title": "Create account",

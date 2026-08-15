@@ -136,6 +136,11 @@ export default function ClientLogin() {
               size="lg"
             />
           </View>
+
+          {/* Acceso discreto para empleados */}
+          <Pressable onPress={() => router.push("/login/staff")} style={styles.staffLink} hitSlop={8}>
+            <Text style={styles.staffLinkText}>{t("login.staffAccess")}</Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -180,4 +185,6 @@ const makeStyles = () => StyleSheet.create({
   divider: { flexDirection: "row", alignItems: "center", marginVertical: 20 },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
   dividerText: { marginHorizontal: 12, ...type.small, color: colors.textMuted },
+  staffLink: { alignSelf: "center", marginTop: 18, paddingVertical: 6, paddingHorizontal: 12 },
+  staffLinkText: { ...type.small, color: colors.textMuted, textDecorationLine: "underline" },
 });
