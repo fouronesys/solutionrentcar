@@ -4,10 +4,10 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "back": "Atrás",
-    "loading": "Un chin, ya va...",
-    "retry": "Dale otra vez",
-    "empty": "Aquí no hay na' todavía",
-    "error": "Algo salió mal, dale otra vez",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "empty": "Aún no hay nada aquí",
+    "error": "Algo salió mal. Intenta de nuevo",
     "search": "Buscar",
     "from": "Desde",
     "to": "Hasta",
@@ -18,7 +18,7 @@
   },
   "welcome": {
     "title": "Casa Rivas RentCar",
-    "subtitle": "Tus rentas resueltas, sin brete",
+    "subtitle": "Alquiler de vehículos fácil y rápido",
     "asClient": "Soy cliente",
     "asStaff": "Soy del equipo"
   },
@@ -52,7 +52,7 @@
   },
   "register": {
     "title": "Crear cuenta",
-    "subtitle": "Empieza a reservar en un ratico",
+    "subtitle": "Empieza a reservar en minutos",
     "name": "Nombre",
     "lastname": "Apellido",
     "phone": "Teléfono",
@@ -80,7 +80,7 @@
     "perDay": "/ día",
     "details": "Detalles",
     "noPhoto": "Sin foto",
-    "book": "Eto' eh tuyo",
+    "book": "Reservar",
     "filterDates": "Filtrar por fechas",
     "pickup": "Recogida",
     "dropoff": "Devolución",
@@ -94,7 +94,7 @@
     }
   },
   "book": {
-    "success": "¡Tamo' ready! 🎉",
+    "success": "¡Reserva creada! 🎉",
     "pickupRequired": "Ingresa el lugar de recogida",
     "ctaNow": "Reservar ahora",
     "suggestionsLabel": "Sugerencias",
@@ -154,7 +154,7 @@
     "confirmDeliver": "¿Confirmar entrega?",
     "confirmReturn": "¿Confirmar devolución?",
     "created": "Reserva creada",
-    "noneClient": "Todavía no tienes reservas, ¡móntate!",
+    "noneClient": "Todavía no tienes reservas. ¡Haz la primera!",
     "noneStaff": "No hay reservas con esos filtros",
     "myBookings": "Mis reservas",
     "paymentMethod": "Método de pago",
@@ -203,7 +203,7 @@
   },
   "notifications": {
     "title": "Notificaciones",
-    "empty": "Sin novedades, todo tranquilo",
+    "empty": "No tienes notificaciones",
     "markAllRead": "Marcar todas como leídas",
     "unread": "sin leer"
   },
@@ -243,13 +243,13 @@
     "returned": "Devuelta"
   },
   "home": {
-    "guestBannerText": "Crea tu cuenta y reserva en un ratico.",
-    "guestBannerCta": "Dale",
+    "guestBannerText": "Crea tu cuenta y reserva en minutos.",
+    "guestBannerCta": "Comenzar",
     "featuredTitle": "Destacados",
-    "featuredEmpty": "No hay carros disponibles ahorita",
+    "featuredEmpty": "No hay autos disponibles por el momento",
     "perDay": "/día",
     "exploreFleet": "Explorar flota",
-    "exploreFleetSub": "Chequea todos los carros disponibles",
+    "exploreFleetSub": "Explora todos los autos disponibles",
     "ourLocations": "Nuestras ubicaciones",
     "ourLocationsSub": "Sucursal más cercana"
   }

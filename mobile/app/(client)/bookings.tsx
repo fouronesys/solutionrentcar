@@ -164,7 +164,7 @@ export default function BookingsList() {
       <SafeAreaView style={styles.screen} edges={["top"]}>
         <ScreenHeader
           title={t("booking.myBookings")}
-          subtitle={locale === "en" ? "Track your reservations." : "Chequea tus reservas."}
+          subtitle={locale === "en" ? "Track your reservations." : "Revisa tus reservas."}
         />
         <LoginPrompt />
       </SafeAreaView>
@@ -184,7 +184,7 @@ export default function BookingsList() {
           <View>
             <ScreenHeader
               title={t("booking.myBookings")}
-              subtitle={locale === "en" ? "Track your reservations." : "Chequea tus reservas."}
+              subtitle={locale === "en" ? "Track your reservations." : "Revisa tus reservas."}
             />
             <View style={styles.listMeta}>
               {!loading && (
@@ -216,7 +216,7 @@ export default function BookingsList() {
           ) : (
             <EmptyState
               title={t("booking.noneClient")}
-              subtitle={locale === "en" ? "Browse cars to make a reservation." : "Dale una vuelta a los carros y móntate."}
+              subtitle={locale === "en" ? "Browse cars to make a reservation." : "Explora los autos y haz tu primera reserva."}
               icon="bookings"
             />
           )
