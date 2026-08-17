@@ -1,5 +1,5 @@
 /**
- * ScreenHeader — shared white header matching the Yowell design language.
+ * ScreenHeader — shared white header matching the Casa Rivas design language.
  * Shows logo (shield) + title + subtitle, with optional right actions.
  */
 import React from "react";

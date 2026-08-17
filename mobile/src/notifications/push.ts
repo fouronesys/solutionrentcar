@@ -18,10 +18,10 @@ Notifications.setNotificationHandler({
 export async function ensureAndroidChannel() {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
-      name: "Yowell Rent-Car",
+      name: "Casa Rivas RentCar",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#1828E8",
+      lightColor: "#C9A227",
     });
   }
 }

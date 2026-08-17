@@ -83,7 +83,7 @@ export default function ClientLogin() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.brand}>YOWELL</Text>
+            <Text style={styles.brand}>CASA RIVAS</Text>
             <Text style={styles.brandSub}>Rent-Car</Text>
           </View>
 

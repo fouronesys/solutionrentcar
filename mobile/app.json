@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Yowell Rent-Car",
-    "slug": "solutions-rent-car",
-    "scheme": "solutionsrentcar",
-    "version": "1.3.1",
+    "name": "Casa Rivas RentCar",
+    "slug": "casa-rivas-rentcar",
+    "scheme": "casarivasrentcar",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,15 +11,15 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#000000"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.solutionsrent.app",
-      "buildNumber": "34",
+      "bundleIdentifier": "com.casarivas.rentcar",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Necesitamos la cámara para capturar fotos del vehículo y firmas.",
@@ -29,17 +29,17 @@
       "icon": "./assets/icon-ios.png"
     },
     "android": {
-      "package": "com.solutionsrent.app",
+      "package": "com.casarivas.rentcar",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#000000"
       },
       "permissions": [
         "NOTIFICATIONS",
         "POST_NOTIFICATIONS",
         "CAMERA"
       ],
-      "versionCode": 28
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -55,7 +55,7 @@
         {
           "image": "./assets/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#FFFFFF",
+          "backgroundColor": "#000000",
           "imageWidth": 220
         }
       ],
@@ -63,7 +63,7 @@
         "expo-notifications",
         {
           "icon": "./assets/adaptive-icon.png",
-          "color": "#1828E8"
+          "color": "#C9A227"
         }
       ],
       [
@@ -93,10 +93,7 @@
       "router": {
         "origin": false
       },
-      "apiBaseUrl": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1",
-      "eas": {
-        "projectId": "bf359c12-b13d-432d-944c-b059795b9f3b"
-      }
+      "apiBaseUrl": "https://solutionsrentcar.do/CF-SYSTEMS/api/v1"
     },
     "owner": "fouronesys"
   }

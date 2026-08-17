@@ -83,7 +83,7 @@ export default function StaffLogin() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.brand}>YOWELL</Text>
+            <Text style={styles.brand}>CASA RIVAS</Text>
             <Text style={styles.brandSub}>Equipo</Text>
             <View style={styles.staffPill}>
               <Ionicons name="briefcase-outline" size={13} color={colors.textSecondary} />

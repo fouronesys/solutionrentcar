@@ -134,7 +134,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <StatusBar style={isDark ? "light" : "dark"} />
       <ScreenHeader
-        title="Yowell Rent-Car"
+        title="Casa Rivas RentCar"
         subtitle={locale === "en" ? "Your next move starts here." : "Móntate y dale."}
         right={
           <BellButton

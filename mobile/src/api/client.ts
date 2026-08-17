@@ -21,14 +21,14 @@ const appVersion =
 const platformLabel =
   Platform.OS === "ios" ? "iOS" : Platform.OS === "android" ? "Android" : "Web";
 
-const userAgent = `YowellRentCar/${appVersion} (${platformLabel}; ${Platform.Version})`;
+const userAgent = `CasaRivasRentCar/${appVersion} (${platformLabel}; ${Platform.Version})`;
 
 function deriveOrigin(base: string): string {
   try {
     const u = new URL(base);
     return `${u.protocol}//${u.host}`;
   } catch {
-    return "https://solutionsrentcar.do";
+    return "https://casarivasrentcar.com";
   }
 }
 const originHeader = deriveOrigin(API_BASE);

@@ -11,7 +11,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { applyTheme, ThemeMode } from "@/theme/colors";
 
-const STORAGE_KEY = "yowell.theme";
+const STORAGE_KEY = "casarivas.theme";
 
 type ThemeCtx = {
   mode: ThemeMode;

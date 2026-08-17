@@ -6,24 +6,29 @@ export type ThemeMode = "light" | "dark";
 // Brand stays constant; surfaces/text/borders flip per theme.
 
 const brand = {
-  primary: "#4C5BFF",        // blue – informational / links (readable on dark)
-  primaryDark: "#111B9A",
-  primaryDeep: "#0B126A",
-  primaryLight: "#7D89FF",
+  primary: "#C9A227",        // gold – informational / links (readable on dark)
+  primaryDark: "#7A5E0E",
+  primaryDeep: "#5A4608",
+  primaryLight: "#E3C35C",
 
-  cta: "#E8002D",            // RED – primary CTA / active states / tabs
-  ctaDark: "#B5001F",
-  ctaLight: "#FF4060",
+  cta: "#B8860B",            // GOLD – primary CTA / active states / tabs
+  ctaDark: "#8C6708",
+  ctaLight: "#D4A72C",
 
-  accent: "#E8002D",         // alias → same as cta for backwards compat
+  accent: "#B8860B",         // alias → same as cta for backwards compat
 };
 
 export const lightColors = {
   ...brand,
-  primary: "#1828E8",
-  primaryLight: "#5D6BFF",
-  primaryXLight: "#EEF0FF",
-  ctaXLight: "#FFECEF",
+  primary: "#8C6D12",
+  primaryLight: "#C9A227",
+  primaryXLight: "#FAF3DC",
+  // CTA más oscuro en light para contraste AA (≥4.5:1) con texto blanco
+  cta: "#8C6708",
+  ctaDark: "#6E5106",
+  ctaLight: "#B8860B",
+  accent: "#8C6708",
+  ctaXLight: "#FBF1D9",
 
   // ─── Backgrounds ─────────────────────────────────────────────────────────
   bg: "#F2F3F5",             // screen background (cool light gray)
@@ -48,8 +53,8 @@ export const lightColors = {
   warningBg: "#FFF7E6",
   danger: "#DC2626",
   dangerBg: "#FEF2F2",
-  info: "#111B9A",
-  infoBg: "#EEF0FF",
+  info: "#7A5E0E",
+  infoBg: "#FAF3DC",
 
   // ─── Dark surfaces (avatar squares, highlight cards) ─────────────────────
   dark: "#141414",
@@ -61,24 +66,24 @@ export const lightColors = {
 
   // ─── Overlays / misc ──────────────────────────────────────────────────────
   overlay: "rgba(0,0,0,0.45)",
-  tint: "#EEF4FF",           // loyalty / soft blue tint card
-  tintBorder: "#D0DFFF",
+  tint: "#FAF3DC",           // loyalty / soft gold tint card
+  tintBorder: "#E8D79A",
 };
 
 export const darkColors: typeof lightColors = {
   ...brand,
-  // Brighter red for dark surfaces — #E8002D falls below 4.5:1 contrast on
+  // Brighter gold for dark surfaces — #B8860B falls below 4.5:1 contrast on
   // near-black; buttons still read fine, but text/labels need this lift.
-  cta: "#FF2D50",
-  ctaLight: "#FF5C77",
-  accent: "#FF2D50",
-  primaryXLight: "#1B2040",  // dark blue tint surface
-  ctaXLight: "#3A0E19",      // dark red tint surface
+  cta: "#E3B93B",
+  ctaLight: "#F0CC5F",
+  accent: "#E3B93B",
+  primaryXLight: "#2A2410",  // dark gold tint surface
+  ctaXLight: "#33290E",      // dark gold tint surface
 
-  bg: "#0B0B0F",             // near-black with a hint of blue
-  bgWarm: "#101014",
-  card: "#17171D",
-  cardAlt: "#1F1F27",
+  bg: "#0B0A08",             // near-black with a warm hint
+  bgWarm: "#12100B",
+  card: "#171510",
+  cardAlt: "#1F1C15",
 
   text: "#F5F5F7",
   textSecondary: "#B3B3BD",
@@ -94,19 +99,19 @@ export const darkColors: typeof lightColors = {
   warningBg: "#2E2410",
   danger: "#F87171",
   dangerBg: "#331216",
-  info: "#8B96FF",
-  infoBg: "#1B2040",
+  info: "#E3C35C",
+  infoBg: "#2A2410",
 
   dark: "#1F1F27",           // "dark accent" squares become elevated surfaces
   darkDeep: "#000000",
-  darkCard: "#1B2337",
+  darkCard: "#211D12",
   darkBorder: "#33333D",
   onDark: "#FAFAFA",
   onDarkMuted: "#A1A1AA",
 
   overlay: "rgba(0,0,0,0.6)",
-  tint: "#161C2E",
-  tintBorder: "#28324E",
+  tint: "#1E1A0E",
+  tintBorder: "#4A3E1A",
 };
 
 // Mutable palette — DEFAULT DARK. `applyTheme` swaps values in place so every
@@ -117,7 +122,7 @@ export const bookingStatus: Record<number, { en: string; es: string; color: stri
   0: { en: "Pending",   es: "Pendiente",  color: "#D97706", bg: "#FFFBEB" },
   1: { en: "Confirmed", es: "Confirmada", color: "#059669", bg: "#ECFDF5" },
   2: { en: "Cancelled", es: "Cancelada",  color: "#DC2626", bg: "#FEF2F2" },
-  3: { en: "Delivered", es: "Entregada",  color: "#1828E8", bg: "#EEF0FF" },
+  3: { en: "Delivered", es: "Entregada",  color: "#8C6D12", bg: "#FAF3DC" },
   4: { en: "Returned",  es: "Devuelta",   color: "#71717A", bg: "#F4F4F5" },
 };
 
@@ -131,14 +136,14 @@ const bookingStatusDark: Record<number, { color: string; bg: string }> = {
   0: { color: "#F5B94E", bg: "#2E2410" },
   1: { color: "#34D399", bg: "#0C2B21" },
   2: { color: "#F87171", bg: "#331216" },
-  3: { color: "#8B96FF", bg: "#1B2040" },
+  3: { color: "#E3C35C", bg: "#2A2410" },
   4: { color: "#A1A1AA", bg: "#22222A" },
 };
 const bookingStatusLight: Record<number, { color: string; bg: string }> = {
   0: { color: "#D97706", bg: "#FFFBEB" },
   1: { color: "#059669", bg: "#ECFDF5" },
   2: { color: "#DC2626", bg: "#FEF2F2" },
-  3: { color: "#1828E8", bg: "#EEF0FF" },
+  3: { color: "#8C6D12", bg: "#FAF3DC" },
   4: { color: "#71717A", bg: "#F4F4F5" },
 };
 const carStatusDark: Record<number, { color: string; bg: string }> = {
@@ -154,10 +159,10 @@ const carStatusLight: Record<number, { color: string; bg: string }> = {
 
 // Gradients (kept for AnimatedSplash; screens no longer use hero gradients)
 export const gradients = {
-  hero: ["#080B2D", "#111B9A", "#1828E8"] as const,
-  heroSoft: ["#0B0B0D", "#111B9A"] as const,
-  primary: ["#5D6BFF", "#1828E8", "#111B9A"] as const,
-  primarySoft: ["#6F7BFF", "#1828E8"] as const,
+  hero: ["#14100A", "#7A5E0E", "#C9A227"] as const,
+  heroSoft: ["#0B0B0D", "#7A5E0E"] as const,
+  primary: ["#E3C35C", "#C9A227", "#7A5E0E"] as const,
+  primarySoft: ["#EAD27A", "#C9A227"] as const,
   imageScrim: ["transparent", "rgba(0,0,0,0.0)", "rgba(0,0,0,0.88)"] as const,
   cardScrim: ["transparent", "rgba(0,0,0,0.78)"] as const,
   shimmer: ["#1F1F27", "#2A2A33", "#1F1F27"] as [string, string, string],
@@ -246,14 +251,14 @@ export const shadow = {
     elevation: 10,
   },
   cta: {
-    shadowColor: "#E8002D",
+    shadowColor: "#B8860B",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.30,
     shadowRadius: 14,
     elevation: 6,
   },
   primary: {
-    shadowColor: "#E8002D",
+    shadowColor: "#B8860B",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.30,
     shadowRadius: 14,

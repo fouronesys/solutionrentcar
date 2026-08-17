@@ -43,7 +43,7 @@ const ICON_MAP: Record<ToastType, keyof typeof Ionicons.glyphMap> = {
 const BG_MAP: Record<ToastType, string> = {
   success: "#059669",
   error: "#DC2626",
-  info: "#1828E8",
+  info: "#9A7B12",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {

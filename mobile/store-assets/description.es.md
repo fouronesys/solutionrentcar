@@ -1,7 +1,7 @@
-# Yowell Rent-Car — descripción para tiendas
+# Casa Rivas RentCar — descripción para tiendas
 
 ## Nombre
-Yowell Rent-Car
+Casa Rivas RentCar
 
 ## Subtítulo (App Store, 30 caracteres)
 Renta de autos al alcance
@@ -10,7 +10,7 @@ Renta de autos al alcance
 Reserva tu auto, paga y administra tus rentas desde una sola app.
 
 ## Descripción completa
-Yowell Rent-Car es la app oficial de nuestra empresa de alquiler de vehículos.
+Casa Rivas RentCar es la app oficial de nuestra empresa de alquiler de vehículos.
 Reserva en segundos, recibe avisos del estado de tu reserva, registra pagos y
 mantén tu información de contacto siempre al día.
 

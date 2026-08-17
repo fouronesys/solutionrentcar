@@ -112,7 +112,7 @@ export default function ProfileScreen() {
       <SafeAreaView style={styles.screen} edges={["top"]}>
         <ScreenHeader
           title={t("profile.title")}
-          subtitle={i18n.locale === "en" ? "Your Yowell account" : "Tu cuenta Yowell"}
+          subtitle={i18n.locale === "en" ? "Your Casa Rivas account" : "Tu cuenta Casa Rivas"}
         />
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
           <LoginPrompt />
@@ -192,7 +192,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <ScreenHeader
         title={t("profile.title")}
-        subtitle={locale === "en" ? "Your Yowell account" : "Tu cuenta Yowell"}
+        subtitle={locale === "en" ? "Your Casa Rivas account" : "Tu cuenta Casa Rivas"}
         right={
           <Pressable hitSlop={8} onPress={() => setEditOpen((v) => !v)} style={styles.editBtn}>
             <Ionicons name="person-outline" size={20} color={colors.text} />
@@ -287,7 +287,7 @@ export default function ProfileScreen() {
               icon: "help-circle-outline" as const,
               label: locale === "en" ? "Help & support" : "Ayuda y soporte",
               sub: locale === "en" ? "We're here 24/7" : "Aquí pa' ti 24/7",
-              onPress: () => Linking.openURL("mailto:hola@yowell.do"),
+              onPress: () => Linking.openURL("mailto:hola@casarivasrentcar.com"),
             },
           ].map((item, idx) => (
             <Pressable key={idx} style={styles.menuRow} onPress={item.onPress}>
@@ -398,7 +398,7 @@ export default function ProfileScreen() {
           ) : null}
 
           <Text style={styles.privacyNote}>
-            {locale === "en" ? "🔒 Your data is protected by Yowell." : "🔒 Tus datos están protegidos por Yowell."}
+            {locale === "en" ? "🔒 Your data is protected by Casa Rivas." : "🔒 Tus datos están protegidos por Casa Rivas."}
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
