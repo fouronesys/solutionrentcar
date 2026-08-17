@@ -3,12 +3,12 @@ class Database {
     public static $db = null;
     public static $con = null;
 
-    public string $user;
-    public string $pass;
-    public string $host;
-    public string $ddbb;
-    public string $socket;
-    public int    $port;
+    public $user;
+    public $pass;
+    public $host;
+    public $ddbb;
+    public $socket;
+    public $port;
 
     public function __construct(){
         // Valores por defecto (instancia original)
