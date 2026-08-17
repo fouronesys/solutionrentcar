@@ -20,14 +20,14 @@ const brand = {
 
 export const lightColors = {
   ...brand,
-  primary: "#8A5F12",
+  primary: "#A97C15",
   primaryLight: "#C79323",
   primaryXLight: "#FAF1DC",
-  // CTA más oscuro en light para contraste AA (≥4.5:1) con texto blanco
-  cta: "#8A5F12",
-  ctaDark: "#6E4B0D",
+  // Dorado real también en light; el tono #A97C15 mantiene legibilidad con texto blanco
+  cta: "#B8860B",
+  ctaDark: "#A97C15",
   ctaLight: "#C79323",
-  accent: "#8A5F12",
+  accent: "#B8860B",
   ctaXLight: "#F9EED4",
 
   // ─── Backgrounds ─────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ export const lightColors = {
   warningBg: "#FFF7E6",
   danger: "#DC2626",
   dangerBg: "#FEF2F2",
-  info: "#8A5F12",
+  info: "#A97C15",
   infoBg: "#FAF1DC",
 
   // ─── Dark surfaces (avatar squares, highlight cards) ─────────────────────
@@ -122,7 +122,7 @@ export const bookingStatus: Record<number, { en: string; es: string; color: stri
   0: { en: "Pending",   es: "Pendiente",  color: "#D97706", bg: "#FFFBEB" },
   1: { en: "Confirmed", es: "Confirmada", color: "#059669", bg: "#ECFDF5" },
   2: { en: "Cancelled", es: "Cancelada",  color: "#DC2626", bg: "#FEF2F2" },
-  3: { en: "Delivered", es: "Entregada",  color: "#8A5F12", bg: "#FAF1DC" },
+  3: { en: "Delivered", es: "Entregada",  color: "#A97C15", bg: "#FAF1DC" },
   4: { en: "Returned",  es: "Devuelta",   color: "#71717A", bg: "#F4F4F5" },
 };
 
@@ -143,7 +143,7 @@ const bookingStatusLight: Record<number, { color: string; bg: string }> = {
   0: { color: "#D97706", bg: "#FFFBEB" },
   1: { color: "#059669", bg: "#ECFDF5" },
   2: { color: "#DC2626", bg: "#FEF2F2" },
-  3: { color: "#8A5F12", bg: "#FAF1DC" },
+  3: { color: "#A97C15", bg: "#FAF1DC" },
   4: { color: "#71717A", bg: "#F4F4F5" },
 };
 const carStatusDark: Record<number, { color: string; bg: string }> = {

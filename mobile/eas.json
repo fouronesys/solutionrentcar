@@ -16,7 +16,7 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://assanpos.com/CF-SYSTEMS/api/v1"
+        "EXPO_PUBLIC_API_BASE_URL": "https://assanpos.com/RENTCAR/CASARIVAS-RENTCAR/CF-SYSTEMS/api/v1"
       },
       "android": {
         "buildType": "apk",
@@ -30,7 +30,7 @@
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://assanpos.com/CF-SYSTEMS/api/v1"
+        "EXPO_PUBLIC_API_BASE_URL": "https://assanpos.com/RENTCAR/CASARIVAS-RENTCAR/CF-SYSTEMS/api/v1"
       },
       "ios": {
         "image": "latest"

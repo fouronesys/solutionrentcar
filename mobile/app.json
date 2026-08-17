@@ -94,7 +94,7 @@
       "router": {
         "origin": false
       },
-      "apiBaseUrl": "https://assanpos.com/CF-SYSTEMS/api/v1",
+      "apiBaseUrl": "https://assanpos.com/RENTCAR/CASARIVAS-RENTCAR/CF-SYSTEMS/api/v1",
       "eas": {
         "projectId": "daa36231-74e5-4567-847c-931ba33a13d8"
       }

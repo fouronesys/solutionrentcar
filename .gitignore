@@ -8,3 +8,4 @@ attached_assets/
 # Secrets and runtime data — never commit
 CF-SYSTEMS/storage/.jwt_secret
 CF-SYSTEMS/storage/runtime/
+core/db.local.php
