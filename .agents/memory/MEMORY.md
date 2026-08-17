@@ -1,3 +1,4 @@
 - [EAS build debugging](eas-build-debugging.md) — cómo bajar logs de builds EAS y el fix del crash de npm en el builder.
 - [Store screenshot pipeline](store-screenshot-pipeline.md) — captura CDP para tiendas: lanzar chromium y driver en el mismo comando, copiar de /tmp al workspace al instante.
 - [Git push quirks](git-push-quirks.md) — gitPush callback es la única vía de push pero puede fallar UNKNOWN; commit por shell requiere identidad inline.
+- [Yowell legacy migration](yowell-legacy-migration.md) — migrate:legacy usa env LEGACY_DB_* contra el MySQL de Hostinger (solo lectura); el mysqld local no escucha en TCP.

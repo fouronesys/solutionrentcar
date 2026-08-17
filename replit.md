@@ -5,6 +5,7 @@
 - App móvil Expo en `mobile/` (workflow "Mobile App (Expo Web)", puerto 3000, `--no-dev`). Grupos de rutas: `(client)` y `(staff)`; logins en `/login/client` y `/login/staff`.
 - CI en GitHub Actions (repo `fouronesys/solutionrentcar`): Deploy a Hostinger (FTP), build iOS vía EAS, build Android vía Gradle. Instalación de dependencias móviles **solo con yarn** (`yarn install --frozen-lockfile`); no debe existir `mobile/package-lock.json`.
 - Screenshots de tiendas en `store-screenshots/` (limpios y con diseño).
+- **Backend multi-empresa nuevo** en `server/` (Node + TypeScript + Express + PostgreSQL integrada/Neon): workflow "API Multiempresa", puerto 8000, prefijos `/api/v1` y `/CF-SYSTEMS/api/v1` (compatible con la app móvil). Multi-tenant por `company_id`; empresa resuelta por token JWT o header `X-Company`/`?company=<slug>`. Branding público en `/branding`; admin en `/admin` (super admin: CRUD empresas; staff: flota y catálogos). Scripts: `npm run db:setup` (esquema), `npm run db:seed-demo` (2 empresas demo + super admin), `npm run migrate:legacy` (MySQL legado → PG, requiere env `LEGACY_DB_*`, solo lectura sobre MySQL). Archivos subidos en `server/storage/` (servidos en `/storage`, fuera de git). JWT firma con `SESSION_SECRET`.
 
 ## User preferences
 - Comunicación en español.
