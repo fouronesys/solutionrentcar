@@ -57,10 +57,10 @@ class ApiHelpers {
         if (strlen($n) >= 11) {
             $last11 = substr($n, -11);
             $out[] = $last11;
-            if ($last11[0] === '1') $out[] = substr($last11, 1);
+            if ($last11[0] === '1') $out[] = (string) substr($last11, 1);
         }
         if (strlen($n) == 10) $out[] = '1' . $n;
-        if (strlen($n) == 11 && $n[0] === '1') $out[] = substr($n, 1);
+        if (strlen($n) == 11 && $n[0] === '1') $out[] = (string) substr($n, 1);
         return array_values(array_unique(array_filter($out)));
     }
 

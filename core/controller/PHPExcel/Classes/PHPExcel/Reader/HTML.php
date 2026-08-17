@@ -215,7 +215,7 @@ class PHPExcel_Reader_HTML extends PHPExcel_Reader_Abstract implements PHPExcel_
 
     protected function _processDomElement(DOMNode $element, $sheet, &$row, &$column, &$cellContent, $format = null)
     {
-        foreach ($element->childNodes as $child) {
+        foreach ($element->childNodes ?? [] as $child) {
             if ($child instanceof DOMText) {
                 $domText = preg_replace('/\s+/u', ' ', trim($child->nodeValue));
                 if (is_string($cellContent)) {

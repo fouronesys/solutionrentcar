@@ -751,7 +751,7 @@ class PHPExcel_Helper_HTML
     }
 
     protected function parseElements(DOMNode $element) {
-        foreach ($element->childNodes as $child) {
+        foreach ($element->childNodes ?? [] as $child) {
             if ($child instanceof DOMText) {
                 $this->parseTextNode($child);
             } elseif ($child instanceof DOMElement) {

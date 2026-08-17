@@ -372,7 +372,7 @@ class PHPExcel_Calculation_FormulaParser {
 						$tokens1[] = new PHPExcel_Calculation_FormulaToken($value, PHPExcel_Calculation_FormulaToken::TOKEN_TYPE_OPERAND);
 						$value = "";
 					}
-					$tokens1[] = new PHPExcel_Calculation_FormulaToken(substr($this->_formula, $index, 2), PHPExcel_Calculation_FormulaToken::TOKEN_TYPE_OPERATORINFIX, PHPExcel_Calculation_FormulaToken::TOKEN_SUBTYPE_LOGICAL);
+					$tokens1[] = new PHPExcel_Calculation_FormulaToken((string) substr($this->_formula, $index, 2), PHPExcel_Calculation_FormulaToken::TOKEN_TYPE_OPERATORINFIX, PHPExcel_Calculation_FormulaToken::TOKEN_SUBTYPE_LOGICAL);
 					$index += 2;
 					continue;
 				}
@@ -603,7 +603,7 @@ class PHPExcel_Calculation_FormulaParser {
 			if ($token->getTokenType() == PHPExcel_Calculation_FormulaToken::TOKEN_TYPE_FUNCTION) {
 				if (strlen($token->getValue() > 0)) {
 					if (substr($token->getValue(), 0, 1) == "@") {
-						$token->setValue(substr($token->getValue(), 1));
+						$token->setValue((string) substr($token->getValue(), 1));
 					}
 				}
 			}

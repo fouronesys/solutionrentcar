@@ -65,8 +65,12 @@ if ($action === 'login') {
         $passVariants[] = $password;
         $passVariants = array_values(array_unique($passVariants));
 
-        $inUser = implode(',', array_map(fn($v) => "'".$con->real_escape_string($v)."'", $variants));
-        $inPass = implode(',', array_map(fn($v) => "'".$con->real_escape_string($v)."'", $passVariants));
+        $inUser = implode(',', array_map(function ($v) use ($con) {
+            return "'".$con->real_escape_string($v)."'";
+        }, $variants));
+        $inPass = implode(',', array_map(function ($v) use ($con) {
+            return "'".$con->real_escape_string($v)."'";
+        }, $passVariants));
 
         // Match either explicit username/password column or by phone variants
         $sql = "SELECT * FROM person
@@ -123,7 +127,9 @@ if ($action === 'register') {
     $variants[] = $phone;
     $variants = array_values(array_unique(array_filter($variants)));
     if (!empty($variants)) {
-        $inUser = implode(',', array_map(fn($v) => "'".$con->real_escape_string($v)."'", $variants));
+        $inUser = implode(',', array_map(function ($v) use ($con) {
+            return "'".$con->real_escape_string($v)."'";
+        }, $variants));
         $sql = "SELECT id FROM person WHERE
                 username IN ($inUser)
                 OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phone,'-',''),' ',''),'(',''),')',''),'+','') IN ($inUser)
@@ -145,7 +151,9 @@ if ($action === 'register') {
     $fullName = $lastname !== '' ? trim($name . ' ' . $lastname) : $name;
 
     // Insert directly (consistent with login flow which uses raw SQL).
-    $esc = fn($v) => $con->real_escape_string((string)$v);
+    $esc = function ($v) use ($con) {
+        return $con->real_escape_string((string)$v);
+    };
     $sql = "INSERT INTO person
         (reference,no,rnc,passport,issuedlicense,invoice_file,passport_file,license_file,home_file,
          invoice_date,passport_date,license_date,home_date,

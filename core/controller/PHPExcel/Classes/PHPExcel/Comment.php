@@ -320,6 +320,7 @@ class PHPExcel_Comment implements PHPExcel_IComparable
      *
      * @return string
      */
+    #[\ReturnTypeWillChange]
     public function __toString() {
         return $this->_text->getPlainText();
     }

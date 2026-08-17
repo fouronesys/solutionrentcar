@@ -3,85 +3,241 @@ class BookingData {
 
     public static $tablename = "booking";
 
-    public int $id = 0;
+    /**
+     * @var int
+     */
+    public $id = 0;
 
-    public string $firma = "";
+    /**
+     * @var string
+     */
+    public $firma = "";
     
-    public string $notified_clients = "";
-    public string $notified = "";
+    /**
+     * @var string
+     */
+    public $notified_clients = "";
+    /**
+     * @var string
+     */
+    public $notified = "";
     
-     public string $code = "";
-     public string $update_time = "";
+     /**
+      * @var string
+      */
+     public $code = "";
+     /**
+      * @var string
+      */
+     public $update_time = "";
     
-    public string $comment = "";
-    public string $payment_day = "";
-    public string $type_id = "";
-    public string $payment = "";
-    public string $start_at = "";
-    public string $st2rt_at = "";
-    public string $end_at = "";
-    public string $e2d_at = "";
+    /**
+     * @var string
+     */
+    public $comment = "";
+    /**
+     * @var string
+     */
+    public $payment_day = "";
+    /**
+     * @var string
+     */
+    public $type_id = "";
+    /**
+     * @var string
+     */
+    public $payment = "";
+    /**
+     * @var string
+     */
+    public $start_at = "";
+    /**
+     * @var string
+     */
+    public $st2rt_at = "";
+    /**
+     * @var string
+     */
+    public $end_at = "";
+    /**
+     * @var string
+     */
+    public $e2d_at = "";
 
-    public string $place_start = "No especificado";
-    public string $place_end = "No especificado";
+    /**
+     * @var string
+     */
+    public $place_start = "No especificado";
+    /**
+     * @var string
+     */
+    public $place_end = "No especificado";
 
-    public int $person_id = 0;
-    public int $person2_id = 0;
+    /**
+     * @var int
+     */
+    public $person_id = 0;
+    /**
+     * @var int
+     */
+    public $person2_id = 0;
 
-    public int $location = 0;
-    public int $stock_id = 0;
+    /**
+     * @var int
+     */
+    public $location = 0;
+    /**
+     * @var int
+     */
+    public $stock_id = 0;
 
-    public int $car_id = 0;
-    public int $car2_id = 0;
+    /**
+     * @var int
+     */
+    public $car_id = 0;
+    /**
+     * @var int
+     */
+    public $car2_id = 0;
 
-    public float $price = 0;
-    public float $total = 0;
-    public float $xtotal = 0;
+    /**
+     * @var float
+     */
+    public $price = 0;
+    /**
+     * @var float
+     */
+    public $total = 0;
+    /**
+     * @var float
+     */
+    public $xtotal = 0;
 
-    public string $day = "";
+    /**
+     * @var string
+     */
+    public $day = "";
 
-    public int $user_id = 0;
+    /**
+     * @var int
+     */
+    public $user_id = 0;
 
-    public string $type = "";
+    /**
+     * @var string
+     */
+    public $type = "";
 
-    public float $deposit = 0;
-    public string $fuel = "";
+    /**
+     * @var float
+     */
+    public $deposit = 0;
+    /**
+     * @var string
+     */
+    public $fuel = "";
 
-    public int $f_id = 0;
+    /**
+     * @var int
+     */
+    public $f_id = 0;
 
-    public int $status = 0;
+    /**
+     * @var int
+     */
+    public $status = 0;
 
-    public string $plane = "";
+    /**
+     * @var string
+     */
+    public $plane = "";
 
-    public float $sure = 0;
-    public int $type_sure = 0;
+    /**
+     * @var float
+     */
+    public $sure = 0;
+    /**
+     * @var int
+     */
+    public $type_sure = 0;
 
-    public string $unit_extra1 = "";
-    public float $price_extra1 = 0;
+    /**
+     * @var string
+     */
+    public $unit_extra1 = "";
+    /**
+     * @var float
+     */
+    public $price_extra1 = 0;
 
-    public string $unit_extra2 = "";
-    public float $price_extra2 = 0;
+    /**
+     * @var string
+     */
+    public $unit_extra2 = "";
+    /**
+     * @var float
+     */
+    public $price_extra2 = 0;
 
-    public string $unit_extra3 = "";
-    public float $price_extra3 = 0;
+    /**
+     * @var string
+     */
+    public $unit_extra3 = "";
+    /**
+     * @var float
+     */
+    public $price_extra3 = 0;
 
-    public string $unit_extra4 = "";
-    public float $price_extra4 = 0;
+    /**
+     * @var string
+     */
+    public $unit_extra4 = "";
+    /**
+     * @var float
+     */
+    public $price_extra4 = 0;
 
-    public float $iva = 0;
+    /**
+     * @var float
+     */
+    public $iva = 0;
 
-    public string $type_iva = "";
-    public string $number_iva = "";
-    public float $value_iva = 0;
+    /**
+     * @var string
+     */
+    public $type_iva = "";
+    /**
+     * @var string
+     */
+    public $number_iva = "";
+    /**
+     * @var float
+     */
+    public $value_iva = 0;
 
-    public string $card = "";
+    /**
+     * @var string
+     */
+    public $card = "";
 
-    public float $usd_price = 0;
-    public float $tasa_dolar = 0;
+    /**
+     * @var float
+     */
+    public $usd_price = 0;
+    /**
+     * @var float
+     */
+    public $tasa_dolar = 0;
 
-    public int $box_id = 0;
+    /**
+     * @var int
+     */
+    public $box_id = 0;
 
-    public string $created_at = "";
+    /**
+     * @var string
+     */
+    public $created_at = "";
 
 	public function getUser(){ return UserData::getById($this->user_id);}
 	public function getSure(){ return SureData::getById($this->type_sure);}

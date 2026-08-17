@@ -2340,7 +2340,7 @@ class Upload {
                         preg_match('/\.([^\.]*$)/', $this->file_src_name, $extension);
                         if (is_array($extension) && sizeof($extension) > 0) {
                             $this->file_src_name_ext      = strtolower($extension[1]);
-                            $this->file_src_name_body     = substr($this->file_src_name, 0, ((strlen($this->file_src_name) - strlen($this->file_src_name_ext)))-1);
+                            $this->file_src_name_body     = (string) substr($this->file_src_name, 0, ((strlen($this->file_src_name) - strlen($this->file_src_name_ext)))-1);
                         } else {
                             $this->file_src_name_ext      = '';
                             $this->file_src_name_body     = $this->file_src_name;
@@ -2371,7 +2371,7 @@ class Upload {
                         preg_match('/\.([^\.]*$)/', $this->file_src_name, $extension);
                         if (is_array($extension) && sizeof($extension) > 0) {
                             $this->file_src_name_ext      = strtolower($extension[1]);
-                            $this->file_src_name_body     = substr($this->file_src_name, 0, ((strlen($this->file_src_name) - strlen($this->file_src_name_ext)))-1);
+                            $this->file_src_name_body     = (string) substr($this->file_src_name, 0, ((strlen($this->file_src_name) - strlen($this->file_src_name_ext)))-1);
                         } else {
                             $this->file_src_name_ext      = '';
                             $this->file_src_name_body     = $this->file_src_name;
@@ -2439,7 +2439,7 @@ class Upload {
                 preg_match('/\.([^\.]*$)/', $this->file_src_name, $extension);
                 if (is_array($extension) && sizeof($extension) > 0) {
                     $this->file_src_name_ext      = strtolower($extension[1]);
-                    $this->file_src_name_body     = substr($this->file_src_name, 0, ((strlen($this->file_src_name) - strlen($this->file_src_name_ext)))-1);
+                    $this->file_src_name_body     = (string) substr($this->file_src_name, 0, ((strlen($this->file_src_name) - strlen($this->file_src_name_ext)))-1);
                 } else {
                     $this->file_src_name_ext      = '';
                     $this->file_src_name_body     = $this->file_src_name;
@@ -2837,7 +2837,7 @@ class Upload {
         $filename = preg_replace(array('/-*\.-*/', '/\.{2,}/'), '.', $filename);
         // cut to 255 characters
         $length = 255 - strlen($this->file_dst_name_ext) + 1;
-        $filename = extension_loaded('mbstring') ? mb_strcut($filename, 0, $length, mb_detect_encoding($filename)) : substr($filename, 0, $length);
+        $filename = extension_loaded('mbstring') ? mb_strcut($filename, 0, $length, mb_detect_encoding($filename)) : (string) substr($filename, 0, $length);
         // remove bad characters at start and end
         $filename = trim($filename, '.-_');
         return $filename;
@@ -2852,7 +2852,7 @@ class Upload {
      */
     function getcolors($color) {
         $color = str_replace('#', '', $color);
-        if (strlen($color) == 3) $color = str_repeat(substr($color, 0, 1), 2) . str_repeat(substr($color, 1, 1), 2) . str_repeat(substr($color, 2, 1), 2);
+        if (strlen($color) == 3) $color = str_repeat(substr($color, 0, 1), 2) . str_repeat((string) substr($color, 1, 1), 2) . str_repeat((string) substr($color, 2, 1), 2);
         $r = sscanf($color, "%2x%2x%2x");
         $red   = (is_array($r) && array_key_exists(0, $r) && is_numeric($r[0]) ? $r[0] : 0);
         $green = (is_array($r) && array_key_exists(1, $r) && is_numeric($r[1]) ? $r[1] : 0);
@@ -2989,7 +2989,7 @@ class Upload {
     function imageunset($im) {
         if (is_resource($im)) {
             imagedestroy($im);
-        } else if (is_object($im) && $im instanceOf \GdImage) {
+        } else if (is_object($im) && (is_resource($im) || $im instanceOf \GdImage)) {
             unset($im);
         }
     }
@@ -3316,7 +3316,7 @@ class Upload {
                     // if we have changed the extension, then we add our increment before
                     if ($file_src_name_ext != $this->file_src_name_ext) {
                         if (substr($this->file_dst_name_body, -1 - strlen($this->file_src_name_ext)) == '.' . $this->file_src_name_ext) {
-                            $body = substr($this->file_dst_name_body, 0, strlen($this->file_dst_name_body) - 1 - strlen($this->file_src_name_ext));
+                            $body = (string) substr($this->file_dst_name_body, 0, strlen($this->file_dst_name_body) - 1 - strlen($this->file_src_name_ext));
                             $ext = '.' . $this->file_src_name_ext;
                         }
                     }
@@ -5156,7 +5156,7 @@ class Upload {
                 if ($bmp['bits_per_pixel'] == 24)
                     $color = unpack("V",substr($im,$P,3).$vide);
                 elseif ($bmp['bits_per_pixel'] == 16) {
-                    $color = unpack("n",substr($im,$P,2));
+                    $color = unpack("n",(string) substr($im,$P,2));
                     $color[1] = $palette[$color[1]+1];
                 } elseif ($bmp['bits_per_pixel'] == 8) {
                     $color = unpack("n",$vide.substr($im,$P,1));

@@ -879,7 +879,7 @@ function Image($file, $x=null, $y=null, $w=0, $h=0, $type='', $link='')
 			$pos = strrpos($file,'.');
 			if(!$pos)
 				$this->Error('Image file has no extension and no type was specified: '.$file);
-			$type = substr($file,$pos+1);
+			$type = (string) substr($file,$pos+1);
 		}
 		$type = strtolower($type);
 		if($type=='jpeg')
@@ -1331,9 +1331,9 @@ protected function _parsepngstream($f, $file)
 			// Read transparency info
 			$t = $this->_readstream($f,$n);
 			if($ct==0)
-				$trns = array(ord(substr($t,1,1)));
+				$trns = array(ord((string) substr($t,1,1)));
 			elseif($ct==2)
-				$trns = array(ord(substr($t,1,1)), ord(substr($t,3,1)), ord(substr($t,5,1)));
+				$trns = array(ord((string) substr($t,1,1)), ord((string) substr($t,3,1)), ord((string) substr($t,5,1)));
 			else
 			{
 				$pos = strpos($t,chr(0));
@@ -1375,7 +1375,7 @@ protected function _parsepngstream($f, $file)
 				$pos = (1+$len)*$i;
 				$color .= $data[$pos];
 				$alpha .= $data[$pos];
-				$line = substr($data,$pos+1,$len);
+				$line = (string) substr($data,$pos+1,$len);
 				$color .= preg_replace('/(.)./s','$1',$line);
 				$alpha .= preg_replace('/.(.)/s','$1',$line);
 			}
@@ -1389,7 +1389,7 @@ protected function _parsepngstream($f, $file)
 				$pos = (1+$len)*$i;
 				$color .= $data[$pos];
 				$alpha .= $data[$pos];
-				$line = substr($data,$pos+1,$len);
+				$line = (string) substr($data,$pos+1,$len);
 				$color .= preg_replace('/(.{3})./s','$1',$line);
 				$alpha .= preg_replace('/.{3}(.)/s','$1',$line);
 			}

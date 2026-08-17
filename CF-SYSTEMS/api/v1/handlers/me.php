@@ -57,7 +57,7 @@ if ($action === 'document' && $method === 'POST') {
     $isPng = strncmp($head, "\x89PNG\r\n\x1a\n", 8) === 0;
     $isJpg = strncmp($head, "\xFF\xD8\xFF", 3) === 0;
     $isPdf = strncmp($head, "%PDF-", 5) === 0;
-    $isWebp = substr($bin, 0, 4) === 'RIFF' && substr($bin, 8, 4) === 'WEBP';
+    $isWebp = substr($bin, 0, 4) === 'RIFF' && (string) substr($bin, 8, 4) === 'WEBP';
     $sniff = $isPng ? 'png' : ($isJpg ? 'jpg' : ($isPdf ? 'pdf' : ($isWebp ? 'webp' : null)));
     if ($sniff === null) ApiResponse::err('invalid_request', 'Archivo inválido', 400);
     $ext = $sniff;

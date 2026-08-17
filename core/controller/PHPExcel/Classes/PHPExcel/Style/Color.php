@@ -215,7 +215,7 @@ class PHPExcel_Style_Color extends PHPExcel_Style_Supervisor implements PHPExcel
 		if ($this->_isSupervisor) {
 			return $this->getSharedComponent()->getRGB();
 		}
-		return substr($this->_argb, 2);
+		return (string) substr($this->_argb, 2);
 	}
 
 	/**
@@ -248,7 +248,7 @@ class PHPExcel_Style_Color extends PHPExcel_Style_Supervisor implements PHPExcel
 	 * @return	string		The extracted colour component
 	 */
 	private static function _getColourComponent($RGB,$offset,$hex=TRUE) {
-		$colour = substr($RGB, $offset, 2);
+		$colour = (string) substr($RGB, $offset, 2);
 		if (!$hex)
 			$colour = hexdec($colour);
 		return $colour;

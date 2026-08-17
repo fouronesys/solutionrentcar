@@ -67,7 +67,7 @@ if (isset($_GET["opt"]) && $_GET["opt"] == "login") :
 				$last11 = substr($n, -11);
 				$out[] = $last11;
 				if (isset($last11[0]) && $last11[0] === '1') {
-					$out[] = substr($last11, 1);
+					$out[] = (string) substr($last11, 1);
 				}
 			}
 
@@ -76,7 +76,7 @@ if (isset($_GET["opt"]) && $_GET["opt"] == "login") :
 			}
 
 			if (strlen($n) == 11 && isset($n[0]) && $n[0] === '1') {
-				$out[] = substr($n, 1);
+				$out[] = (string) substr($n, 1);
 			}
 
 			return array_values(array_unique(array_filter($out)));

@@ -236,7 +236,7 @@ class PHPExcel_Shared_Date
 
 		//	Calculate the Julian Date, then subtract the Excel base date (JD 2415020 = 31-Dec-1899 Giving Excel Date of 0)
 		$century = substr($year,0,2);
-		$decade = substr($year,2,2);
+		$decade = (string) substr($year,2,2);
 		$excelDate = floor((146097 * $century) / 4) + floor((1461 * $decade) / 4) + floor((153 * $month + 2) / 5) + $day + 1721119 - $my_excelBaseDate + $excel1900isLeapYear;
 
 		$excelTime = (($hours * 3600) + ($minutes * 60) + $seconds) / 86400;

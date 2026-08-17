@@ -175,7 +175,7 @@ class PHPExcel_Reader_SYLK extends PHPExcel_Reader_Abstract implements PHPExcel_
 							break;
 						case 'R' :
 						case 'Y' :
-							$rowIndex = substr($rowDatum,1);
+							$rowIndex = (string) substr($rowDatum,1);
 							break;
 					}
 
@@ -258,14 +258,14 @@ class PHPExcel_Reader_SYLK extends PHPExcel_Reader_Abstract implements PHPExcel_
 				$formatArray = array();
 				foreach($rowData as $rowDatum) {
 					switch($rowDatum{0}) {
-						case 'P' :	$formatArray['numberformat']['code'] = str_replace($fromFormats,$toFormats,substr($rowDatum,1));
+						case 'P' :	$formatArray['numberformat']['code'] = str_replace($fromFormats,$toFormats,(string) substr($rowDatum,1));
 									break;
 						case 'E' :
-						case 'F' :	$formatArray['font']['name'] = substr($rowDatum,1);
+						case 'F' :	$formatArray['font']['name'] = (string) substr($rowDatum,1);
 									break;
-						case 'L' :	$formatArray['font']['size'] = substr($rowDatum,1);
+						case 'L' :	$formatArray['font']['size'] = (string) substr($rowDatum,1);
 									break;
-						case 'S' :	$styleSettings = substr($rowDatum,1);
+						case 'S' :	$styleSettings = (string) substr($rowDatum,1);
 									for ($i=0;$i<strlen($styleSettings);++$i) {
 										switch ($styleSettings{$i}) {
 											case 'I' :	$formatArray['font']['italic'] = true;
@@ -293,12 +293,12 @@ class PHPExcel_Reader_SYLK extends PHPExcel_Reader_Abstract implements PHPExcel_
 				foreach($rowData as $rowDatum) {
 					switch($rowDatum{0}) {
 						case 'C' :
-						case 'X' :	$column = substr($rowDatum,1);
+						case 'X' :	$column = (string) substr($rowDatum,1);
 									break;
 						case 'R' :
-						case 'Y' :	$row = substr($rowDatum,1);
+						case 'Y' :	$row = (string) substr($rowDatum,1);
 									break;
-						case 'K' :	$cellData = substr($rowDatum,1);
+						case 'K' :	$cellData = (string) substr($rowDatum,1);
 									break;
 						case 'E' :	$cellDataFormula = '='.substr($rowDatum,1);
 									//	Convert R1C1 style references to A1 style references (but only when not quoted)
@@ -354,16 +354,16 @@ class PHPExcel_Reader_SYLK extends PHPExcel_Reader_Abstract implements PHPExcel_
 				foreach($rowData as $rowDatum) {
 					switch($rowDatum{0}) {
 						case 'C' :
-						case 'X' :	$column = substr($rowDatum,1);
+						case 'X' :	$column = (string) substr($rowDatum,1);
 									break;
 						case 'R' :
-						case 'Y' :	$row = substr($rowDatum,1);
+						case 'Y' :	$row = (string) substr($rowDatum,1);
 									break;
 						case 'P' :	$formatStyle = $rowDatum;
 									break;
-						case 'W' :	list($startCol,$endCol,$columnWidth) = explode(' ',substr($rowDatum,1));
+						case 'W' :	list($startCol,$endCol,$columnWidth) = explode(' ',(string) substr($rowDatum,1));
 									break;
-						case 'S' :	$styleSettings = substr($rowDatum,1);
+						case 'S' :	$styleSettings = (string) substr($rowDatum,1);
 									for ($i=0;$i<strlen($styleSettings);++$i) {
 										switch ($styleSettings{$i}) {
 											case 'I' :	$styleData['font']['italic'] = true;
@@ -410,10 +410,10 @@ class PHPExcel_Reader_SYLK extends PHPExcel_Reader_Abstract implements PHPExcel_
 				foreach($rowData as $rowDatum) {
 					switch($rowDatum{0}) {
 						case 'C' :
-						case 'X' :	$column = substr($rowDatum,1);
+						case 'X' :	$column = (string) substr($rowDatum,1);
 									break;
 						case 'R' :
-						case 'Y' :	$row = substr($rowDatum,1);
+						case 'Y' :	$row = (string) substr($rowDatum,1);
 									break;
 					}
 				}

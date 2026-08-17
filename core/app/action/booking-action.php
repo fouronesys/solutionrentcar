@@ -81,10 +81,10 @@ if (!function_exists('pickPlace84')) {
 if (!function_exists('compressImage')) {
     function compressImage($source, $destination, $quality = 75) {
         if (!file_exists($source)) return false;
-        
+
         $info = @getimagesize($source);
         if (!$info) return false;
-        
+
         $mime = $info['mime'] ?? 'image/jpeg';
         switch ($mime) {
             case 'image/jpeg': $image = imagecreatefromjpeg($source); break;
@@ -284,7 +284,7 @@ if (isset($_POST["stock_id2"]) && !empty($_POST["stock_id2"])):
     $placa  = trim($_POST["cars2_plate"]);
     $chasis = trim($_POST["cars2_chassis"]);
     $provider_price = ($_POST["rpayment"]);
-    
+
 $base = new Database();
 $con = $base->connect();
 $sql = "select SQL_BIG_RESULT * from cars where plate= \"".$placa."\" and chassis= \"".$chasis."\"";
@@ -353,8 +353,8 @@ endif;
     $user->car2_id   = ($_POST["car2_id"] > 0) ? $_POST["car2_id"] : 0;
 
     $user->type = 1;
-    
-    
+
+
 
     // =============================
     // ✅ LIMPIAR VALORES MONETARIOS
@@ -402,7 +402,7 @@ endif;
     // ❌ ERROR QUE TENÍAS: estabas copiando extra3 a extra4
     $user->unit_extra4  = $_POST["unit_extra4"];
     $user->price_extra4 = $_POST["price_extra4"];
-    
+
      // USD y tasa
     $user->usd_price  = $_POST["usd_price"];
     $user->tasa_dolar = $_POST["tasa_dolar"];
@@ -433,14 +433,14 @@ endif;
 			['booking_id' => $_notif_bookingId, 'stock_id' => $_notif_stockId]);
 	}
 	$persxn = PersonData::getById($id_person);
-	
+
     $kmx = CarsData::getById($car_id);
 	$kmx->status = 1;
 	$kmx->update_status();
 
     $id_speds = BookingData::getAllByID();
     $spends = $id_speds[0]->id!=null?$id_speds[0]->id:0;
-    
+
     $payment = new PaymentData();
     $payment->sell_id = $spends;
     $payment->val = $total;
@@ -460,23 +460,23 @@ endif;
         $payment3->is_stock = 0;
         $payment3->add_payment();
     endif;	
-  
-  
+
+
 
    header('location:./?view=booking&opt=modal&id='.$spends); 
    exit;
-   
+
 else:
     header("Location: ./?view=booking&opt=earring");
     exit;
-  
+
 endif;
 
-  
+
 ////////////////////////////////////////////////////////////////////////// DIFERENTE DE VEHICULO EXTERNO ///////////////////////////////////////////////////////////////////////////
 elseif (intval($_POST["method"] ?? 0) != 3):
 
-    
+
 if (intval($_POST["iva"] ?? 0) == 18) {
     $receiptName = explode("-", $_POST["type_iva"] ?? "");
     $x = CData::getById($receiptName[0] ?? 0);
@@ -507,20 +507,20 @@ foreach($bokg as $bk) {
 
 if($found==false) {
 if (!empty($_POST["car_id"])) {   
-    
+
 $cars = CarsData::getById($_POST["car_id"]);
 
 
 if(intval($_POST["nuevo_cliente_activo"] ?? 0)>0):
-        
 
- 
+
+
 // Ruta subida
 $uploadPath = "CF-SYSTEMS/storage/invoice_files/"; 
 
 
 $location = LocationData::getById($_POST["location"]);
-  
+
 
 if (!function_exists('generarMatricula')) {
     function generarMatricula($nombreCliente, $telefonoRaw) {
@@ -558,8 +558,8 @@ $telefonoIngresado = $_POST["phone"] ?? ""; // O viene de $_POST["phone"]
 
 // Generar una matrícula
 $matriculaGenerada = generarMatricula($nombreCliente, $telefonoIngresado);
-  
- 
+
+
 $user = new PersonData();
   $user->name = $_POST["name"] ?? "";
   $user->no = $_POST["no"] ?? "";
@@ -588,7 +588,7 @@ $user = new PersonData();
   $user->passport_date = $_POST["passport_date"] ?? "";
   $user->license_date = $_POST["license_date"] ?? "";
   $user->home_date = $_POST["home_date"] ?? "";
-  
+
 // Archivos a subir con sus atributos en el modelo
 $imagenes = [
     "invoice_file"  => "invoice_file",
@@ -640,15 +640,15 @@ foreach ($imagenes as $campo => $atributo) {
 
     $id_persons = PersonData::getAllByID();
     $persons = $id_persons[0]->id!=null?$id_persons[0]->id:0;
-    
+
     $id_person = $persons;
     else:
-    
+
     $id_person = $_POST["person_id"];
-        
+
     endif;
 
-        
+
     // aqui sigue igual que los demas metodo
 
     $user = new BookingData();
@@ -752,14 +752,14 @@ foreach ($imagenes as $campo => $atributo) {
 	}
 
 	$persxn = PersonData::getById($id_person);
-	
+
 	$kmx = CarsData::getById($_POST["car_id"]);
 	$kmx->status = 1;
 	$kmx->update_status();
 
     $id_speds = BookingData::getAllByID();
     $spends = $id_speds[0]->id!=null?$id_speds[0]->id:0;
-    
+
                 $payment = new PaymentData();
 			 	$payment->sell_id = $spends;
 			 	$payment->val = $total;
@@ -798,7 +798,7 @@ endif;
 
 header('location:./?view=booking&opt=modal&id='.$spends);    
 
-          
+
 }else{
 header('location:./?view=booking&opt=earring');    
 }
@@ -903,7 +903,7 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="earring"):
     $bkg->status = 1;
     $bkg->type = 1;
     $bkg->update_process();
-    
+
     $spends = $booking_id;
 
     $payment = new PaymentData();
@@ -969,7 +969,7 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="earring"):
     }
     header('location:./?view=booking&opt=modal&id='.$spends);
     exit;
-  
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 elseif(isset($_GET["opt"]) && $_GET["opt"]=="addcotiz"):
 
@@ -992,7 +992,7 @@ endif; endforeach;
 if($found==false) {
     if($_POST["f_id"]==3): $card = ($_POST["total"]+$_POST["xtotal"])*(3/100); else: $card = 0; endif;
     if(isset($_POST["iva"])): $iva = ($_POST["total"]+$_POST["xtotal"])*(18/100); else: $iva = 0; endif;
-  
+
 	if($bk->provider_price>0):
 	   $user = new BookingData();
 	$user->start_at = $_POST["start_at"];
@@ -1023,7 +1023,7 @@ if($found==false) {
 	$divisa = StockData::getPrincipal()->divisa;
 	if ($_POST["divisa_id"]==1) {
 	$user->price = intval(str_replace(",", "", $_POST["price2"]));
-    
+
 $price2 = floatval(str_replace(",", "", $_POST["price2"] ?? 0));
 $xtotal = floatval(str_replace(",", "", $_POST["xtotal"] ?? 0));
 $plane  = floatval(str_replace(",", "", $_POST["plane"] ?? 0));
@@ -1032,7 +1032,7 @@ $iva    = floatval(str_replace(",", "", $_POST["iva"] ?? 0));
 
 $total = $price2 + $xtotal + $plane + $card + $iva;
 
-	
+
 	$user->total = $total;
 	$user->payment = intval(str_replace(",", "", $_POST["payment"]));
 	$user->xtotal = intval(str_replace(",", "", $_POST["xtotal"]));
@@ -1042,7 +1042,7 @@ $total = $price2 + $xtotal + $plane + $card + $iva;
 	$user->payment = intval(str_replace(",", "", ($_POST["payment"]/$divisa)));
 	$user->xtotal = intval(str_replace(",", "", $_POST["xtotal"]));
 	}
-	
+
 	}
 	$user->day = $_POST["day"];
 	$user->deposit = $_POST["deposit"];
@@ -1050,7 +1050,7 @@ $total = $price2 + $xtotal + $plane + $card + $iva;
 	$user->plane = $_POST["plane"];
 	$user->price_stock = $bk->provider_price;
 	$user->add_booking();
-	
+
 	 $id_speds = BookingData::getAllByID();
     $spends = $id_speds[0]->id!=null?$id_speds[0]->id:0;
                 $payment = new PaymentData();
@@ -1071,7 +1071,7 @@ $total = $price2 + $xtotal + $plane + $card + $iva;
                     $payment2->is_stock = 0;
 				 	$payment2->add_payment();			 	
 endif;	
-	
+
 	$stoxk = StockData::getPrincipal();
 	$persxn = PersonData::getById($_POST["person_id"]);
 	$carx = CarsData::getById($_POST["car_id"]);
@@ -1102,7 +1102,7 @@ foreach(PersonData::getAllBySQL("where name='".StockData::getPrincipal()->name."
 $user = PersonData::getById($key->id);
 $person_id=$key->id; 	
 endforeach;
-  
+
 	$user = new BookingData();
 	$user->start_at = $_POST["start_at"];
 	$user->end_at = $_POST["end_at"];
@@ -1139,9 +1139,9 @@ endforeach;
 	$user->plane = $_POST["plane"];
 	$user->price_stock = $bk->provider_price;
 	$user->add_booking();
-	
+
 	else:
-	    
+
 	  $user = new BookingData();
 	$user->start_at = $_POST["start_at"];
 	$user->end_at = $_POST["end_at"];
@@ -1169,7 +1169,7 @@ endforeach;
 	if ($_POST["price"]>0) {$user->price = $_POST["price"];}
 	else{
 	$user->price = intval(str_replace(",", "", $_POST["price2"]));
-	
+
 $price2 = floatval(str_replace(",", "", $_POST["price2"] ?? 0));
 $xtotal = floatval(str_replace(",", "", $_POST["xtotal"] ?? 0));
 $plane  = floatval(str_replace(",", "", $_POST["plane"] ?? 0));
@@ -1178,7 +1178,7 @@ $iva    = floatval(str_replace(",", "", $_POST["iva"] ?? 0));
 
 $total = $price2 + $xtotal + $plane + $card + $iva;
 
-	
+
 	$user->total = $total;
 	$user->xtotal = intval(str_replace(",", "", $_POST["xtotal"]));
 	$user->payment = intval(str_replace(",", "", $_POST["payment"]));
@@ -1188,8 +1188,8 @@ $total = $price2 + $xtotal + $plane + $card + $iva;
     $user->user_id = $_SESSION["user_id"] ?? 0;
 	$user->plane = $_POST["plane"];
 	$user->add_booking();
-	
-	
+
+
 	 $id_speds = BookingData::getAllByID();
     $spends = $id_speds[0]->id!=null?$id_speds[0]->id:0;
                 $payment = new PaymentData();
@@ -1208,15 +1208,15 @@ $total = $price2 + $xtotal + $plane + $card + $iva;
 				 	$payment2->person_id=$_POST["person_id"];
 				 	$payment2->add_payment();			 	
 endif;	
-	
+
 	endif;
-	
-	
+
+
 	$user = new ACData();
           $user->user_id = $_SESSION["user_id"] ?? 0;
           $user->accion = "Agrego la reserva";
           $user->add();
-          
+
 
 $xcar = CarsData::getById($_POST["car_id"]);
 $xcar->status = 1;
@@ -1224,7 +1224,7 @@ $xcar->update_status();
 
 $operation = OperationData::getById($_POST["cotiz_id"]);
 $operation->del();
-        
+
 echo 'true';
 }else{
 echo 'false'; 
@@ -1251,7 +1251,7 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="delivery"):
 			'Tu vehículo fue entregado', 'Tu reserva #'.intval($bkg->id).' está activa. ¡Disfruta tu viaje!',
 			['booking_id' => intval($bkg->id), 'stock_id' => intval($bkg->stock_id)]);
 	}
-	
+
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -1358,7 +1358,7 @@ if($cars_id->provider_price>0):
     $payment2->person_id = $cars_id->provider_id;
     $payment2->is_stock = 1;
     $payment2->add();
-    
+
 endif;
 
 	$user = new DeliveryData();
@@ -1419,7 +1419,7 @@ else:
     $user->status = 0;
 endif;
 	$user->update_status();
-	
+
 foreach(PaymentData::getAllBySQL("where booking_id=".$_GET["id"]) as $payment):
 $payment->del();
 endforeach;
@@ -1447,7 +1447,7 @@ $user = new ACData();
           $user->user_id = $_SESSION["user_id"] ?? 0;
           $user->accion = "Elimino la reserva";
           $user->add();
-          
+
 header('location:./?view=booking&opt=all');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 elseif(isset($_GET["opt"]) && $_GET["opt"]=="updrandom"):
@@ -1767,9 +1767,9 @@ elseif(isset($_GET["opt"]) && $_GET["opt"]=="what"):
 
     header("Location: ".$enlace);
     exit();
-    
+
 elseif(isset($_GET["opt"]) && $_GET["opt"]=="signature"):
-    
+
 $img = $_POST["base64"];
 $img = str_replace('data:image/png;base64,', '', $img);
 $fileData = base64_decode($img);
@@ -1782,7 +1782,7 @@ $xuser->firma = $fileName;
 $xuser->update_firma();
 
 header('location:./?view=home');   
-    
+
 
 endif;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

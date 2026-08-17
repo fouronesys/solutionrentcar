@@ -274,8 +274,8 @@ if (!class_exists('QRcode', false)) {
 			if ((strlen($string) > $split_length) OR (!$split_length)) {
 				do {
 					$c = strlen($string);
-					$parts[] = substr($string, 0, $split_length);
-					$string = substr($string, $split_length);
+					$parts[] = (string) substr($string, 0, $split_length);
+					$string = (string) substr($string, $split_length);
 				} while ($string !== false);
 			} else {
 				$parts = array($string);
@@ -1488,7 +1488,7 @@ if (!class_exists('QRcode', false)) {
 				if ($length < 0) {
 					return -1;
 				}
-				$this->dataStr = substr($this->dataStr, $length);
+				$this->dataStr = (string) substr($this->dataStr, $length);
 			}
 		}
 
@@ -1499,7 +1499,7 @@ if (!class_exists('QRcode', false)) {
 			$stringLen = strlen($this->dataStr);
 			$p = 0;
 			while ($p < $stringLen) {
-				$mode = $this->identifyMode(substr($this->dataStr, $p), $this->hint);
+				$mode = $this->identifyMode((string) substr($this->dataStr, $p), $this->hint);
 				if ($mode == QR_MODE_KJ) {
 					$p += 2;
 				} else {
@@ -2277,7 +2277,7 @@ if (!class_exists('QRcode', false)) {
 		 * @return array srctab
 		 */
 		 protected function qrstrset($srctab, $x, $y, $repl, $replLen=false) {
-			$srctab[$y] = substr_replace($srctab[$y], ($replLen !== false)?substr($repl,0,$replLen):$repl, $x, ($replLen !== false)?$replLen:strlen($repl));
+			$srctab[$y] = substr_replace($srctab[$y], ($replLen !== false)?(string) substr($repl,0,$replLen):$repl, $x, ($replLen !== false)?$replLen:strlen($repl));
 			return $srctab;
 		}
 

@@ -4,60 +4,158 @@ class CarsData {
     public static $tablename = "cars";
 
     /* ================= PHP 8.4 ================= */
+    /**
+     * @var int
+     */
+    public $id = 0;
 
-    public int $id = 0;
+    /**
+     * @var int
+     */
+    public $provider_id = 0;
+    /**
+     * @var float
+     */
+    public $provider_price = 0;
 
-    public int $provider_id = 0;
-    public float $provider_price = 0;
+    /**
+     * @var string
+     */
+    public $charge_kms = "";
+    /**
+     * @var string
+     */
+    public $token = "";
 
-    public string $charge_kms = "";
-    public string $token = "";
+    /**
+     * @var string
+     */
+    public $name = "";
+    /**
+     * @var string
+     */
+    public $year = "";
 
-    public string $name = "";
-    public string $year = "";
+    /**
+     * @var int
+     */
+    public $stock_id = 0;
+    /**
+     * @var int
+     */
+    public $user_id = 0;
 
-    public int $stock_id = 0;
-    public int $user_id = 0;
+    /**
+     * @var int
+     */
+    public $brand_id = 0;
+    /**
+     * @var int
+     */
+    public $category_id = 0;
 
-    public int $brand_id = 0;
-    public int $category_id = 0;
+    /**
+     * @var mixed
+     */
+    public $insurance_id = 0;
+    /**
+     * @var mixed
+     */
+    public $insurance2_id = 0;
 
-    public mixed $insurance_id = 0;
-    public mixed $insurance2_id = 0;
+    /**
+     * @var int
+     */
+    public $interior_id = 0;
+    /**
+     * @var int
+     */
+    public $exterior_id = 0;
 
-    public int $interior_id = 0;
-    public int $exterior_id = 0;
+    /**
+     * @var string
+     */
+    public $invoice_file = "";
 
-    public string $invoice_file = "";
+    /**
+     * @var string
+     */
+    public $plate = "";
 
-    public string $plate = "";
+    /**
+     * @var string
+     */
+    public $date_insurance = "";
+    /**
+     * @var string
+     */
+    public $date2_insurance = "";
 
-    public string $date_insurance = "";
-    public string $date2_insurance = "";
+    /**
+     * @var string
+     */
+    public $insurance_file = "";
+    /**
+     * @var string
+     */
+    public $insurance2_file = "";
 
-    public string $insurance_file = "";
-    public string $insurance2_file = "";
+    /**
+     * @var string
+     */
+    public $kms_current = "";
+    /**
+     * @var string
+     */
+    public $kms = "";
 
-    public string $kms_current = "";
-    public string $kms = "";
+    /**
+     * @var string
+     */
+    public $tuition = "";
+    /**
+     * @var string
+     */
+    public $chassis = "";
 
-    public string $tuition = "";
-    public string $chassis = "";
+    /**
+     * @var string
+     */
+    public $seat = "";
 
-    public string $seat = "";
+    /**
+     * @var float
+     */
+    public $price = 0;
 
-    public float $price = 0;
+    /**
+     * @var int
+     */
+    public $transmission_id = 0;
+    /**
+     * @var int
+     */
+    public $fuel_id = 0;
 
-    public int $transmission_id = 0;
-    public int $fuel_id = 0;
+    /**
+     * @var int
+     */
+    public $status = 0;
 
-    public int $status = 0;
+   /**
+    * @var mixed
+    */
+   public $gps_id = 0;
 
-   public mixed $gps_id = 0;
+    /**
+     * @var string
+     */
+    public $created_at = "";
 
-    public string $created_at = "";
-
-    public string $no_batery = "";
+    /**
+     * @var string
+     */
+    public $no_batery = "";
 
    	public function getStock(){ return StockData::getById($this->stock_id);}
 	public function getBrand(){ return BrandData::getById($this->brand_id);}

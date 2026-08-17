@@ -2,7 +2,10 @@
 
 class ApiAuth {
 
-    private static ?array $current = null;
+    /**
+     * @var mixed[]|null
+     */
+    private static $current;
 
     public static function bearerToken(): ?string {
         $hdr = '';

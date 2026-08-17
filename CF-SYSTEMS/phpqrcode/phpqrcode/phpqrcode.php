@@ -97,7 +97,7 @@
 	
 	class qrstr {
 		public static function set(&$srctab, $x, $y, $repl, $replLen = false) {
-			$srctab[$y] = substr_replace($srctab[$y], ($replLen !== false)?substr($repl,0,$replLen):$repl, $x, ($replLen !== false)?$replLen:strlen($repl));
+			$srctab[$y] = substr_replace($srctab[$y], ($replLen !== false)?(string) substr($repl,0,$replLen):$repl, $x, ($replLen !== false)?$replLen:strlen($repl));
 		}
 	}	
 
@@ -2206,7 +2206,7 @@
                 if($length == 0) return 0;
                 if($length < 0)  return -1;
                 
-                $this->dataStr = substr($this->dataStr, $length);
+                $this->dataStr = (string) substr($this->dataStr, $length);
             }
         }
 

@@ -73,7 +73,9 @@ if ($method === 'GET' && $id === 0) {
     $sqlExtra = ($where ? 'WHERE ' . implode(' AND ', $where) : '')
               . " ORDER BY id DESC LIMIT $offset,$limit";
     $rows = BookingData::getAllBySQL($sqlExtra);
-    $out = array_map(fn($b) => ApiHelpers::bookingToArray($b), $rows);
+    $out = array_map(function ($b) {
+        return ApiHelpers::bookingToArray($b);
+    }, $rows);
     ApiResponse::ok([
         'bookings' => $out,
         'limit'    => $limit,

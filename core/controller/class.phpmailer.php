@@ -860,7 +860,7 @@ class PHPMailer
         }
         $params = array($kind, $address, $name);
         // Enqueue addresses with IDN until we know the PHPMailer::$CharSet.
-        if ($this->has8bitChars(substr($address, ++$pos)) and $this->idnSupported()) {
+        if ($this->has8bitChars((string) substr($address, ++$pos)) and $this->idnSupported()) {
             if ($kind != 'Reply-To') {
                 if (!array_key_exists($address, $this->RecipientsQueue)) {
                     $this->RecipientsQueue[$address] = $params;
@@ -992,7 +992,7 @@ class PHPMailer
         $name = trim(preg_replace('/[\r\n]+/', '', $name)); //Strip breaks and trim
         // Don't validate now addresses with IDN. Will be done in send().
         if (($pos = strrpos($address, '@')) === false or
-            (!$this->has8bitChars(substr($address, ++$pos)) or !$this->idnSupported()) and
+            (!$this->has8bitChars((string) substr($address, ++$pos)) or !$this->idnSupported()) and
             !$this->validateAddress($address)) {
             $error_message = $this->lang('invalid_address') . $address;
             $this->setError($error_message);
@@ -1151,7 +1151,7 @@ class PHPMailer
         if ($this->idnSupported() and
             !empty($this->CharSet) and
             ($pos = strrpos($address, '@')) !== false) {
-            $domain = substr($address, ++$pos);
+            $domain = (string) substr($address, ++$pos);
             // Verify CharSet string is a valid one, and domain properly encoded in this CharSet.
             if ($this->has8bitChars($domain) and @mb_check_encoding($domain, $this->CharSet)) {
                 $domain = mb_convert_encoding($domain, 'UTF-8', $this->CharSet);
@@ -1769,7 +1769,7 @@ class PHPMailer
         $message = $this->fixEOL($message);
         //Remove a trailing line break
         if (substr($message, -$lelen) == $this->LE) {
-            $message = substr($message, 0, -$lelen);
+            $message = (string) substr($message, 0, -$lelen);
         }
 
         //Split message into lines
@@ -1793,8 +1793,8 @@ class PHPMailer
                             } elseif (substr($word, $len - 2, 1) == '=') {
                                 $len -= 2;
                             }
-                            $part = substr($word, 0, $len);
-                            $word = substr($word, $len);
+                            $part = (string) substr($word, 0, $len);
+                            $word = (string) substr($word, $len);
                             $buf .= ' ' . $part;
                             $message .= $buf . sprintf('=%s', self::CRLF);
                         } else {
@@ -1814,8 +1814,8 @@ class PHPMailer
                         } elseif (substr($word, $len - 2, 1) == '=') {
                             $len -= 2;
                         }
-                        $part = substr($word, 0, $len);
-                        $word = substr($word, $len);
+                        $part = (string) substr($word, 0, $len);
+                        $word = (string) substr($word, $len);
 
                         if (strlen($word) > 0) {
                             $message .= $part . sprintf('=%s', self::CRLF);
@@ -1857,12 +1857,12 @@ class PHPMailer
         $foundSplitPos = false;
         $lookBack = 3;
         while (!$foundSplitPos) {
-            $lastChunk = substr($encodedText, $maxLength - $lookBack, $lookBack);
+            $lastChunk = (string) substr($encodedText, $maxLength - $lookBack, $lookBack);
             $encodedCharPos = strpos($lastChunk, '=');
             if (false !== $encodedCharPos) {
                 // Found start of encoded character byte within $lookBack block.
                 // Check the encoded byte value (the 2 chars after the '=')
-                $hex = substr($encodedText, $maxLength - $lookBack + $encodedCharPos + 1, 2);
+                $hex = (string) substr($encodedText, $maxLength - $lookBack + $encodedCharPos + 1, 2);
                 $dec = hexdec($hex);
                 if ($dec < 128) {
                     // Single byte character.
@@ -2768,7 +2768,7 @@ class PHPMailer
         }
 
         // Chomp the last linefeed
-        $encoded = substr($encoded, 0, -strlen($linebreak));
+        $encoded = (string) substr($encoded, 0, -strlen($linebreak));
         return $encoded;
     }
 
@@ -3282,7 +3282,7 @@ class PHPMailer
             foreach ($images[2] as $imgindex => $url) {
                 // Convert data URIs into embedded images
                 if (preg_match('#^data:(image[^;,]*)(;base64)?,#', $url, $match)) {
-                    $data = substr($url, strpos($url, ','));
+                    $data = (string) substr($url, strpos($url, ','));
                     if ($match[2]) {
                         $data = base64_decode($data);
                     } else {
@@ -3498,7 +3498,7 @@ class PHPMailer
         // In case the path is a URL, strip any query string before getting extension
         $qpos = strpos($filename, '?');
         if (false !== $qpos) {
-            $filename = substr($filename, 0, $qpos);
+            $filename = (string) substr($filename, 0, $qpos);
         }
         $pathinfo = self::mb_pathinfo($filename);
         return self::_mime_types($pathinfo['extension']);
@@ -3701,7 +3701,7 @@ class PHPMailer
         $body = str_replace("\n", "\r\n", $body);
         // END stabilize line endings
         while (substr($body, strlen($body) - 4, 4) == "\r\n\r\n") {
-            $body = substr($body, 0, strlen($body) - 2);
+            $body = (string) substr($body, 0, strlen($body) - 2);
         }
         return $body;
     }

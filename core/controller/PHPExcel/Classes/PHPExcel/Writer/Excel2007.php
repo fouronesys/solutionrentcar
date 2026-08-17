@@ -365,7 +365,7 @@ class PHPExcel_Writer_Excel2007 extends PHPExcel_Writer_Abstract implements PHPE
 					$imageContents = null;
 					$imagePath = $this->getDrawingHashTable()->getByIndex($i)->getPath();
 					if (strpos($imagePath, 'zip://') !== false) {
-						$imagePath = substr($imagePath, 6);
+						$imagePath = (string) substr($imagePath, 6);
 						$imagePathSplitted = explode('#', $imagePath);
 
 						$imageZip = new ZipArchive();

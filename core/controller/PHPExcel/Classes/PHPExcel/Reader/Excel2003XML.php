@@ -459,7 +459,7 @@ class PHPExcel_Reader_Excel2003XML extends PHPExcel_Reader_Abstract implements P
 												$borderPosition = strtolower($borderStyleValue);
 												break;
 										case 'Color' :
-												$borderColour = substr($borderStyleValue,1);
+												$borderColour = (string) substr($borderStyleValue,1);
 												$thisBorder['color']['rgb'] = $borderColour;
 												break;
 									}
@@ -483,7 +483,7 @@ class PHPExcel_Reader_Excel2003XML extends PHPExcel_Reader_Abstract implements P
 											$this->_styles[$styleID]['font']['size'] = $styleAttributeValue;
 											break;
 									case 'Color' :
-											$this->_styles[$styleID]['font']['color']['rgb'] = substr($styleAttributeValue,1);
+											$this->_styles[$styleID]['font']['color']['rgb'] = (string) substr($styleAttributeValue,1);
 											break;
 									case 'Bold' :
 											$this->_styles[$styleID]['font']['bold'] = true;
@@ -504,7 +504,7 @@ class PHPExcel_Reader_Excel2003XML extends PHPExcel_Reader_Abstract implements P
 //								echo $styleAttributeKey.' = '.$styleAttributeValue.'<br />';
 								switch ($styleAttributeKey) {
 									case 'Color' :
-											$this->_styles[$styleID]['fill']['color']['rgb'] = substr($styleAttributeValue,1);
+											$this->_styles[$styleID]['fill']['color']['rgb'] = (string) substr($styleAttributeValue,1);
 											break;
 								}
 							}
@@ -672,7 +672,7 @@ class PHPExcel_Reader_Excel2003XML extends PHPExcel_Reader_Abstract implements P
 								$type = PHPExcel_Cell_DataType::TYPE_FORMULA;
 								$columnNumber = PHPExcel_Cell::columnIndexFromString($columnID);
 								if (substr($cellDataFormula,0,3) == 'of:') {
-									$cellDataFormula = substr($cellDataFormula,3);
+									$cellDataFormula = (string) substr($cellDataFormula,3);
 //									echo 'Before: ',$cellDataFormula,'<br />';
 									$temp = explode('"',$cellDataFormula);
 									$key = false;

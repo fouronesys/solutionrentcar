@@ -1121,10 +1121,10 @@ class PHPExcel_Writer_Excel2007_Worksheet extends PHPExcel_Writer_Excel2007_Writ
 							$objWriter->writeAttribute('ref', $pCellAddress);
 							$objWriter->writeAttribute('aca', '1');
 							$objWriter->writeAttribute('ca', '1');
-							$objWriter->text(substr($cellValue, 1));
+							$objWriter->text((string) substr($cellValue, 1));
 							$objWriter->endElement();
 						} else {
-							$objWriter->writeElement('f', substr($cellValue, 1));
+							$objWriter->writeElement('f', (string) substr($cellValue, 1));
 						}
 						if ($this->getParentWriter()->getOffice2003Compatibility() === false) {
 							if ($this->getParentWriter()->getPreCalculateFormulas()) {
@@ -1148,8 +1148,8 @@ class PHPExcel_Writer_Excel2007_Worksheet extends PHPExcel_Writer_Excel2007_Writ
 						break;
 					case 'e':			// Error
 						if (substr($cellValue, 0, 1) == '=') {
-							$objWriter->writeElement('f', substr($cellValue, 1));
-							$objWriter->writeElement('v', substr($cellValue, 1));
+							$objWriter->writeElement('f', (string) substr($cellValue, 1));
+							$objWriter->writeElement('v', (string) substr($cellValue, 1));
 						} else {
 							$objWriter->writeElement('v', $cellValue);
 						}

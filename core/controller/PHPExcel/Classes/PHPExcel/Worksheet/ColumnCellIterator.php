@@ -131,7 +131,8 @@ class PHPExcel_Worksheet_ColumnCellIterator extends PHPExcel_Worksheet_CellItera
 	/**
 	 * Rewind the iterator to the starting row
 	 */
-	public function rewind() {
+	#[\ReturnTypeWillChange]
+    public function rewind() {
 		$this->_position = $this->_startRow;
 	}
 
@@ -140,7 +141,8 @@ class PHPExcel_Worksheet_ColumnCellIterator extends PHPExcel_Worksheet_CellItera
 	 *
 	 * @return PHPExcel_Worksheet_Row
 	 */
-	public function current() {
+	#[\ReturnTypeWillChange]
+    public function current() {
 		return $this->_subject->getCellByColumnAndRow($this->_columnIndex, $this->_position);
 	}
 
@@ -149,14 +151,16 @@ class PHPExcel_Worksheet_ColumnCellIterator extends PHPExcel_Worksheet_CellItera
 	 *
 	 * @return int
 	 */
-	public function key() {
+	#[\ReturnTypeWillChange]
+    public function key() {
 		return $this->_position;
 	}
 
 	/**
 	 * Set the iterator to its next value
 	 */
-	public function next() {
+	#[\ReturnTypeWillChange]
+    public function next() {
         do {
             ++$this->_position;
         } while (($this->_onlyExistingCells) &&
@@ -184,7 +188,8 @@ class PHPExcel_Worksheet_ColumnCellIterator extends PHPExcel_Worksheet_CellItera
 	 *
 	 * @return boolean
 	 */
-	public function valid() {
+	#[\ReturnTypeWillChange]
+    public function valid() {
 		return $this->_position <= $this->_endRow;
 	}
 

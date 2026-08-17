@@ -1747,7 +1747,7 @@ class PHPExcel_Calculation {
 	private static function _loadLocales() {
 		$localeFileDirectory = PHPEXCEL_ROOT.'PHPExcel/locale/';
 		foreach (glob($localeFileDirectory.'/*',GLOB_ONLYDIR) as $filename) {
-			$filename = substr($filename,strlen($localeFileDirectory)+1);
+			$filename = (string) substr($filename,strlen($localeFileDirectory)+1);
 			if ($filename != 'en') {
 				self::$_validLocaleLanguages[] = $filename;
 			}
@@ -2187,7 +2187,7 @@ class PHPExcel_Calculation {
 	public static function _unwrapResult($value) {
 		if (is_string($value)) {
 			if ((isset($value{0})) && ($value{0} == '"') && (substr($value,-1) == '"')) {
-				return substr($value,1,-1);
+				return (string) substr($value,1,-1);
 			}
 		//	Convert numeric errors to NaN error
 		} else if((is_float($value)) && ((is_nan($value)) || (is_infinite($value)))) {
@@ -2303,7 +2303,7 @@ class PHPExcel_Calculation {
 		//	We return an empty array if not
 		$formula = trim($formula);
 		if ((!isset($formula{0})) || ($formula{0} != '=')) return array();
-		$formula = ltrim(substr($formula,1));
+		$formula = ltrim((string) substr($formula,1));
 		if (!isset($formula{0})) return array();
 
 		//	Parse the formula and return the token stack
@@ -2379,7 +2379,7 @@ class PHPExcel_Calculation {
 		//	We simply return the cell value if not
 		$formula = trim($formula);
 		if ($formula{0} != '=') return self::_wrapResult($formula);
-		$formula = ltrim(substr($formula, 1));
+		$formula = ltrim((string) substr($formula, 1));
 		if (!isset($formula{0})) return self::_wrapResult($formula);
 
 		$pCellParent = ($pCell !== NULL) ? $pCell->getWorksheet() : NULL;
@@ -2775,7 +2775,7 @@ class PHPExcel_Calculation {
 			}
 
 			//	Find out if we're currently at the beginning of a number, variable, cell reference, function, parenthesis or operand
-			$isOperandOrFunction = preg_match($regexpMatchString, substr($formula, $index), $match);
+			$isOperandOrFunction = preg_match($regexpMatchString, (string) substr($formula, $index), $match);
 //echo '$isOperandOrFunction is '.(($isOperandOrFunction) ? 'True' : 'False').PHP_EOL;
 //var_dump($match);
 
@@ -2924,7 +2924,7 @@ class PHPExcel_Calculation {
 //					echo 'Element '.$val.' is a Function<br />';
 					if (isset(self::$_PHPExcelFunctions[strtoupper($matches[1])]) || isset(self::$_controlFunctions[strtoupper($matches[1])])) {	// it's a function
 						$stack->push('Function', strtoupper($val));
-						$ax = preg_match('/^\s*(\s*\))/ui', substr($formula, $index+$length), $amatch);
+						$ax = preg_match('/^\s*(\s*\))/ui', (string) substr($formula, $index+$length), $amatch);
 						if ($ax) {
 							$stack->push('Operand Count for Function '.strtoupper($val).')', 0);
 							$expectingOperator = TRUE;
@@ -3055,7 +3055,7 @@ class PHPExcel_Calculation {
 				//	If we're expecting an operator, but only have a space between the previous and next operands (and both are
 				//		Cell References) then we have an INTERSECTION operator
 //				echo 'Possible Intersect Operator<br />';
-				if (($expectingOperator) && (preg_match('/^'.self::CALCULATION_REGEXP_CELLREF.'.*/Ui', substr($formula, $index), $match)) &&
+				if (($expectingOperator) && (preg_match('/^'.self::CALCULATION_REGEXP_CELLREF.'.*/Ui', (string) substr($formula, $index), $match)) &&
 					($output[count($output)-1]['type'] == 'Cell Reference')) {
 //					echo 'Element is an Intersect Operator<br />';
 					while($stack->count() > 0 &&

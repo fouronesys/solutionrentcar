@@ -86,8 +86,8 @@ class PHPExcel_Shared_ZipStreamWrapper {
         }
 
 		$pos = strrpos($path, '#');
-		$url['host'] = substr($path, 6, $pos - 6); // 6: strlen('zip://')
-		$url['fragment'] = substr($path, $pos + 1);
+		$url['host'] = (string) substr($path, 6, $pos - 6); // 6: strlen('zip://')
+		$url['fragment'] = (string) substr($path, $pos + 1);
 
         // Open archive
         $this->_archive = new ZipArchive();
@@ -134,7 +134,7 @@ class PHPExcel_Shared_ZipStreamWrapper {
 	 * @return  string
      */
     function stream_read($count) {
-        $ret = substr($this->_data, $this->_position, $count);
+        $ret = (string) substr($this->_data, $this->_position, $count);
         $this->_position += strlen($ret);
         return $ret;
     }

@@ -213,7 +213,7 @@ class PHPExcel_Shared_Drawing
         $image            =    imagecreatetruecolor($width,$height);
 
         //    Grab the body from the image
-        $body            =    substr($hex,108);
+        $body            =    (string) substr($hex,108);
 
         //    Calculate if padding at the end-line is needed
         //    Divided by two to keep overview.

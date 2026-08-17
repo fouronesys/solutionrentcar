@@ -596,7 +596,7 @@ class PHPExcel_Writer_Excel5_Parser
 	function _convertString($string)
 	{
 		// chop away beggining and ending quotes
-		$string = substr($string, 1, strlen($string) - 2);
+		$string = (string) substr($string, 1, strlen($string) - 2);
 		if (strlen($string) > 255) {
 			throw new PHPExcel_Writer_Exception("String is too long");
 		}

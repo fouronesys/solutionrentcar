@@ -725,7 +725,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 		$str_error = 0;
 
 		if ($strlen > $this->_xls_strmax) { // LABEL must be < 255 chars
-			$str	= substr($str, 0, $this->_xls_strmax);
+			$str	= (string) substr($str, 0, $this->_xls_strmax);
 			$length	= 0x0008 + $this->_xls_strmax;
 			$strlen	= $this->_xls_strmax;
 			$str_error = -3;
@@ -791,7 +791,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 		$this->_append($header . $data . substr($note, 0, 2048));
 
 		for ($i = $max_length; $i < $note_length; $i += $max_length) {
-			$chunk  = substr($note, $i, $max_length);
+			$chunk  = (string) substr($note, $i, $max_length);
 			$length = 0x0006 + strlen($chunk);
 			$header = pack("vv",   $record, $length);
 			$data   = pack("vvv", -1, 0, strlen($chunk));
@@ -905,7 +905,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 
 		// Strip the '=' or '@' sign at the beginning of the formula string
 		if ($formula{0} == '=') {
-			$formula = substr($formula,1);
+			$formula = (string) substr($formula,1);
 		} else {
 			// Error handling
 			$this->_writeString($row, $col, 'Unrecognised character for formula');
@@ -2633,25 +2633,25 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 		}
 
 		// Remove bitmap data: ID.
-		$data = substr($data, 2);
+		$data = (string) substr($data, 2);
 
 		// Read and remove the bitmap size. This is more reliable than reading
 		// the data size at offset 0x22.
 		//
 		$size_array   = unpack("Vsa", substr($data, 0, 4));
 		$size   = $size_array['sa'];
-		$data   = substr($data, 4);
+		$data   = (string) substr($data, 4);
 		$size  -= 0x36; // Subtract size of bitmap header.
 		$size  += 0x0C; // Add size of BIFF header.
 
 		// Remove bitmap data: reserved, offset, header length.
-		$data = substr($data, 12);
+		$data = (string) substr($data, 12);
 
 		// Read and remove the bitmap width and height. Verify the sizes.
 		$width_and_height = unpack("V2", substr($data, 0, 8));
 		$width  = $width_and_height[1];
 		$height = $width_and_height[2];
-		$data   = substr($data, 8);
+		$data   = (string) substr($data, 8);
 		if ($width > 0xFFFF) {
 			throw new PHPExcel_Writer_Exception("$bitmap: largest image width supported is 65k.\n");
 		}
@@ -2661,7 +2661,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 
 		// Read and remove the bitmap planes and bpp data. Verify them.
 		$planes_and_bitcount = unpack("v2", substr($data, 0, 4));
-		$data = substr($data, 4);
+		$data = (string) substr($data, 4);
 		if ($planes_and_bitcount[2] != 24) { // Bitcount
 			throw new PHPExcel_Writer_Exception("$bitmap isn't a 24bit true color bitmap.\n");
 		}
@@ -2671,7 +2671,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 
 		// Read and remove the bitmap compression. Verify compression.
 		$compression = unpack("Vcomp", substr($data, 0, 4));
-		$data = substr($data, 4);
+		$data = (string) substr($data, 4);
 
 		//$compression = 0;
 		if ($compression['comp'] != 0) {
@@ -2679,7 +2679,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 		}
 
 		// Remove bitmap data: data size, hres, vres, colours, imp. colours.
-		$data = substr($data, 20);
+		$data = (string) substr($data, 20);
 
 		// Add the BITMAPCOREHEADER data
 		$header  = pack("Vvvvv", 0x000c, $width, $height, 0x01, 0x18);
@@ -2748,7 +2748,7 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 				$record = 0x00EC;			// Record identifier
 
 				// chunk of Escher stream for one shape
-				$dataChunk = substr($data, $spOffsets[$i -1], $spOffsets[$i] - $spOffsets[$i - 1]);
+				$dataChunk = (string) substr($data, $spOffsets[$i -1], $spOffsets[$i] - $spOffsets[$i - 1]);
 
 				$length = strlen($dataChunk);
 				$header = pack("vv", $record, $length);

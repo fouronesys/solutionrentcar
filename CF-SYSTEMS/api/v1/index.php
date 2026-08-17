@@ -16,7 +16,7 @@ if (!empty($_GET['path'])) {
     $marker = '/api/v1/';
     $pos = strpos($uri, $marker);
     if ($pos !== false) {
-        $path = substr($uri, $pos + strlen($marker));
+        $path = (string) substr($uri, $pos + strlen($marker));
     }
 }
 $path = trim((string)$path, '/');

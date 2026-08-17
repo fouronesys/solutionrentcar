@@ -132,6 +132,7 @@ class PHPExcel_RichText implements PHPExcel_IComparable
      *
      * @return string
      */
+    #[\ReturnTypeWillChange]
     public function __toString()
     {
         return $this->getPlainText();

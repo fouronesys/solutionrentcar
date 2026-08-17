@@ -210,7 +210,7 @@ abstract class PHPExcel_CachedObjectStorage_CacheBase {
 		if (!empty($row)) {
 			// Determine highest column and row
 			$highestRow = max($row);
-			$highestColumn = substr(max($col),1);
+			$highestColumn = (string) substr(max($col),1);
 		}
 
 		return array( 'row'	   => $highestRow,

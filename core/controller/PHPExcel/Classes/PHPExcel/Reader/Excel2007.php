@@ -319,7 +319,7 @@ class PHPExcel_Reader_Excel2007 extends PHPExcel_Reader_Abstract implements PHPE
 		// Root-relative paths
 		if (strpos($fileName, '//') !== false)
 		{
-			$fileName = substr($fileName, strpos($fileName, '//') + 1);
+			$fileName = (string) substr($fileName, strpos($fileName, '//') + 1);
 		}
 		$fileName = PHPExcel_Shared_File::realpath($fileName);
 
@@ -327,7 +327,7 @@ class PHPExcel_Reader_Excel2007 extends PHPExcel_Reader_Abstract implements PHPE
 		$contents = $archive->getFromName($fileName);
 		if ($contents === false)
 		{
-			$contents = $archive->getFromName(substr($fileName, 1));
+			$contents = $archive->getFromName((string) substr($fileName, 1));
 		}
 
 		return $contents;
@@ -1326,7 +1326,7 @@ class PHPExcel_Reader_Excel2007 extends PHPExcel_Reader_Abstract implements PHPE
 
 										if (isset($shape['style'])) {
 	    									$style        = (string)$shape['style'];
-	    									$fillColor    = strtoupper( substr( (string)$shape['fillcolor'], 1 ) );
+	    									$fillColor    = strtoupper( (string) substr( (string)$shape['fillcolor'], 1 ) );
 	    									$column       = null;
 	    									$row          = null;
 
@@ -1561,7 +1561,7 @@ class PHPExcel_Reader_Excel2007 extends PHPExcel_Reader_Abstract implements PHPE
 									$extractedRange = (string)$definedName;
 									$extractedRange = preg_replace('/\'(\w+)\'\!/', '', $extractedRange);
 									if (($spos = strpos($extractedRange,'!')) !== false) {
-										$extractedRange = substr($extractedRange,0,$spos).str_replace('$', '', substr($extractedRange,$spos));
+										$extractedRange = substr($extractedRange,0,$spos).str_replace('$', '', (string) substr($extractedRange,$spos));
 									} else {
 										$extractedRange = str_replace('$', '', $extractedRange);
 									}
@@ -1640,7 +1640,7 @@ class PHPExcel_Reader_Excel2007 extends PHPExcel_Reader_Abstract implements PHPE
 								$extractedRange = (string)$definedName;
 								$extractedRange = preg_replace('/\'(\w+)\'\!/', '', $extractedRange);
 								if (($spos = strpos($extractedRange,'!')) !== false) {
-									$extractedRange = substr($extractedRange,0,$spos).str_replace('$', '', substr($extractedRange,$spos));
+									$extractedRange = substr($extractedRange,0,$spos).str_replace('$', '', (string) substr($extractedRange,$spos));
 								} else {
 									$extractedRange = str_replace('$', '', $extractedRange);
 								}

@@ -2658,12 +2658,12 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
         }
 
         if ($returnRange) {
-            return array( trim(substr($pRange, 0, $sep),"'"),
-                          substr($pRange, $sep + 1)
+            return array( trim((string) substr($pRange, 0, $sep),"'"),
+                          (string) substr($pRange, $sep + 1)
                         );
         }
 
-        return substr($pRange, $sep + 1);
+        return (string) substr($pRange, $sep + 1);
     }
 
     /**

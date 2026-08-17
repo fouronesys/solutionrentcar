@@ -155,7 +155,7 @@ class PHPExcel_Shared_ZipArchive
         if ($list_index != -1) {
             $extracted = $this->_zip->extractByIndex($list_index, PCLZIP_OPT_EXTRACT_AS_STRING);
         } else {
-            $filename = substr($fileName, 1);
+            $filename = (string) substr($fileName, 1);
             $list_index = -1;
             for ($i = 0; $i < $listCount; ++$i) {
                 if (strtolower($list[$i]["filename"]) == strtolower($fileName) || 

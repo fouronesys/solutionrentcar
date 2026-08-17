@@ -76,8 +76,8 @@ class PHPExcel_Shared_File
 		// doing the original file_exists on ZIP archives...
 		if ( strtolower(substr($pFilename, 0, 3)) == 'zip' ) {
 			// Open ZIP file and verify if the file exists
-			$zipFile 		= substr($pFilename, 6, strpos($pFilename, '#') - 6);
-			$archiveFile 	= substr($pFilename, strpos($pFilename, '#') + 1);
+			$zipFile 		= (string) substr($pFilename, 6, strpos($pFilename, '#') - 6);
+			$archiveFile 	= (string) substr($pFilename, strpos($pFilename, '#') + 1);
 
 			$zip = new ZipArchive();
 			if ($zip->open($zipFile) === true) {

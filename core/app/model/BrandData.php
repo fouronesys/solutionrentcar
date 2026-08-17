@@ -3,9 +3,18 @@ class BrandData {
 
     public static $tablename = "brand";
 
-    public int $id = 0;
-    public string $name = "";
-    public string $created_at = "";
+    /**
+     * @var int
+     */
+    public $id = 0;
+    /**
+     * @var string
+     */
+    public $name = "";
+    /**
+     * @var string
+     */
+    public $created_at = "";
 
     	public function add(){
 		$sql = "insert into brand (name)";

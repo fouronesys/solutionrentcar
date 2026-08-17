@@ -332,8 +332,8 @@ class PHPExcel_Writer_Excel5_Workbook extends PHPExcel_Writer_Excel5_BIFFwriter
 				$this->_palette[$colorIndex] =
 					array(
 						hexdec(substr($rgb, 0, 2)),
-						hexdec(substr($rgb, 2, 2)),
-						hexdec(substr($rgb, 4)),
+						hexdec((string) substr($rgb, 2, 2)),
+						hexdec((string) substr($rgb, 4)),
 						0
 					);
 				$this->_colors[$rgb] = $colorIndex;
@@ -818,7 +818,7 @@ class PHPExcel_Writer_Excel5_Workbook extends PHPExcel_Writer_Excel5_BIFFwriter
 		$nlen = PHPExcel_Shared_String::CountCharacters($name);
 
 		// name with stripped length field
-		$name = substr(PHPExcel_Shared_String::UTF8toBIFF8UnicodeLong($name), 2);
+		$name = (string) substr(PHPExcel_Shared_String::UTF8toBIFF8UnicodeLong($name), 2);
 
 		// size of the formula (in bytes)
 		$sz = strlen($formulaData);
@@ -1376,7 +1376,7 @@ class PHPExcel_Writer_Excel5_Workbook extends PHPExcel_Writer_Excel5_BIFFwriter
 						// one block fininshed, store the block data
 						$recordData .= substr($string, 0, $effective_space_remaining);
 
-						$string = substr($string, $effective_space_remaining); // for next cycle in while loop
+						$string = (string) substr($string, $effective_space_remaining); // for next cycle in while loop
 						$recordDatas[] = $recordData;
 
 						// start new record data block with the repeated option flags

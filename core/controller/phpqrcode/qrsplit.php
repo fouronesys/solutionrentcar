@@ -269,7 +269,7 @@
                 if($length == 0) return 0;
                 if($length < 0)  return -1;
                 
-                $this->dataStr = substr($this->dataStr, $length);
+                $this->dataStr = (string) substr($this->dataStr, $length);
             }
         }
 

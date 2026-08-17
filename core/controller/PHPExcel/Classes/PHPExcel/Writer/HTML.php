@@ -578,7 +578,7 @@ class PHPExcel_Writer_HTML extends PHPExcel_Writer_Abstract implements PHPExcel_
 
 					// Strip off eventual '.'
 					if (substr($filename, 0, 1) == '.') {
-						$filename = substr($filename, 1);
+						$filename = (string) substr($filename, 1);
 					}
 
 					// Prepend images root
@@ -586,7 +586,7 @@ class PHPExcel_Writer_HTML extends PHPExcel_Writer_Abstract implements PHPExcel_
 
 					// Strip off eventual '.'
 					if (substr($filename, 0, 1) == '.' && substr($filename, 0, 2) != './') {
-						$filename = substr($filename, 1);
+						$filename = (string) substr($filename, 1);
 					}
 
 					// Convert UTF8 data to PCDATA

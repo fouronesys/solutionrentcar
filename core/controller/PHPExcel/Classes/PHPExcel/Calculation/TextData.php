@@ -344,7 +344,7 @@ class PHPExcel_Calculation_TextData {
 		if (function_exists('mb_substr')) {
 			return mb_substr($value, 0, $chars, 'UTF-8');
 		} else {
-			return substr($value, 0, $chars);
+			return (string) substr($value, 0, $chars);
 		}
 	}	//	function LEFT()
 
@@ -373,7 +373,7 @@ class PHPExcel_Calculation_TextData {
 		if (function_exists('mb_substr')) {
 			return mb_substr($value, --$start, $chars, 'UTF-8');
 		} else {
-			return substr($value, --$start, $chars);
+			return (string) substr($value, --$start, $chars);
 		}
 	}	//	function MID()
 
@@ -400,7 +400,7 @@ class PHPExcel_Calculation_TextData {
 		if ((function_exists('mb_substr')) && (function_exists('mb_strlen'))) {
 			return mb_substr($value, mb_strlen($value, 'UTF-8') - $chars, $chars, 'UTF-8');
 		} else {
-			return substr($value, strlen($value) - $chars);
+			return (string) substr($value, strlen($value) - $chars);
 		}
 	}	//	function RIGHT()
 

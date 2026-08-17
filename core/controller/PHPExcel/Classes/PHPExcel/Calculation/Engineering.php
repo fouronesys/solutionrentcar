@@ -700,7 +700,7 @@ class PHPExcel_Calculation_Engineering {
 		//	Extract the suffix, if there is one
 		$suffix = substr($workString,-1);
 		if (!is_numeric($suffix)) {
-			$workString = substr($workString,0,-1);
+			$workString = (string) substr($workString,0,-1);
 		} else {
 			$suffix = '';
 		}
@@ -717,10 +717,10 @@ class PHPExcel_Calculation_Engineering {
 			++$leadingSign;
 		}
 
-		$realNumber = substr($workString,0,strlen($realNumber)+strlen($power)+$leadingSign);
+		$realNumber = (string) substr($workString,0,strlen($realNumber)+strlen($power)+$leadingSign);
 
 		if ($suffix != '') {
-			$imaginary = substr($workString,strlen($realNumber));
+			$imaginary = (string) substr($workString,strlen($realNumber));
 
 			if (($imaginary == '') && (($realNumber == '') || ($realNumber == '+') || ($realNumber == '-'))) {
 				$imaginary = $realNumber.'1';
@@ -747,10 +747,10 @@ class PHPExcel_Calculation_Engineering {
 	 * @return	string		The "cleaned" complex number
 	 */
 	private static function _cleanComplex($complexNumber) {
-		if ($complexNumber{0} == '+') $complexNumber = substr($complexNumber,1);
-		if ($complexNumber{0} == '0') $complexNumber = substr($complexNumber,1);
+		if ($complexNumber{0} == '+') $complexNumber = (string) substr($complexNumber,1);
+		if ($complexNumber{0} == '0') $complexNumber = (string) substr($complexNumber,1);
 		if ($complexNumber{0} == '.') $complexNumber = '0'.$complexNumber;
-		if ($complexNumber{0} == '+') $complexNumber = substr($complexNumber,1);
+		if ($complexNumber{0} == '+') $complexNumber = (string) substr($complexNumber,1);
 		return $complexNumber;
 	}
 
@@ -2431,7 +2431,7 @@ class PHPExcel_Calculation_Engineering {
 			$unitGroup1 = self::$_conversionUnits[$fromUOM]['Group'];
 		} else {
 			$fromMultiplier = substr($fromUOM,0,1);
-			$fromUOM = substr($fromUOM,1);
+			$fromUOM = (string) substr($fromUOM,1);
 			if (isset(self::$_conversionMultipliers[$fromMultiplier])) {
 				$fromMultiplier = self::$_conversionMultipliers[$fromMultiplier]['multiplier'];
 			} else {
@@ -2450,7 +2450,7 @@ class PHPExcel_Calculation_Engineering {
 			$unitGroup2 = self::$_conversionUnits[$toUOM]['Group'];
 		} else {
 			$toMultiplier = substr($toUOM,0,1);
-			$toUOM = substr($toUOM,1);
+			$toUOM = (string) substr($toUOM,1);
 			if (isset(self::$_conversionMultipliers[$toMultiplier])) {
 				$toMultiplier = self::$_conversionMultipliers[$toMultiplier]['multiplier'];
 			} else {

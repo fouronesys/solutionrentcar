@@ -5,83 +5,234 @@ class PersonData {
     public static $tablename = "person";
 
     /* ================= PROPIEDADES PHP 8.4 ================= */
+    /**
+     * @var int
+     */
+    public $id = 0;
 
-    public int $id = 0;
-
-    public string $invoice_date = "";
-    public string $passport_date = "";
-    public string $license_date = "";
-    public string $home_date = "";
+    /**
+     * @var string
+     */
+    public $invoice_date = "";
+    /**
+     * @var string
+     */
+    public $passport_date = "";
+    /**
+     * @var string
+     */
+    public $license_date = "";
+    /**
+     * @var string
+     */
+    public $home_date = "";
     
-     public string $license2 = "";
+     /**
+      * @var string
+      */
+     public $license2 = "";
 
-    public string $language = "";
-    public mixed $birthday = "";
-   public mixed $gender = "";
+    /**
+     * @var string
+     */
+    public $language = "";
+    /**
+     * @var mixed
+     */
+    public $birthday = "";
+   /**
+    * @var mixed
+    */
+   public $gender = "";
 
-    public string $rnc = "";
-    public string $estado = "";
+    /**
+     * @var string
+     */
+    public $rnc = "";
+    /**
+     * @var string
+     */
+    public $estado = "";
 
-    public string $username = "";
-    public string $password = "";
+    /**
+     * @var string
+     */
+    public $username = "";
+    /**
+     * @var string
+     */
+    public $password = "";
 
-    public string $location = "";
-    public string $latitud = "";
-    public string $longitud = "";
+    /**
+     * @var string
+     */
+    public $location = "";
+    /**
+     * @var string
+     */
+    public $latitud = "";
+    /**
+     * @var string
+     */
+    public $longitud = "";
 
-    public string $reference = "";
+    /**
+     * @var string
+     */
+    public $reference = "";
 
-    public string $invoice_file = "";
-    public string $passport_file = "";
-    public string $license_file = "";
-    public string $home_file = "";
+    /**
+     * @var string
+     */
+    public $invoice_file = "";
+    /**
+     * @var string
+     */
+    public $passport_file = "";
+    /**
+     * @var string
+     */
+    public $license_file = "";
+    /**
+     * @var string
+     */
+    public $home_file = "";
 
-    public string $name = "";
-    public string $lastname = "";
+    /**
+     * @var string
+     */
+    public $name = "";
+    /**
+     * @var string
+     */
+    public $lastname = "";
 
-    public string $address = "";
-    public string $address2 = "";
+    /**
+     * @var string
+     */
+    public $address = "";
+    /**
+     * @var string
+     */
+    public $address2 = "";
 
-    public string $phone = "";
-    public string $phone2 = "";
+    /**
+     * @var string
+     */
+    public $phone = "";
+    /**
+     * @var string
+     */
+    public $phone2 = "";
 
-    public string $phone1 = "";
+    /**
+     * @var string
+     */
+    public $phone1 = "";
 
-    public string $email = "";
-    public string $email1 = "";
+    /**
+     * @var string
+     */
+    public $email = "";
+    /**
+     * @var string
+     */
+    public $email1 = "";
 
-    public string $no = "";
+    /**
+     * @var string
+     */
+    public $no = "";
 
-    public string $nationality = "";
-    public string $passport = "";
-    public string $expirelicense = "";
-    public string $issuedlicense = "";
-    public string $license = "";
+    /**
+     * @var string
+     */
+    public $nationality = "";
+    /**
+     * @var string
+     */
+    public $passport = "";
+    /**
+     * @var string
+     */
+    public $expirelicense = "";
+    /**
+     * @var string
+     */
+    public $issuedlicense = "";
+    /**
+     * @var string
+     */
+    public $license = "";
 
-    public int $user_id = 0;
-    public int $stock_id = 0;
+    /**
+     * @var int
+     */
+    public $user_id = 0;
+    /**
+     * @var int
+     */
+    public $stock_id = 0;
 
-    public string $created_at = "";
+    /**
+     * @var string
+     */
+    public $created_at = "";
 
-    public int $is_rental = 0;
+    /**
+     * @var int
+     */
+    public $is_rental = 0;
 
     /* ================= SUPPLIER ================= */
+    /**
+     * @var int
+     */
+    public $sup_id = 0;
 
-    public int $sup_id = 0;
+    /**
+     * @var string
+     */
+    public $code_name = "";
+    /**
+     * @var string
+     */
+    public $sup_name = "";
+    /**
+     * @var string
+     */
+    public $sup_address = "";
+    /**
+     * @var string
+     */
+    public $sup_email = "";
+    /**
+     * @var string
+     */
+    public $sup_mobile = "";
 
-    public string $code_name = "";
-    public string $sup_name = "";
-    public string $sup_address = "";
-    public string $sup_email = "";
-    public string $sup_mobile = "";
+    /**
+     * @var string
+     */
+    public $gtin = "";
 
-    public string $gtin = "";
+    /**
+     * @var int
+     */
+    public $type_id = 0;
 
-    public int $type_id = 0;
-
-    public string $is_id = "";
-    public string $is_type = "";
-    public string $address1 = "";
+    /**
+     * @var string
+     */
+    public $is_id = "";
+    /**
+     * @var string
+     */
+    public $is_type = "";
+    /**
+     * @var string
+     */
+    public $address1 = "";
 
   public function __construct(){
 		$this->created_at = "NOW()";
