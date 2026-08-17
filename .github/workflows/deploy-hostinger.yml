@@ -20,6 +20,25 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y lftp
 
+      - name: Generar db.local.php (BD propia de la instancia)
+        if: ${{ secrets.DB_NAME != '' }}
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          cat > core/db.local.php <<EOF
+          <?php
+          return [
+            'host' => '${DB_HOST}',
+            'user' => '${DB_USER}',
+            'pass' => '${DB_PASSWORD}',
+            'ddbb' => '${DB_NAME}',
+            'port' => 3306,
+          ];
+          EOF
+
       - name: Mirror to Hostinger via FTP
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -53,7 +72,6 @@ jobs:
               --exclude-glob home/ \
               --exclude-glob CF-SYSTEMS/storage/ \
               --exclude-glob firmas/ \
-              --exclude-glob db.local.php \
               --exclude-glob backups/ \
               ./ /
             bye
