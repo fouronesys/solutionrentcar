@@ -54,6 +54,6 @@ jobs:
               --exclude-glob CF-SYSTEMS/storage/ \
               --exclude-glob firmas/ \
               --exclude-glob backups/ \
-              ./ /
+              ./ /public_html/RENTCAR/CASARIVAS-RENTCAR
             bye
           LFTP_EOF
