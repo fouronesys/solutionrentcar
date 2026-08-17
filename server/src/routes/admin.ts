@@ -2,12 +2,14 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import fs from "node:fs";
 import path from "node:path";
-import { one, q } from "../db.js";
+import { one, pool, q } from "../db.js";
+import { PRIVATE_DIR } from "../storage.js";
 import {
   companyById,
   invalidateCompanyCache,
   requireCompanyStaff,
   requireSuper,
+  revokeAllFor,
   tryAuth,
 } from "../auth.js";
 import {
@@ -151,7 +153,60 @@ adminRouter.patch("/companies/:id(\\d+)", requireSuper(), h(async (req, res) => 
     patch.vals,
   );
   invalidateCompanyCache();
+  // Al desactivar la empresa, revocar los refresh tokens de todos sus usuarios/clientes
+  if (req.body?.active !== undefined && !req.body.active) {
+    await q(
+      "UPDATE refresh_tokens SET revoked_at = NOW() WHERE company_id=$1 AND revoked_at IS NULL",
+      [id],
+    );
+  }
   return ok(res, { company: companyToArray(req, updated) });
+}));
+
+/**
+ * DELETE /admin/companies/:id — eliminación DEFINITIVA de una empresa y todos
+ * sus datos (usuarios, clientes, flota, reservas, pagos, notificaciones,
+ * tokens) más sus archivos en disco. Requiere ?confirm=<slug> exacto como
+ * salvaguarda. Solo super admin. Para retiros temporales usar active=false.
+ */
+adminRouter.delete("/companies/:id(\\d+)", requireSuper(), h(async (req, res) => {
+  const id = toInt(req.params.id);
+  const company = await one("SELECT * FROM companies WHERE id=$1", [id]);
+  if (!company) return err(res, "not_found", "Empresa no encontrada", 404);
+  const confirm = toStr(req.query.confirm).trim();
+  if (confirm !== toStr(company.slug)) {
+    return err(res, "confirmation_required", "Debes confirmar con ?confirm=<slug de la empresa>", 400);
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    // Orden por dependencias (no hay ON DELETE CASCADE en el esquema)
+    for (const t of [
+      "refresh_tokens", "device_tokens", "notification_preferences", "notifications",
+      "payments", "bookings", "cars", "catalog_items", "persons", "users",
+    ]) {
+      await client.query(`DELETE FROM ${t} WHERE company_id=$1`, [id]);
+    }
+    await client.query("DELETE FROM companies WHERE id=$1", [id]);
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+  invalidateCompanyCache();
+
+  // Archivos de la empresa (logos/fotos públicos y docs/firmas privados)
+  for (const dir of [
+    path.join(PUBLIC_DIR, "companies", String(id)),
+    path.join(PRIVATE_DIR, "companies", String(id)),
+  ]) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+
+  return ok(res, { deleted: true, company_id: id });
 }));
 
 // POST /admin/companies/:id/logo { logo: base64 }
@@ -195,7 +250,7 @@ adminRouter.post("/companies/:id(\\d+)/users", requireSuper(), h(async (req, res
   return ok(res, { user: { ...userToArray(req, u), username } }, 201);
 }));
 
-// ================= STAFF DE EMPRESA: flota y catálogo =================
+// ================= STAFF DE EMPRESA: empresa propia y personal =================
 
 function staffCompanyId(req: any, res: any): number | null {
   const a = tryAuth(req)!;
@@ -207,6 +262,108 @@ function staffCompanyId(req: any, res: any): number | null {
   }
   return a.companyId;
 }
+
+// GET /admin/company — datos/branding de la empresa del staff autenticado
+// (el super admin indica ?company_id=)
+adminRouter.get("/company", requireCompanyStaff(), h(async (req, res) => {
+  const companyId = staffCompanyId(req, res);
+  if (!companyId) return;
+  const c = await companyById(companyId);
+  if (!c) return err(res, "not_found", "Empresa no encontrada", 404);
+  return ok(res, { company: companyToArray(req, c) });
+}));
+
+function staffToArray(req: any, u: any) {
+  return { ...userToArray(req, u), username: toStr(u.username), status: toInt(u.status) };
+}
+
+// GET /admin/users — personal de la empresa
+adminRouter.get("/users", requireCompanyStaff(), h(async (req, res) => {
+  const companyId = staffCompanyId(req, res);
+  if (!companyId) return;
+  const r = await q(
+    "SELECT * FROM users WHERE company_id=$1 AND NOT is_super ORDER BY id ASC",
+    [companyId],
+  );
+  return ok(res, { users: r.rows.map((u) => staffToArray(req, u)) });
+}));
+
+// Solo los admins de empresa (kind >= 1) o el super pueden gestionar personal
+function requireStaffManager(req: any, res: any): boolean {
+  const a = tryAuth(req)!;
+  if (a.isSuper || a.kind >= 1) return true;
+  err(res, "forbidden", "Solo administradores de la empresa pueden gestionar personal", 403);
+  return false;
+}
+
+// POST /admin/users — crear staff en la propia empresa
+adminRouter.post("/users", requireCompanyStaff(), h(async (req, res) => {
+  const companyId = staffCompanyId(req, res);
+  if (!companyId) return;
+  if (!requireStaffManager(req, res)) return;
+  const body = req.body ?? {};
+  const username = toStr(body.username).trim();
+  const password = toStr(body.password).trim();
+  if (!username || password.length < 6) {
+    return err(res, "invalid_request", "username y password (≥6) son requeridos", 400);
+  }
+  const dup = await one(
+    "SELECT id FROM users WHERE company_id=$1 AND LOWER(username)=LOWER($2)",
+    [companyId, username],
+  );
+  if (dup) return err(res, "conflict", "Ya existe un usuario con ese nombre en la empresa", 409);
+  const hash = await bcrypt.hash(password, 10);
+  const u = await one(
+    `INSERT INTO users (company_id, username, email, password_hash, name, lastname, phone, kind, status)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,1) RETURNING *`,
+    [
+      companyId, username, toStr(body.email).trim(), hash,
+      toStr(body.name).trim(), toStr(body.lastname).trim(), toStr(body.phone).trim(),
+      Math.min(Math.max(toInt(body.kind ?? 0), 0), 1),
+    ],
+  );
+  return ok(res, { user: staffToArray(req, u) }, 201);
+}));
+
+// PATCH /admin/users/:id — actualizar staff (datos, rol, estado o contraseña)
+adminRouter.patch("/users/:id(\\d+)", requireCompanyStaff(), h(async (req, res) => {
+  const companyId = staffCompanyId(req, res);
+  if (!companyId) return;
+  if (!requireStaffManager(req, res)) return;
+  const id = toInt(req.params.id);
+  const body = req.body ?? {};
+  const sets: string[] = [];
+  const vals: unknown[] = [];
+  const push = (col: string, v: unknown) => {
+    vals.push(v);
+    sets.push(`${col}=$${vals.length}`);
+  };
+  for (const f of ["name", "lastname", "email", "phone"] as const) {
+    if (body[f] !== undefined) push(f, toStr(body[f]).trim());
+  }
+  if (body.kind !== undefined) push("kind", Math.min(Math.max(toInt(body.kind), 0), 1));
+  if (body.status !== undefined) push("status", toInt(body.status) ? 1 : 0);
+  if (body.password !== undefined) {
+    const password = toStr(body.password).trim();
+    if (password.length < 6) return err(res, "invalid_request", "password debe tener al menos 6 caracteres", 400);
+    push("password_hash", await bcrypt.hash(password, 10));
+    push("password_algo", "bcrypt");
+  }
+  if (!sets.length) return err(res, "invalid_request", "Sin campos para actualizar", 400);
+  vals.push(id, companyId);
+  const u = await one(
+    `UPDATE users SET ${sets.join(",")} WHERE id=$${vals.length - 1} AND company_id=$${vals.length} AND NOT is_super RETURNING *`,
+    vals,
+  );
+  if (!u) return err(res, "not_found", "Usuario no encontrado", 404);
+  // Al desactivar o cambiar contraseña, revocar sus refresh tokens (cierra sesiones)
+  if ((body.status !== undefined && toInt(body.status) !== 1) || body.password !== undefined) {
+    await revokeAllFor("user", id);
+  }
+  return ok(res, { user: staffToArray(req, u) });
+}));
+
+// ================= STAFF DE EMPRESA: flota y catálogo =================
 
 const CAR_FIELDS = [
   "name", "year", "plate", "seat", "kms", "kms_current", "description",

@@ -57,56 +57,65 @@ bookingsRouter.get("/", h(async (req, res) => {
   const company = await resolveCompany(req, res);
   if (!company) return;
 
-  const where: string[] = ["company_id=$1"];
+  const where: string[] = ["b.company_id=$1"];
   const vals: unknown[] = [company.id];
 
   if (a.type === "client") {
     vals.push(a.id);
-    where.push(`person_id=$${vals.length}`);
+    where.push(`b.person_id=$${vals.length}`);
   } else if (a.stockId > 0) {
     vals.push(a.stockId);
-    where.push(`stock_id=$${vals.length}`);
+    where.push(`b.stock_id=$${vals.length}`);
   }
   if (req.query.status !== undefined && req.query.status !== "") {
     vals.push(toInt(req.query.status));
-    where.push(`status=$${vals.length}`);
+    where.push(`b.status=$${vals.length}`);
   }
   const from = toStr(req.query.from).trim();
   if (from) {
     if (!DATE_ONLY_RE.test(from)) return err(res, "invalid_request", "from debe ser YYYY-MM-DD", 400);
     vals.push(from);
-    where.push(`created_at::date >= $${vals.length}::date`);
+    where.push(`b.created_at::date >= $${vals.length}::date`);
   }
   const to = toStr(req.query.to).trim();
   if (to) {
     if (!DATE_ONLY_RE.test(to)) return err(res, "invalid_request", "to debe ser YYYY-MM-DD", 400);
     vals.push(to);
-    where.push(`created_at::date <= $${vals.length}::date`);
+    where.push(`b.created_at::date <= $${vals.length}::date`);
   }
   if (a.type === "user") {
     if (req.query.client_id) {
       vals.push(toInt(req.query.client_id));
-      where.push(`person_id=$${vals.length}`);
+      where.push(`b.person_id=$${vals.length}`);
     }
     if (req.query.car_id) {
       vals.push(toInt(req.query.car_id));
-      where.push(`car_id=$${vals.length}`);
+      where.push(`b.car_id=$${vals.length}`);
     }
     if (req.query.q) {
       vals.push(`%${toStr(req.query.q)}%`);
-      where.push(`(code ILIKE $${vals.length} OR person_id IN (
+      where.push(`(b.code ILIKE $${vals.length} OR b.person_id IN (
         SELECT id FROM persons WHERE company_id=$1 AND (name ILIKE $${vals.length} OR lastname ILIKE $${vals.length} OR phone ILIKE $${vals.length})))`);
     }
   }
 
   const { limit, offset } = pageParams(req);
   vals.push(limit, offset);
+  // car_name/client_name son campos adicionales para el panel; no rompen el contrato legado
   const r = await q(
-    `SELECT * FROM bookings WHERE ${where.join(" AND ")} ORDER BY id DESC LIMIT $${vals.length - 1} OFFSET $${vals.length}`,
+    `SELECT b.*, c.name AS car_name, TRIM(p.name || ' ' || p.lastname) AS client_name
+     FROM bookings b
+     LEFT JOIN cars c ON c.id = b.car_id AND c.company_id = b.company_id
+     LEFT JOIN persons p ON p.id = b.person_id AND p.company_id = b.company_id
+     WHERE ${where.join(" AND ")} ORDER BY b.id DESC LIMIT $${vals.length - 1} OFFSET $${vals.length}`,
     vals,
   );
   return ok(res, {
-    bookings: r.rows.map((b) => bookingToArray(req, b)),
+    bookings: r.rows.map((b) => ({
+      ...bookingToArray(req, b),
+      car_name: toStr(b.car_name),
+      client_name: toStr(b.client_name),
+    })),
     limit,
     offset,
     count: r.rows.length,

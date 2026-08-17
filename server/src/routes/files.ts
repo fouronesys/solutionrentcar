@@ -2,7 +2,7 @@ import { Router } from "express";
 import fs from "node:fs";
 import path from "node:path";
 import { one } from "../db.js";
-import { bearerToken } from "../auth.js";
+import { bearerToken, liveStaff } from "../auth.js";
 import { verifyAccess } from "../jwt.js";
 import { err, h, toInt, toStr } from "../helpers.js";
 import { PRIVATE_DIR } from "../storage.js";
@@ -26,15 +26,16 @@ filesRouter.get("/companies/:cid(\\d+)/:kind(docs|firmas)/:filename", h(async (r
   const payload = token ? verifyAccess(token) : null;
   if (!payload || !payload.sub) return err(res, "unauthorized", "Token requerido o inválido", 401);
 
-  const isSuper = !!payload.is_super;
   const authCompany = payload.company_id === null || payload.company_id === undefined ? null : Number(payload.company_id);
   const authId = Number(payload.sub);
 
   let allowed = false;
-  if (isSuper) {
-    allowed = true;
-  } else if (payload.typ === "user") {
-    allowed = authCompany === cid;
+  if (payload.typ === "user") {
+    // Verificación viva: staff desactivado (o degradado, o de empresa desactivada)
+    // pierde acceso a documentos/firmas de inmediato, sin esperar a que expire el JWT.
+    const live = await liveStaff(authId);
+    if (!live.ok) return err(res, "unauthorized", "La cuenta o la empresa está desactivada", 401);
+    allowed = live.isSuper || live.companyId === cid;
   } else if (payload.typ === "client" && authCompany === cid) {
     if (kind === "docs") {
       allowed = filename.startsWith(`client_${authId}_`);
