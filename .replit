@@ -57,8 +57,8 @@ waitForPort = 3000
 [userenv]
 
 [userenv.shared]
-EXPO_PUBLIC_GUEST_PASSWORD = "8090000000"
-EXPO_PUBLIC_GUEST_USERNAME = "8090000000"
+EXPO_PUBLIC_GUEST_PASSWORD = "crguest2026"
+EXPO_PUBLIC_GUEST_USERNAME = "casarivas.guest"
 
 [postMerge]
 path = "scripts/post-merge.sh"
