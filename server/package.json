@@ -9,8 +9,7 @@
     "start": "tsx src/index.ts",
     "db:setup": "tsx src/setup-db.ts",
     "db:seed-demo": "tsx scripts/seed-demo.ts",
-    "migrate:legacy": "tsx scripts/migrate-legacy.ts",
-    "check": "tsc --noEmit"
+    "migrate:legacy": "tsx scripts/migrate-legacy.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

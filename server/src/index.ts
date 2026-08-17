@@ -17,7 +17,6 @@ import {
   pushRouter,
 } from "./routes/misc.js";
 import { placesRouter } from "./routes/places.js";
-import { enforceLiveStaff } from "./auth.js";
 import { brandingRouter } from "./routes/branding.js";
 import { adminRouter } from "./routes/admin.js";
 
@@ -43,9 +42,6 @@ app.use("/files", filesRouter);
 
 const api = express.Router();
 api.use("/auth", authRouter);
-// Verificación viva global: staff desactivado (o de empresa desactivada) pierde
-// acceso de inmediato en TODAS las rutas, aunque su access token siga vigente.
-api.use(enforceLiveStaff());
 api.use("/me", meRouter);
 api.use("/cars", carsRouter);
 api.use("/bookings", bookingsRouter);

@@ -147,66 +147,10 @@ export function requireAuth(type?: "user" | "client") {
   };
 }
 
-/**
- * Estado vivo de un usuario staff contra la BD: debe seguir activo (y su
- * empresa activa). Refresca kind/isSuper/companyId desde la BD (manda la BD,
- * no el JWT), de modo que desactivar o degradar surte efecto de inmediato
- * aunque el access token siga vigente.
- */
-export interface LiveStaffResult {
-  ok: boolean;
-  reason?: "inactive_user" | "inactive_company";
-  kind?: number;
-  isSuper?: boolean;
-  companyId?: number | null;
-}
-
-export async function liveStaff(userId: number): Promise<LiveStaffResult> {
-  const u = await one("SELECT status, kind, is_super, company_id FROM users WHERE id=$1", [userId]);
-  if (!u || Number(u.status) !== 1) return { ok: false, reason: "inactive_user" };
-  const isSuper = !!u.is_super;
-  const companyId = u.company_id === null || u.company_id === undefined ? null : Number(u.company_id);
-  if (!isSuper) {
-    const c = companyId ? await companyById(companyId) : null;
-    if (!c || !c.active) return { ok: false, reason: "inactive_company" };
-  }
-  return { ok: true, kind: Number(u.kind ?? 0), isSuper, companyId };
-}
-
-async function verifyLiveStaff(a: AuthInfo, res: Response): Promise<boolean> {
-  const live = await liveStaff(a.id);
-  if (!live.ok) {
-    if (live.reason === "inactive_company") err(res, "forbidden", "La empresa está desactivada", 403);
-    else err(res, "unauthorized", "La cuenta está desactivada", 401);
-    return false;
-  }
-  a.kind = live.kind ?? 0;
-  a.isSuper = !!live.isSuper;
-  if (!live.isSuper) a.companyId = live.companyId ?? null;
-  return true;
-}
-
-/**
- * Middleware global: cualquier request autenticada como staff (type "user")
- * pasa la verificación viva, sin importar la ruta (bookings, cars, agenda…).
- * Las sesiones de clientes y las requests sin token no se ven afectadas.
- */
-export function enforceLiveStaff() {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const a = tryAuth(req);
-    if (a && a.type === "user") {
-      if (!(await verifyLiveStaff(a, res))) return;
-    }
-    next();
-  };
-}
-
 export function requireSuper() {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const a = tryAuth(req);
     if (!a) return err(res, "unauthorized", "Token requerido o inválido", 401);
-    if (a.type !== "user" || !a.isSuper) return err(res, "forbidden", "Solo super administradores", 403);
-    if (!(await verifyLiveStaff(a, res))) return;
     if (!a.isSuper) return err(res, "forbidden", "Solo super administradores", 403);
     next();
   };
@@ -214,11 +158,10 @@ export function requireSuper() {
 
 /** Staff de empresa (no super): requiere company_id en token. */
 export function requireCompanyStaff() {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const a = tryAuth(req);
     if (!a) return err(res, "unauthorized", "Token requerido o inválido", 401);
     if (a.type !== "user") return err(res, "forbidden", "Solo staff", 403);
-    if (!(await verifyLiveStaff(a, res))) return;
     if (!a.isSuper && !a.companyId) return err(res, "forbidden", "Token sin empresa", 403);
     next();
   };

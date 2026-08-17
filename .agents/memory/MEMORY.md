@@ -2,4 +2,3 @@
 - [Store screenshot pipeline](store-screenshot-pipeline.md) — captura CDP para tiendas: lanzar chromium y driver en el mismo comando, copiar de /tmp al workspace al instante.
 - [Git push quirks](git-push-quirks.md) — gitPush callback es la única vía de push pero puede fallar UNKNOWN; commit por shell requiere identidad inline.
 - [Yowell legacy migration](yowell-legacy-migration.md) — migrate:legacy usa env LEGACY_DB_* contra el MySQL de Hostinger (solo lectura); el mysqld local no escucha en TCP.
-- [Status codes plataforma](status-codes-plataforma.md) — al mapear estados en UIs nuevas, verificar los códigos contra el server (no asumirlos): una UI ya salió invertida.
