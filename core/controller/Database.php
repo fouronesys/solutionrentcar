@@ -11,11 +11,12 @@ class Database {
     public $port;
 
     public function __construct(){
-        // Valores por defecto (instancia original)
-        $this->host   = 'srv500.hstgr.io';
-        $this->user   = 'u144787244_solutionsrent';
-        $this->pass   = 'PSsolutions99';
-        $this->ddbb   = 'u144787244_solutionsrent';
+        // Sin credenciales en el código: se cargan desde core/db.local.php
+        // (generado por el deploy) o desde variables de entorno.
+        $this->host   = getenv('DB_HOST') ?: '';
+        $this->user   = getenv('DB_USER') ?: '';
+        $this->pass   = getenv('DB_PASSWORD') ?: '';
+        $this->ddbb   = getenv('DB_NAME') ?: '';
         $this->socket = '';
         $this->port   = 3306;
 
@@ -34,6 +35,9 @@ class Database {
     }
 
     public function connect(){
+        if ($this->host === '' || $this->user === '' || $this->ddbb === '') {
+            die("Configuración de base de datos ausente: falta core/db.local.php o variables de entorno DB_*");
+        }
         $con = new mysqli(
             $this->host,
             $this->user,

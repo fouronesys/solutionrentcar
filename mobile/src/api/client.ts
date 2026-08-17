@@ -203,14 +203,17 @@ async function call<T>(
         return await retryWithToken<T>(method, path, body, params, refreshed.access_token);
       }
       await clearTokens();
-      // Stale real session — fall back to a fresh guest session so the
-      // public catalog keeps working.
-      const g = await tryGuestLogin();
-      if (g) {
-        return await retryWithToken<T>(method, path, body, params, g.access_token);
+      // Stale real session — fall back to a fresh guest session, but only for
+      // read requests: mutations must never be replayed as the guest account.
+      if (method === "get") {
+        const g = await tryGuestLogin();
+        if (g) {
+          return await retryWithToken<T>(method, path, body, params, g.access_token);
+        }
       }
-    } else {
-      // No real session: guest token missing or expired — re-acquire and retry once.
+    } else if (method === "get") {
+      // No real session: guest token missing or expired — re-acquire and retry
+      // once, only for reads (the guest account is catalog-only).
       const g = await tryGuestLogin();
       if (g) {
         return await retryWithToken<T>(method, path, body, params, g.access_token);

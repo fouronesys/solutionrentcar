@@ -86,9 +86,12 @@ if ($action === 'login') {
         $r = @$con->query($sql);
         if ($r && $row = $r->fetch_assoc()) {
             $client = (object)$row;
-            $tokens = ApiAuth::issueTokens('client', intval($client->id), [
-                'stock_id' => intval($client->stock_id ?? 0),
-            ]);
+            $extra = ['stock_id' => intval(isset($client->stock_id) ? $client->stock_id : 0)];
+            // La cuenta pública de invitado solo puede leer el catálogo.
+            if (isset($client->username) && $client->username === 'casarivas.guest') {
+                $extra['guest'] = 1;
+            }
+            $tokens = ApiAuth::issueTokens('client', intval($client->id), $extra);
             ApiResponse::ok([
                 'role'    => 'client',
                 'user'    => ApiHelpers::personToArray($client),

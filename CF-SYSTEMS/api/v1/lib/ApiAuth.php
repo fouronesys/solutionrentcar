@@ -46,6 +46,11 @@ class ApiAuth {
         if ($type !== null && $a['type'] !== $type) {
             ApiResponse::err('forbidden', 'Acceso restringido', 403);
         }
+        // La sesión de invitado es de solo lectura: se rechaza cualquier mutación.
+        $method = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
+        if (!empty($a['payload']['guest']) && $method !== 'GET' && $method !== 'HEAD' && $method !== 'OPTIONS') {
+            ApiResponse::err('forbidden', 'La sesión de invitado es de solo lectura', 403);
+        }
         return $a;
     }
 
