@@ -14,10 +14,6 @@ externalPort = 80
 localPort = 5000
 externalPort = 5000
 
-[[ports]]
-localPort = 8000
-externalPort = 8000
-
 [workflows]
 runButton = "Project"
 
@@ -33,10 +29,6 @@ args = "Start application"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Mobile App (Expo Web)"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "API Multiempresa"
 
 [[workflows.workflow]]
 name = "Start application"
@@ -61,18 +53,6 @@ outputType = "console"
 task = "shell.exec"
 args = "cd /home/runner/workspace/mobile && EXPO_NO_DOCTOR=1 npx expo start --web --port 3000 --no-dev 2>&1"
 waitForPort = 3000
-
-[[workflows.workflow]]
-name = "API Multiempresa"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd /home/runner/workspace/server && DEFAULT_COMPANY_SLUG=demo-a npm run dev"
-waitForPort = 8000
 
 [userenv]
 
