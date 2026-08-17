@@ -6,29 +6,29 @@ export type ThemeMode = "light" | "dark";
 // Brand stays constant; surfaces/text/borders flip per theme.
 
 const brand = {
-  primary: "#C9A227",        // gold – informational / links (readable on dark)
-  primaryDark: "#7A5E0E",
-  primaryDeep: "#5A4608",
-  primaryLight: "#E3C35C",
+  primary: "#C79323",        // gold – informational / links (readable on dark)
+  primaryDark: "#8A5F12",
+  primaryDeep: "#5F3F0C",
+  primaryLight: "#E0B24A",
 
-  cta: "#B8860B",            // GOLD – primary CTA / active states / tabs
-  ctaDark: "#8C6708",
-  ctaLight: "#D4A72C",
+  cta: "#C79323",            // GOLD – primary CTA / active states / tabs
+  ctaDark: "#8A5F12",
+  ctaLight: "#E0B24A",
 
-  accent: "#B8860B",         // alias → same as cta for backwards compat
+  accent: "#C79323",         // alias → same as cta for backwards compat
 };
 
 export const lightColors = {
   ...brand,
-  primary: "#8C6D12",
-  primaryLight: "#C9A227",
-  primaryXLight: "#FAF3DC",
+  primary: "#8A5F12",
+  primaryLight: "#C79323",
+  primaryXLight: "#FAF1DC",
   // CTA más oscuro en light para contraste AA (≥4.5:1) con texto blanco
-  cta: "#8C6708",
-  ctaDark: "#6E5106",
-  ctaLight: "#B8860B",
-  accent: "#8C6708",
-  ctaXLight: "#FBF1D9",
+  cta: "#8A5F12",
+  ctaDark: "#6E4B0D",
+  ctaLight: "#C79323",
+  accent: "#8A5F12",
+  ctaXLight: "#F9EED4",
 
   // ─── Backgrounds ─────────────────────────────────────────────────────────
   bg: "#F2F3F5",             // screen background (cool light gray)
@@ -53,8 +53,8 @@ export const lightColors = {
   warningBg: "#FFF7E6",
   danger: "#DC2626",
   dangerBg: "#FEF2F2",
-  info: "#7A5E0E",
-  infoBg: "#FAF3DC",
+  info: "#8A5F12",
+  infoBg: "#FAF1DC",
 
   // ─── Dark surfaces (avatar squares, highlight cards) ─────────────────────
   dark: "#141414",
@@ -66,17 +66,17 @@ export const lightColors = {
 
   // ─── Overlays / misc ──────────────────────────────────────────────────────
   overlay: "rgba(0,0,0,0.45)",
-  tint: "#FAF3DC",           // loyalty / soft gold tint card
-  tintBorder: "#E8D79A",
+  tint: "#FAF1DC",           // loyalty / soft gold tint card
+  tintBorder: "#E9D3A0",
 };
 
 export const darkColors: typeof lightColors = {
   ...brand,
   // Brighter gold for dark surfaces — #B8860B falls below 4.5:1 contrast on
   // near-black; buttons still read fine, but text/labels need this lift.
-  cta: "#E3B93B",
-  ctaLight: "#F0CC5F",
-  accent: "#E3B93B",
+  cta: "#D9A030",
+  ctaLight: "#E8B858",
+  accent: "#D9A030",
   primaryXLight: "#2A2410",  // dark gold tint surface
   ctaXLight: "#33290E",      // dark gold tint surface
 
@@ -99,7 +99,7 @@ export const darkColors: typeof lightColors = {
   warningBg: "#2E2410",
   danger: "#F87171",
   dangerBg: "#331216",
-  info: "#E3C35C",
+  info: "#E0B24A",
   infoBg: "#2A2410",
 
   dark: "#1F1F27",           // "dark accent" squares become elevated surfaces
@@ -122,7 +122,7 @@ export const bookingStatus: Record<number, { en: string; es: string; color: stri
   0: { en: "Pending",   es: "Pendiente",  color: "#D97706", bg: "#FFFBEB" },
   1: { en: "Confirmed", es: "Confirmada", color: "#059669", bg: "#ECFDF5" },
   2: { en: "Cancelled", es: "Cancelada",  color: "#DC2626", bg: "#FEF2F2" },
-  3: { en: "Delivered", es: "Entregada",  color: "#8C6D12", bg: "#FAF3DC" },
+  3: { en: "Delivered", es: "Entregada",  color: "#8A5F12", bg: "#FAF1DC" },
   4: { en: "Returned",  es: "Devuelta",   color: "#71717A", bg: "#F4F4F5" },
 };
 
@@ -136,14 +136,14 @@ const bookingStatusDark: Record<number, { color: string; bg: string }> = {
   0: { color: "#F5B94E", bg: "#2E2410" },
   1: { color: "#34D399", bg: "#0C2B21" },
   2: { color: "#F87171", bg: "#331216" },
-  3: { color: "#E3C35C", bg: "#2A2410" },
+  3: { color: "#E0B24A", bg: "#2A2410" },
   4: { color: "#A1A1AA", bg: "#22222A" },
 };
 const bookingStatusLight: Record<number, { color: string; bg: string }> = {
   0: { color: "#D97706", bg: "#FFFBEB" },
   1: { color: "#059669", bg: "#ECFDF5" },
   2: { color: "#DC2626", bg: "#FEF2F2" },
-  3: { color: "#8C6D12", bg: "#FAF3DC" },
+  3: { color: "#8A5F12", bg: "#FAF1DC" },
   4: { color: "#71717A", bg: "#F4F4F5" },
 };
 const carStatusDark: Record<number, { color: string; bg: string }> = {
@@ -159,10 +159,10 @@ const carStatusLight: Record<number, { color: string; bg: string }> = {
 
 // Gradients (kept for AnimatedSplash; screens no longer use hero gradients)
 export const gradients = {
-  hero: ["#14100A", "#7A5E0E", "#C9A227"] as const,
-  heroSoft: ["#0B0B0D", "#7A5E0E"] as const,
-  primary: ["#E3C35C", "#C9A227", "#7A5E0E"] as const,
-  primarySoft: ["#EAD27A", "#C9A227"] as const,
+  hero: ["#14100A", "#8A5F12", "#C79323"] as const,
+  heroSoft: ["#0B0B0D", "#8A5F12"] as const,
+  primary: ["#E0B24A", "#C79323", "#8A5F12"] as const,
+  primarySoft: ["#EFC468", "#C79323"] as const,
   imageScrim: ["transparent", "rgba(0,0,0,0.0)", "rgba(0,0,0,0.88)"] as const,
   cardScrim: ["transparent", "rgba(0,0,0,0.78)"] as const,
   shimmer: ["#1F1F27", "#2A2A33", "#1F1F27"] as [string, string, string],
@@ -251,14 +251,14 @@ export const shadow = {
     elevation: 10,
   },
   cta: {
-    shadowColor: "#B8860B",
+    shadowColor: "#C79323",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.30,
     shadowRadius: 14,
     elevation: 6,
   },
   primary: {
-    shadowColor: "#B8860B",
+    shadowColor: "#C79323",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.30,
     shadowRadius: 14,

@@ -67,7 +67,7 @@ function buildLeafletHTML(branches: Branch[], selected: Branch): string {
         `L.marker([${b.lat}, ${b.lng}], {
           icon: L.divIcon({
             className: '',
-            html: '<div style="width:28px;height:28px;background:${b.id === selected.id ? "#C9A227" : "#8C6D12"};border-radius:50% 50% 50% 0;border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>',
+            html: '<div style="width:28px;height:28px;background:${b.id === selected.id ? "#C79323" : "#8A5F12"};border-radius:50% 50% 50% 0;border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>',
             iconSize: [28,28], iconAnchor: [14,28], popupAnchor: [0,-30]
           })
         }).addTo(map).bindPopup('<b>${b.name}</b><br/>${b.address}').on('click', function(){ if(window.ReactNativeWebView){ window.ReactNativeWebView.postMessage('${b.id}'); } });`

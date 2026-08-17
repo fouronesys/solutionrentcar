@@ -21,7 +21,7 @@ export async function ensureAndroidChannel() {
       name: "Casa Rivas RentCar",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#C9A227",
+      lightColor: "#C79323",
     });
   }
 }

@@ -316,7 +316,7 @@ const makeStyles = () => StyleSheet.create({
     width: BAR_TRACK_W,
     height: 3,
     borderRadius: 3,
-     backgroundColor: "rgba(201,162,39,0.22)",
+     backgroundColor: "rgba(199,147,35,0.24)",
     overflow: "hidden",
   },
   barFill: {
