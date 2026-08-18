@@ -55,8 +55,21 @@ jobs:
             set net:max-retries 3
             set net:timeout 20
             set xfer:clobber on
+            rm -rf /.aider.input.history /.aider.tags.cache.v4 /.DS_Store /.agents /.continue || echo "cleanup done"
+            rm -f /IMG_4620.jpg /IMG_4621.jpg /IMG_4622.jpg /IMG_4623.jpg || true
+            rm -rf /store-assets /store-screenshots /docs /attached_assets || true
             mirror --reverse --delete --verbose --parallel=4 \
               --exclude-glob .git* \
+              --exclude-glob '.aider*' \
+              --exclude-glob .agents/ \
+              --exclude-glob .continue/ \
+              --exclude-glob .DS_Store \
+              --exclude-glob .easignore \
+              --exclude-glob attached_assets/ \
+              --exclude-glob store-assets/ \
+              --exclude-glob store-screenshots/ \
+              --exclude-glob docs/ \
+              --exclude-glob 'IMG_*.jpg' \
               --exclude-glob .github/ \
               --exclude-glob node_modules/ \
               --exclude-glob mobile/ \
