@@ -46,6 +46,33 @@ jobs:
             run_lftp "rm /RENTCAR/rtdiag.php"
             echo "Deleted rtdiag.php"
 
+          elif [ "$ACTION" = "deploy-central" ]; then
+            # Sube los scripts centrales refactorizados (lotes + índice de usuarios)
+            run_lftp "put scripts/central/rtcommon.php -o /RENTCAR/rtcommon.php; put scripts/central/login.php -o /RENTCAR/login.php; put scripts/central/update.php -o /RENTCAR/update.php; put scripts/central/indexer.php -o /RENTCAR/indexer.php"
+            echo "Deployed central scripts"
+            run_lftp "cls -la /RENTCAR/*.php" > out/central-php-listing.txt || true
+            cat out/central-php-listing.txt
+
+          elif [ "$ACTION" = "build-index" ]; then
+            # Ejecuta indexer.php repetidamente hasta indexar todas las instalaciones
+            : > out/index_build.txt
+            for i in $(seq 1 30); do
+              echo "== round $i ==" | tee -a out/index_build.txt
+              curl -s -m 120 "https://assanpos.com/RENTCAR/indexer.php" | tee -a out/index_build.txt
+              if grep -q "PENDIENTES=0" out/index_build.txt; then echo "INDEX COMPLETE"; break; fi
+              sleep 10
+            done
+
+          elif [ "$ACTION" = "run-update" ]; then
+            # Ejecuta update.php por lotes hasta procesar todas las bases
+            : > out/update_run.txt
+            for i in $(seq 1 30); do
+              echo "== round $i ==" | tee -a out/update_run.txt
+              curl -s -m 240 "https://assanpos.com/RENTCAR/update.php" | tee -a out/update_run.txt
+              if grep -q "PENDIENTES=0" out/update_run.txt; then echo "UPDATE COMPLETE"; break; fi
+              sleep 10
+            done
+
           elif [ "$ACTION" = "cleanup" ]; then
             run_lftp "rm /RENTCAR/rtdiag.php" || true
             run_lftp "rm /RENTCAR/rtfix.php" || true
