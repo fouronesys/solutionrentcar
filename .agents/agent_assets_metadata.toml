@@ -176,3 +176,24 @@ uri = "file://store-screenshots/googleplay-diseno/book_top-1080x1920.png"
 type = "image"
 title = "Google Play · «CON YOWELL» (corregido)"
 description = "Texto completo, sin cortes en los bordes"
+
+[[outputs]]
+id = "HQEvTMZihY2QRrkvLZAnD"
+uri = "file://store-assets/screenshots-tiendas.zip"
+type = "unspecified"
+title = "Screenshots para tiendas"
+description = "5 capturas para App Store (1290×2796) y 5 para Google Play (1080×1920), en español y máxima calidad."
+
+[[outputs]]
+id = "Amc-KzSOY-sP8zBEli2g0"
+uri = "file://store-assets/icon-googleplay-512.png"
+type = "image"
+title = "Icono Google Play (512×512)"
+description = "Icono de la app en el tamaño requerido por Play Console."
+
+[[outputs]]
+id = "jTqnsxrIfUFvIwZ2sViW1"
+uri = "file://store-assets/icon-appstore-1024.png"
+type = "image"
+title = "Icono App Store (1024×1024)"
+description = "Icono de la app en el tamaño requerido por App Store Connect."
