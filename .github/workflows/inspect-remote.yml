@@ -2,63 +2,141 @@ name: Inspect remote FTP (temporal)
 
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to run: inspect | apply-fix | cleanup'
+        required: true
+        default: 'inspect'
 
 permissions:
   contents: write
 
 jobs:
-  inspect:
+  run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install lftp
-        timeout-minutes: 5
-        run: |
-          sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+        run: sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
 
-      - name: Inspect RENTCAR root and sibling installs
+      - name: Run action
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+          ACTION: ${{ github.event.inputs.action }}
         run: |
           set +x
           export LFTP_PASSWORD="$FTP_PASSWORD"
-          mkdir -p out
           run_lftp() {
-            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; $1; bye" 2>&1 || true
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; $1; bye" 2>&1 || true
           }
-          B=/RENTCAR
-          run_lftp "cls -la $B/" > out/root-listing.txt
-          cat out/root-listing.txt
-          # Central login files of the RENTCAR multi-tenant login
-          for f in update.php test.php actualizar.php; do
-            run_lftp "get $B/$f -o out/central_$(echo $f | tr '/' '_')" || true
-          done
-          run_lftp "cls -laR $B/core/" > out/central-core-listing.txt || true
-          # Each rentcar installation: grab Database.php (redacted later)
-          dirs=$(awk '/\/$/{print $NF}' out/root-listing.txt | awk -F/ '{print $(NF-1)}' | grep -Ev '^\.|^core$|^css$|^img$|^lib$' || true)
-          echo "DIRS: $dirs"
-          for d in $dirs; do
-            run_lftp "get $B/$d/core/controller/Database.php -o out/db_${d}.php" || true
-          done
-          # Redact any password-looking assignments before publishing
-          for f in out/*.php out/*.txt; do
-            [ -f "$f" ] && sed -i -E "s/(pass[a-zA-Z_]*['\"]?\s*(=|=>)\s*)['\"][^'\"]*['\"]/\1'REDACTED'/gI" "$f"
-          done
-          ls -la out/
 
-      - name: Publish results to branch
+          mkdir -p out
+
+          if [ "$ACTION" = "apply-fix" ]; then
+            # Upload a PHP fixer script, run it via HTTP, then delete it
+            cat > /tmp/rtfix.php << 'PHPEOF'
+<?php
+// One-shot fixer: inject dual-host fallback into update.php and login.php
+$results = [];
+$files = [
+    '/RENTCAR/update.php' => [
+        'search'  => '        $pdo = new PDO(
+            "mysql:host={$info[\'host\']};dbname={$info[\'db\']};charset=utf8mb4",
+            $info[\'user\'],
+            $info[\'pass\'],
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );',
+        'replace' => '        // RENTCAR_HOST_PATCH: dual-host fallback (127.0.0.1 → 195.35.61.45)
+        $_rtry_hosts = ($info[\'host\']==="localhost"||$info[\'host\']==="127.0.0.1") ? [\'127.0.0.1\',\'195.35.61.45\'] : [$info[\'host\']];
+        $pdo=null; $_rtry_last=null;
+        foreach($_rtry_hosts as $_rtry_h){
+            try{ $pdo=new PDO("mysql:host={$_rtry_h};dbname={$info[\'db\']};charset=utf8mb4",$info[\'user\'],$info[\'pass\'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]); break; }
+            catch(PDOException $_rtry_e){ $_rtry_last=$_rtry_e; if(strpos($_rtry_e->getMessage(),\'2002\')===false) throw $_rtry_e; }
+        }
+        if($pdo===null) throw $_rtry_last;',
+    ],
+    '/RENTCAR/login.php' => [
+        'search'  => '        $dsn = "mysql:host=" . $db[\'host\'] .
+               ";dbname=" . $db[\'dbname\'] .
+               ";charset=utf8";
+
+        $pdo = new PDO(
+            $dsn,
+            $db[\'user\'],
+            $db[\'password\'],
+            array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            )
+        );',
+        'replace' => '        // RENTCAR_HOST_PATCH: dual-host fallback (127.0.0.1 → 195.35.61.45)
+        $_lg_hosts=($db[\'host\']==="localhost"||$db[\'host\']==="127.0.0.1") ? [\'127.0.0.1\',\'195.35.61.45\'] : [$db[\'host\']];
+        $pdo=null; $_lg_last=null;
+        foreach($_lg_hosts as $_lg_h){
+            try{ $pdo=new PDO("mysql:host={$_lg_h};dbname={$db[\'dbname\']};charset=utf8",$db[\'user\'],$db[\'password\'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]); break; }
+            catch(PDOException $_lg_e){ $_lg_last=$_lg_e; if(strpos($_lg_e->getMessage(),\'2002\')===false) throw $_lg_e; }
+        }
+        if($pdo===null) throw $_lg_last;',
+    ],
+];
+foreach($files as $path => $ops){
+    $absPath = dirname(__DIR__) . $path; // from /RENTCAR/rtfix.php → go up to root then /RENTCAR/...
+    // Actually use the server path directly
+    $absPath = $_SERVER['DOCUMENT_ROOT'] . $path;
+    if(!file_exists($absPath)){ $results[]="NOT FOUND: $path"; continue; }
+    $txt = file_get_contents($absPath);
+    // Remove existing simple RENTCAR_HOST_PATCH lines
+    $txt = preg_replace('/[ \t]*\/\/ RENTCAR_HOST_PATCH[^\n]*\n/', '', $txt);
+    $txt = preg_replace('/[ \t]*if\s*\(\\\$db_host\s*===\s*[\'"][^\'"]*[\'"]\s*\|\|[^\n]+\n/', '', $txt);
+    $txt = preg_replace('/[ \t]*if\s*\(\\\$db\[.host.\]\s*===\s*[\'"][^\'"]*[\'"]\s*\|\|[^\n]+\n/', '', $txt);
+    if(strpos($txt, $ops['search'])!==false){
+        $txt = str_replace($ops['search'], $ops['replace'], $txt);
+        file_put_contents($absPath, $txt);
+        $results[] = "PATCHED: $path";
+    } else {
+        $results[] = "SEARCH NOT FOUND in $path";
+    }
+}
+echo implode("\n", $results) . "\n";
+PHPEOF
+            # Upload the fixer script
+            run_lftp "put /tmp/rtfix.php -o /RENTCAR/rtfix.php"
+            echo "Uploaded rtfix.php"
+            sleep 3
+            # Execute it via HTTP and capture output
+            curl -s -m 30 "https://assanpos.com/RENTCAR/rtfix.php" > out/fix_result.txt || true
+            cat out/fix_result.txt
+            # Delete it immediately
+            run_lftp "rm /RENTCAR/rtfix.php"
+            echo "Deleted rtfix.php"
+
+          elif [ "$ACTION" = "cleanup" ]; then
+            run_lftp "rm /RENTCAR/rtfix.php" || true
+            echo "Cleaned up"
+
+          else
+            # Default: inspect
+            run_lftp "cls -la /RENTCAR/" > out/rentcar-listing.txt
+            cat out/rentcar-listing.txt
+          fi
+
+      - name: Publish results
+        if: always()
         run: |
+          [ -d out ] || exit 0
           git config user.name "inspect-bot"
           git config user.email "inspect@localhost"
-          git checkout --orphan inspect-output
+          git checkout --orphan inspect-output || git checkout inspect-output
           git rm -rf --cached . >/dev/null 2>&1 || true
           mkdir -p /tmp/keep && cp -r out /tmp/keep/
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -r /tmp/keep/out .
           git add out
-          git commit -m "inspect output"
+          git commit -m "inspect/fix output"
           git push -f origin inspect-output
