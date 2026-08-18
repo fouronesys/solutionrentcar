@@ -29,7 +29,7 @@
       "icon": "./assets/icon-ios.png"
     },
     "android": {
-      "package": "com.solutionsrent.app",
+      "package": "com.casarivas.rentcar",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
