@@ -1,4 +1,5 @@
 - [EAS build debugging](eas-build-debugging.md) — cómo bajar logs de builds EAS y el fix del crash de npm en el builder.
 - [Store screenshot pipeline](store-screenshot-pipeline.md) — captura CDP para tiendas: lanzar chromium y driver en el mismo comando, copiar de /tmp al workspace al instante.
 - [Hostinger FTP deploy](hostinger-ftp-deploy.md) — usar la IP de hPanel como FTP_HOST; cuenta enjaulada, mirror a `/`; puerto 21 bloqueado desde Replit.
+- [Casa Rivas PHP 7.3 y guest](casarivas-php73-guest.md) — el servidor debe correr PHP 7.3 (código downgradeado con Rector); sesión guest solo lectura y caché de Metro.
 - [Git push quirks](git-push-quirks.md) — gitPush callback es la única vía de push pero puede fallar UNKNOWN; commit por shell requiere identidad inline.
