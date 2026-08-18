@@ -135,7 +135,7 @@ export default function HomeScreen() {
       <StatusBar style={isDark ? "light" : "dark"} />
       <ScreenHeader
         title="Casa Rivas RentCar"
-        subtitle={locale === "en" ? "Your next move starts here." : "Móntate y dale."}
+        subtitle={locale === "en" ? "Your next move starts here." : "Tu próximo viaje empieza aquí."}
         right={
           <BellButton
             unread={unread}
@@ -176,7 +176,7 @@ export default function HomeScreen() {
               {locale === "en" ? "Browse cars" : "Ver los carros"}
             </Text>
             <Text style={styles.ctaCardRedSub}>
-              {locale === "en" ? "Available now" : "Ahí mismo, disponibles"}
+              {locale === "en" ? "Available now" : "Disponibles ahora"}
             </Text>
           </Pressable>
           {isGuest ? (

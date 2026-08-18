@@ -24,3 +24,5 @@ expo-env.d.ts
 android/
 ios/
 package-lock.json
+credentials/
+credentials.json

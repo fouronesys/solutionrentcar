@@ -326,7 +326,7 @@ const CarCard = React.memo(function CarCard({
           ) : null}
           <Pressable onPress={onPress} style={styles.pickBtn}>
             <Text style={styles.pickBtnText}>
-              {locale === "en" ? "Choose" : "Móntate"}
+              {locale === "en" ? "Choose" : "Elegir"}
             </Text>
             <Ionicons name="chevron-forward" size={13} color="#FFFFFF" />
           </Pressable>
