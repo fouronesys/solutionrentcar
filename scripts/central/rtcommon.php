@@ -111,7 +111,14 @@ function rt_index_load($base_path) {
     $p = rt_index_path($base_path);
     if (!file_exists($p)) return ['folders' => []];
     $j = json_decode(file_get_contents($p), true);
-    return is_array($j) && isset($j['folders']) ? $j : ['folders' => []];
+    if (!is_array($j) || !isset($j['folders'])) return ['folders' => []];
+    // Entradas de versiones previas sin lista de teléfonos: forzar re-escaneo
+    foreach ($j['folders'] as $folder => $data) {
+        if (!array_key_exists('phones', $data) && !isset($data['note'])) {
+            unset($j['folders'][$folder]);
+        }
+    }
+    return $j;
 }
 
 function rt_index_save($base_path, $idx) {
@@ -123,29 +130,36 @@ function rt_index_save($base_path, $idx) {
 function rt_index_scan_folder(&$idx, $cfg) {
     $c = rt_connect($cfg);
     if (isset($c['error'])) return $c;
+    $emails = [];
+    $phones = [];
     try {
-        $emails = [];
         $st = $c['pdo']->query("SELECT email FROM user");
         foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $em) {
             $em = strtolower(trim((string)$em));
             if ($em !== '') $emails[] = $em;
         }
-        $idx['folders'][$cfg['folder']] = [
-            'scanned_at' => date('c'),
-            'users'      => array_values(array_unique($emails)),
-        ];
-        return ['ok' => true, 'count' => count($emails)];
     } catch (Exception $e) {
-        // sin tabla user u otro problema: marcar como escaneada sin usuarios
-        $idx['folders'][$cfg['folder']] = [
-            'scanned_at' => date('c'),
-            'users'      => [],
-            'note'       => 'scan_error',
-        ];
-        return ['ok' => true, 'count' => 0];
-    } finally {
-        $c['pdo'] = null;
+        // sin tabla user: seguir, quizá haya person
     }
+    try {
+        // clientes: login con teléfono (guardar normalizado a solo dígitos)
+        $st = $c['pdo']->query("SELECT phone, phone2 FROM person");
+        foreach ($st->fetchAll(PDO::FETCH_NUM) as $row) {
+            foreach ($row as $ph) {
+                $ph = rt_clean_phone((string)$ph);
+                if ($ph !== '') $phones[] = $ph;
+            }
+        }
+    } catch (Exception $e) {
+        // sin tabla person u otra estructura: seguir
+    }
+    $c['pdo'] = null;
+    $idx['folders'][$cfg['folder']] = [
+        'scanned_at' => date('c'),
+        'users'      => array_values(array_unique($emails)),
+        'phones'     => array_values(array_unique($phones)),
+    ];
+    return ['ok' => true, 'count' => count($emails) + count($phones)];
 }
 
 function rt_index_lookup($idx, $email) {
@@ -153,6 +167,45 @@ function rt_index_lookup($idx, $email) {
     $out = [];
     foreach ($idx['folders'] as $folder => $data) {
         if (in_array($email, $data['users'] ?? [], true)) $out[] = $folder;
+    }
+    return $out;
+}
+
+/* ---------- teléfonos (login de clientes: person.phone) ---------- */
+
+function rt_clean_phone($tel) {
+    return preg_replace('/[^0-9]/', '', (string)$tel);
+}
+
+/* Variantes con/sin código de país "1" (mismo criterio que la app). */
+function rt_phone_variants($tel) {
+    $n = rt_clean_phone($tel);
+    if ($n === '') return [];
+    $out = [$n];
+    if (strlen($n) >= 10) {
+        $last10 = substr($n, -10);
+        $out[] = $last10;
+        $out[] = '1' . $last10;
+    }
+    if (strlen($n) >= 11) {
+        $last11 = substr($n, -11);
+        $out[] = $last11;
+        if ($last11[0] === '1') $out[] = (string)substr($last11, 1);
+    }
+    return array_values(array_unique(array_filter($out)));
+}
+
+/* Carpetas donde el índice conoce alguna variante de este teléfono. */
+function rt_index_lookup_phone($idx, $tel) {
+    $vars = rt_phone_variants($tel);
+    if ($vars === []) return [];
+    $out = [];
+    foreach ($idx['folders'] as $folder => $data) {
+        $phones = $data['phones'] ?? [];
+        if ($phones === []) continue;
+        foreach ($vars as $v) {
+            if (in_array($v, $phones, true)) { $out[] = $folder; break; }
+        }
     }
     return $out;
 }

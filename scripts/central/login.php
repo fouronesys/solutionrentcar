@@ -42,6 +42,53 @@ function rt_login_success($row, $folder) {
     session_regenerate_id(true); // evitar fijación de sesión
     $_SESSION['user_id'] = $row['id'];
     $_SESSION['stock_id'] = $row['stock_id'];
+    $_SESSION['login_type'] = 'user';
+    unset($_SESSION['client_id']);
+    echo json_encode([
+        'success' => true,
+        'redirect' => $folder . '/?view=home'
+    ]);
+    exit;
+}
+
+/*
+| Login de cliente: person.phone como usuario Y como contraseña (sin cifrar),
+| igual que el login de cada instalación. Compara sobre el teléfono
+| normalizado (solo dígitos) admitiendo variantes con/sin "1" inicial.
+*/
+function rt_try_client_login($cfg, $username_raw, $password_raw) {
+    $vu = rt_phone_variants($username_raw);
+    $vp = rt_phone_variants($password_raw);
+    if ($vu === [] || $vp === []) return ['ok' => true, 'row' => null];
+    $c = rt_connect($cfg, 'utf8');
+    if (isset($c['error'])) return $c;
+    try {
+        $norm = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(%s, '-', ''), ' ', ''), '(', ''), ')', ''), '+', '')";
+        $np  = sprintf($norm, 'phone');
+        $np2 = sprintf($norm, 'phone2');
+        $ph_u = implode(',', array_fill(0, count($vu), '?'));
+        $ph_p = implode(',', array_fill(0, count($vp), '?'));
+        $sql = "SELECT id, stock_id FROM person
+                WHERE ($np IN ($ph_u) OR $np2 IN ($ph_u))
+                  AND ($np IN ($ph_p) OR $np2 IN ($ph_p))
+                LIMIT 1";
+        $stmt = $c['pdo']->prepare($sql);
+        $stmt->execute(array_merge($vu, $vu, $vp, $vp));
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return ['ok' => true, 'row' => $row ?: null];
+    } catch (Exception $e) {
+        return ['error' => 'OTHER', 'msg' => $e->getMessage()];
+    } finally {
+        $c['pdo'] = null;
+    }
+}
+
+function rt_client_login_success($row, $folder) {
+    session_regenerate_id(true);
+    $_SESSION['client_id']  = (int)$row['id'];
+    $_SESSION['stock_id']   = (int)$row['stock_id'];
+    $_SESSION['login_type'] = 'client';
+    unset($_SESSION['user_id']);
     echo json_encode([
         'success' => true,
         'redirect' => $folder . '/?view=home'
@@ -68,6 +115,20 @@ foreach (rt_index_lookup($idx, $username) as $folder) {
     if (isset($r['error']) && $r['error'] === 'QUOTA') { $quota_hit = true; break; }
 }
 
+/* 1b) Cliente por teléfono: el índice sabe dónde vive el número */
+if (!$quota_hit) {
+    foreach (rt_index_lookup_phone($idx, $username) as $folder) {
+        if (!isset($configs[$folder])) continue;
+        if (rt_quota_left() <= 0) { $quota_hit = true; break; }
+        $r = rt_try_client_login($configs[$folder], $username, $password_raw);
+        if (isset($r['row']) && $r['row']) {
+            if ($idx_dirty) rt_index_save($base_path, $idx);
+            rt_client_login_success($r['row'], $folder);
+        }
+        if (isset($r['error']) && $r['error'] === 'QUOTA') { $quota_hit = true; break; }
+    }
+}
+
 /* 2) Email no indexado (o cambió de instalación): escanear carpetas pendientes,
       dentro del presupuesto de conexiones del request, alimentando el índice. */
 if (!$quota_hit) {
@@ -88,6 +149,17 @@ if (!$quota_hit) {
             }
             if (isset($r['error']) && $r['error'] === 'QUOTA') { $quota_hit = true; break; }
         }
+        // ¿el teléfono del cliente vive en esta instalación recién escaneada?
+        $ph_vars = rt_phone_variants($username);
+        if ($ph_vars !== [] && array_intersect($ph_vars, $idx['folders'][$folder]['phones'] ?? []) !== []) {
+            if (rt_quota_left() <= 0) { $quota_hit = true; break; }
+            $r = rt_try_client_login($cfg, $username, $password_raw);
+            if (isset($r['row']) && $r['row']) {
+                rt_index_save($base_path, $idx);
+                rt_client_login_success($r['row'], $folder);
+            }
+            if (isset($r['error']) && $r['error'] === 'QUOTA') { $quota_hit = true; break; }
+        }
     }
 }
 
@@ -98,7 +170,7 @@ foreach ($configs as $folder => $cfg) {
     if (!isset($idx['folders'][$folder])) $pending++;
 }
 
-if ($quota_hit || ($pending > 0 && rt_index_lookup($idx, $username) === [])) {
+if ($quota_hit || ($pending > 0 && rt_index_lookup($idx, $username) === [] && rt_index_lookup_phone($idx, $username) === [])) {
     // No se pudo verificar contra todas las instalaciones en este request
     echo json_encode([
         'success' => false,
