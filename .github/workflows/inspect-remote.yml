@@ -26,6 +26,7 @@ jobs:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+          ADMIN_KEY: ${{ secrets.RENTCAR_ADMIN_KEY }}
           ACTION: ${{ github.event.inputs.action }}
         run: |
           set +x
@@ -48,8 +49,18 @@ jobs:
 
           elif [ "$ACTION" = "deploy-central" ]; then
             # Sube los scripts centrales refactorizados (lotes + índice de usuarios)
-            run_lftp "put scripts/central/rtcommon.php -o /RENTCAR/rtcommon.php; put scripts/central/login.php -o /RENTCAR/login.php; put scripts/central/update.php -o /RENTCAR/update.php; put scripts/central/indexer.php -o /RENTCAR/indexer.php"
+            if [ -z "$ADMIN_KEY" ]; then echo "RENTCAR_ADMIN_KEY secret missing"; exit 1; fi
+            printf '%s' "$ADMIN_KEY" > /tmp/central_admin_key.txt
+            run_lftp "put scripts/central/rtcommon.php -o /RENTCAR/rtcommon.php; put scripts/central/login.php -o /RENTCAR/login.php; put scripts/central/update.php -o /RENTCAR/update.php; put scripts/central/indexer.php -o /RENTCAR/indexer.php; mkdir -p /RENTCAR/logs; put /tmp/central_admin_key.txt -o /RENTCAR/logs/central_admin_key.txt"
+            rm -f /tmp/central_admin_key.txt
             echo "Deployed central scripts"
+            # Verificar que los endpoints admin fallan cerrado sin clave
+            code_upd=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "https://assanpos.com/RENTCAR/update.php")
+            code_idx=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "https://assanpos.com/RENTCAR/indexer.php")
+            echo "no-key http codes: update=$code_upd indexer=$code_idx" | tee out/central-authcheck.txt
+            # Selftest de la ruta índice→conexión→consulta de login (muestra de 10)
+            curl -s -m 120 "https://assanpos.com/RENTCAR/indexer.php?k=${ADMIN_KEY}&selftest=10" > out/central-selftest.txt || true
+            cat out/central-selftest.txt
             run_lftp "cls -la /RENTCAR/*.php" > out/central-php-listing.txt || true
             cat out/central-php-listing.txt
 
@@ -58,7 +69,7 @@ jobs:
             : > out/index_build.txt
             for i in $(seq 1 30); do
               echo "== round $i ==" | tee -a out/index_build.txt
-              curl -s -m 120 "https://assanpos.com/RENTCAR/indexer.php" | tee -a out/index_build.txt
+              curl -s -m 120 "https://assanpos.com/RENTCAR/indexer.php?k=${ADMIN_KEY}" | tee -a out/index_build.txt
               if grep -q "PENDIENTES=0" out/index_build.txt; then echo "INDEX COMPLETE"; break; fi
               sleep 10
             done
@@ -68,7 +79,7 @@ jobs:
             : > out/update_run.txt
             for i in $(seq 1 30); do
               echo "== round $i ==" | tee -a out/update_run.txt
-              curl -s -m 240 "https://assanpos.com/RENTCAR/update.php" | tee -a out/update_run.txt
+              curl -s -m 240 "https://assanpos.com/RENTCAR/update.php?k=${ADMIN_KEY}" | tee -a out/update_run.txt
               if grep -q "PENDIENTES=0" out/update_run.txt; then echo "UPDATE COMPLETE"; break; fi
               sleep 10
             done

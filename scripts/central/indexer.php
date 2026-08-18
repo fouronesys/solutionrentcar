@@ -10,7 +10,43 @@ header('Content-Type: text/plain; charset=utf-8');
 require __DIR__ . '/rtcommon.php';
 
 $base_path = __DIR__;
+rt_require_admin_key($base_path);
 $idx = rt_index_load($base_path);
+
+/*
+| ?selftest=N → valida la ruta índice→conexión→consulta de login en una
+| muestra de N instalaciones indexadas con usuarios (sin credenciales reales).
+*/
+if (isset($_GET['selftest'])) {
+    $n = max(1, min(15, (int)$_GET['selftest']));
+    $configs = [];
+    foreach (rt_folders($base_path) as $carpeta) {
+        $cfg = rt_read_config($carpeta);
+        if ($cfg !== null) $configs[$cfg['folder']] = $cfg;
+    }
+    $candidates = [];
+    foreach ($idx['folders'] as $folder => $data) {
+        if (!empty($data['users']) && isset($configs[$folder])) $candidates[] = $folder;
+    }
+    shuffle($candidates);
+    $ok = 0; $fail = 0;
+    foreach (array_slice($candidates, 0, $n) as $folder) {
+        $cfg = $configs[$folder];
+        $email = $idx['folders'][$folder]['users'][0];
+        $c = rt_connect($cfg, 'utf8');
+        if (isset($c['error'])) { echo "$folder|" . $c['error'] . "\n"; $fail++; continue; }
+        try {
+            $st = $c['pdo']->prepare("SELECT id FROM user WHERE email = :u AND password = :p LIMIT 1");
+            $st->execute(['u' => $email, 'p' => 'selftest-invalid']);
+            $st->fetch();
+            echo "$folder|LOGIN_PATH_OK\n"; $ok++;
+        } catch (Exception $e) {
+            echo "$folder|QUERY_ERROR\n"; $fail++;
+        } finally { $c['pdo'] = null; }
+    }
+    echo "\nSELFTEST_OK=$ok SELFTEST_FAIL=$fail INDEXED=" . count($candidates) . "\n";
+    exit;
+}
 
 if (isset($_GET['rescan'])) {
     $idx = ['folders' => []];

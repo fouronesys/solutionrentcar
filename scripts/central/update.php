@@ -10,6 +10,8 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require __DIR__ . '/rtcommon.php';
 
+rt_require_admin_key(__DIR__);
+
 $base_path = __DIR__ . '/';
 
 $progress_file = __DIR__ . '/logs/central_update_progress.json';

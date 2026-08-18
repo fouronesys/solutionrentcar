@@ -10,6 +10,22 @@
 
 define('RT_MAX_CONN_PER_REQUEST', 15); // margen bajo el límite (~20)
 
+/*
+| Protección de endpoints administrativos: exige ?k=<clave> igual al contenido
+| de logs/central_admin_key.txt (carpeta denegada por .htaccess). Falla cerrado:
+| sin archivo de clave o sin parámetro válido → 403 y exit.
+*/
+function rt_require_admin_key($base_path) {
+    $key_file = $base_path . '/logs/central_admin_key.txt';
+    $stored = file_exists($key_file) ? trim((string)file_get_contents($key_file)) : '';
+    $given = isset($_GET['k']) ? (string)$_GET['k'] : '';
+    if ($stored === '' || $given === '' || !hash_equals($stored, $given)) {
+        http_response_code(403);
+        echo "Forbidden";
+        exit;
+    }
+}
+
 function rt_folders($base_path) {
     $excluidas = ['CLIENTES', 'CF-SYSTEMS', 'logs', 'PWA'];
     $dirs = array_filter(glob($base_path . '/*'), function ($dir) use ($excluidas) {

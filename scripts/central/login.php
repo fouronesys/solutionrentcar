@@ -39,6 +39,7 @@ function rt_try_login($cfg, $username, $password) {
 }
 
 function rt_login_success($row, $folder) {
+    session_regenerate_id(true); // evitar fijación de sesión
     $_SESSION['user_id'] = $row['id'];
     $_SESSION['stock_id'] = $row['stock_id'];
     echo json_encode([
