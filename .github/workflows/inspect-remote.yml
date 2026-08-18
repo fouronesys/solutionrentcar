@@ -49,44 +49,77 @@ jobs:
             echo "Deleted rtdiag.php"
 
           elif [ "$ACTION" = "fetch-lkrentacar" ]; then
-            # Download LK-RENTACAR Database.php and show credentials (password masked)
-            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php" || { echo "FTP get FAILED"; exit 1; }
-            echo "=== LK-RENTACAR Database.php ==="
+            # Strict FTP download — no || true so failures propagate
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php; bye" \
+              2>&1 && echo "FTP get OK" || { echo "FTP get FAILED"; exit 1; }
+            [ -s /tmp/lkrentacar_db.php ] || { echo "Downloaded file is empty"; exit 1; }
+            echo "=== LK-RENTACAR Database.php (non-credential lines) ==="
             grep -E '\$this->(host|user|ddbb)\s*=' /tmp/lkrentacar_db.php || true
-            # Show masked password to confirm a value is set (not empty)
-            pass_line=$(grep -E '\$this->pass\s*=' /tmp/lkrentacar_db.php || true)
-            if [ -n "$pass_line" ]; then
-              masked=$(echo "$pass_line" | sed "s/'\([^']*\)'/'\*\*\*\*\*'/g")
-              echo "$masked"
-              raw_pass=$(echo "$pass_line" | sed "s/.*'\(.*\)'.*/\1/")
-              pass_len=${#raw_pass}
-              echo "password length: $pass_len"
-            else
-              echo "WARNING: no \$this->pass line found"
-            fi
+            # Show masked password and length (both quote styles)
+            python3 << 'PYEOF'
+import re, sys
+content = open('/tmp/lkrentacar_db.php').read()
+m = re.search(r"""\$this->pass\s*=\s*(['"])(.*?)\1""", content)
+if not m:
+    print("WARNING: no $this->pass assignment found", file=sys.stderr)
+    sys.exit(1)
+q, pw = m.group(1), m.group(2)
+print(f"quote style: {q!r}")
+print(f"password length: {len(pw)}")
+print(f"$this->pass = {q}{'*' * len(pw)}{q};")
+PYEOF
 
           elif [ "$ACTION" = "patch-lkrentacar" ]; then
             # Patch the Database.php password for LK-RENTACAR using LKRENTACAR_DB_PASSWORD secret
             if [ -z "$LKRENTACAR_DB_PASSWORD" ]; then echo "ERROR: LKRENTACAR_DB_PASSWORD secret is not set in GitHub"; exit 1; fi
-            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php" || { echo "FTP get FAILED"; exit 1; }
-            echo "Downloaded Database.php — patching password..."
+            # Strict FTP download
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php; bye" \
+              2>&1 && echo "FTP get OK" || { echo "FTP get FAILED"; exit 1; }
+            [ -s /tmp/lkrentacar_db.php ] || { echo "Downloaded file is empty"; exit 1; }
+            echo "Patching password..."
             python3 << 'PYEOF'
-import re, os
+import re, os, sys
 content = open('/tmp/lkrentacar_db.php').read()
 new_pass = os.environ['LKRENTACAR_DB_PASSWORD']
-patched = re.sub(r"(\$this->pass\s*=\s*')[^']*'", lambda m: m.group(1) + new_pass + "'", content)
-if patched == content:
-    print("WARNING: pattern not found or password already matches — file unchanged")
-else:
-    open('/tmp/lkrentacar_db.php', 'w').write(patched)
-    print("Password line patched OK")
+
+# PHP-escape for a single-quoted string literal: escape \ and '
+php_escaped = new_pass.replace('\\', '\\\\').replace("'", "\\'")
+
+# Match $this->pass = '...' or $this->pass = "..." (both quote styles)
+pattern = r"""(\$this->pass\s*=\s*)(['"])[^'"]*\2"""
+replacement = r"\g<1>'" + php_escaped + "'"
+
+patched, count = re.subn(pattern, replacement, content)
+if count == 0:
+    print("ERROR: no \\$this->pass assignment found in Database.php", file=sys.stderr)
+    sys.exit(1)
+if count > 1:
+    print(f"ERROR: {count} \\$this->pass assignments found (expected exactly 1)", file=sys.stderr)
+    sys.exit(1)
+open('/tmp/lkrentacar_db.php', 'w').write(patched)
+print(f"Patched 1 assignment → single-quoted form, escaped length {len(php_escaped)}")
 PYEOF
-            run_lftp "put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTACAR/core/controller/Database.php" || { echo "FTP put FAILED"; exit 1; }
-            echo "Re-uploaded Database.php"
-            # Verify: run diag for LK-RENTACAR specifically
+            # PHP syntax check on the patched file
+            php -l /tmp/lkrentacar_db.php || { echo "PHP syntax error in patched file — aborting upload"; exit 1; }
+            local_size=$(stat -c%s /tmp/lkrentacar_db.php)
+            echo "Uploading patched file (${local_size} bytes)..."
+            # Strict FTP upload
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTACAR/core/controller/Database.php; bye" \
+              2>&1 && echo "FTP put OK" || { echo "FTP put FAILED"; exit 1; }
+            # Verify upload size
+            remote_size=$(lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; cls -la /RENTCAR/LK-RENTACAR/core/controller/Database.php; bye" \
+              2>/dev/null | awk '{print $5}' | head -1 || echo "unknown")
+            echo "local_size=${local_size} remote_size=${remote_size}"
+            [ "$remote_size" = "$local_size" ] || { echo "SIZE MISMATCH after upload (remote=${remote_size} local=${local_size}) — re-run to retry"; exit 1; }
+            # Verify connectivity via rtdiag
             run_lftp "put scripts/rtdiag.php -o /RENTCAR/rtdiag.php"
             sleep 3
-            curl -s -m 60 "https://assanpos.com/RENTCAR/rtdiag.php?order=rev&host=socket" | grep -i "lk-rentacar\|LK-RENTACAR" > out/lkrentacar_diag.txt || true
+            curl -s -m 60 "https://assanpos.com/RENTCAR/rtdiag.php?host=socket" \
+              | grep -i "lk-rentacar\|LK-RENTACAR" > out/lkrentacar_diag.txt || true
             cat out/lkrentacar_diag.txt
             run_lftp "rm /RENTCAR/rtdiag.php"
             if grep -qi "SOCKET:OK" out/lkrentacar_diag.txt; then
