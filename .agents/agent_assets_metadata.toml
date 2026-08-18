@@ -181,8 +181,8 @@ description = "Texto completo, sin cortes en los bordes"
 id = "HQEvTMZihY2QRrkvLZAnD"
 uri = "file://store-assets/screenshots-tiendas.zip"
 type = "unspecified"
-title = "Screenshots para tiendas"
-description = "5 capturas para App Store (1290×2796) y 5 para Google Play (1080×1920), en español y máxima calidad."
+title = "Screenshots de tiendas (sin barra negra)"
+description = "10 capturas recapturadas: 5 Google Play (1080×1920) y 5 App Store (1290×2796), ahora sin la barra negra inferior."
 
 [[outputs]]
 id = "Amc-KzSOY-sP8zBEli2g0"
