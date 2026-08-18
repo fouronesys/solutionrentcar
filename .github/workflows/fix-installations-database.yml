@@ -1,0 +1,138 @@
+name: Fix Database.php localhost → host real (instalaciones)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-installations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        timeout-minutes: 5
+        run: |
+          sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Descubrir instalaciones y parchear Database.php
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set +x
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          REAL_HOST="195.35.61.45"
+          B=/RENTCAR
+
+          run_lftp() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" \
+              -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; $1; bye" 2>&1 || true
+          }
+
+          mkdir -p out/patched out/original
+
+          # Listar carpetas de primer nivel en /RENTCAR/
+          echo "=== Listando $B/ ==="
+          run_lftp "cls -la $B/" > out/root-listing.txt
+          cat out/root-listing.txt
+
+          # Extraer nombres de subdirectorios (igual que inspect-remote.yml)
+          dirs=$(awk '/\/$/{print $NF}' out/root-listing.txt \
+            | awk -F/ '{print $(NF-1)}' \
+            | grep -Ev '^\.|^core$|^css$|^img$|^lib$' || true)
+
+          echo "Directorios detectados: $dirs"
+
+          PATCHED=""
+          SKIPPED=""
+          FAILED=""
+
+          for d in $dirs; do
+            # Excluir instalaciones que ya tienen el host correcto o que no son instalaciones normales
+            if echo "$d" | grep -qiE '^(CASARIVAS-RENTCAR|CF-SYSTEMS)$'; then
+              echo "⏭️  Omitiendo $d (excluido)"
+              SKIPPED="$SKIPPED $d"
+              continue
+            fi
+
+            DB_PATH="$B/$d/core/controller/Database.php"
+            LOCAL_ORIG="out/original/db_${d}.php"
+            LOCAL_PATCHED="out/patched/db_${d}.php"
+
+            echo ""
+            echo "--- Procesando: $d ---"
+
+            # Descargar Database.php
+            run_lftp "get $DB_PATH -o $LOCAL_ORIG"
+
+            if [ ! -f "$LOCAL_ORIG" ] || [ ! -s "$LOCAL_ORIG" ]; then
+              echo "⚠️  $d: Database.php no encontrado o vacío — omitiendo"
+              FAILED="$FAILED $d"
+              continue
+            fi
+
+            # Verificar si ya tiene el host correcto
+            if grep -q "$REAL_HOST" "$LOCAL_ORIG"; then
+              echo "✅ $d: ya tiene $REAL_HOST — sin cambios"
+              SKIPPED="$SKIPPED $d"
+              continue
+            fi
+
+            # Verificar si tiene localhost que necesita parche
+            if ! grep -q 'localhost' "$LOCAL_ORIG"; then
+              echo "ℹ️  $d: no contiene 'localhost' en Database.php — omitiendo"
+              SKIPPED="$SKIPPED $d"
+              continue
+            fi
+
+            # Aplicar parche: reemplazar solo la asignación de $this->host
+            sed "s/\(\\\$this->host\s*=\s*\)['\"]localhost['\"]/\1'${REAL_HOST}'/" \
+              "$LOCAL_ORIG" > "$LOCAL_PATCHED"
+
+            # Verificar que el parche se aplicó
+            if grep -q "$REAL_HOST" "$LOCAL_PATCHED"; then
+              echo "✏️  $d: parche aplicado correctamente"
+            else
+              echo "❌ $d: el parche NO se aplicó — revisar Database.php"
+              FAILED="$FAILED $d"
+              cp "$LOCAL_ORIG" "$LOCAL_PATCHED"
+              continue
+            fi
+
+            # Subir archivo parcheado
+            run_lftp "put $LOCAL_PATCHED -o $DB_PATH"
+            echo "⬆️  $d: Database.php subido"
+            PATCHED="$PATCHED $d"
+          done
+
+          echo ""
+          echo "========================================="
+          echo "RESUMEN"
+          echo "========================================="
+          echo "✅ Parcheados:$(echo $PATCHED | tr ' ' '\n' | grep -v '^$' | sed 's/^/  /')"
+          echo "⏭️  Omitidos: $(echo $SKIPPED | tr ' ' '\n' | grep -v '^$' | sed 's/^/  /')"
+          echo "❌ Fallidos: $(echo $FAILED  | tr ' ' '\n' | grep -v '^$' | sed 's/^/  /')"
+
+          # Redactar contraseñas antes de publicar
+          for f in out/original/*.php out/patched/*.php out/*.txt; do
+            [ -f "$f" ] && sed -i -E \
+              "s/(pass[a-zA-Z_]*['\"]?\s*(=|=>)\s*)['\"][^'\"]*['\"]/\1'REDACTED'/gI" "$f"
+          done
+
+      - name: Publicar resultados en rama fix-db-output (auditoría)
+        run: |
+          git config user.name "fix-db-bot"
+          git config user.email "fix-db@localhost"
+          git checkout --orphan fix-db-output
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          mkdir -p /tmp/keep && cp -r out /tmp/keep/
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/keep/out .
+          git add out
+          git commit -m "Database.php localhost patch — instalaciones individuales"
+          git push -f origin fix-db-output
