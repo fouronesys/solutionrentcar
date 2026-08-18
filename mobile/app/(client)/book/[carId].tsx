@@ -297,7 +297,7 @@ export default function BookScreen() {
           <Text style={styles.headerSub}>
             {locale === "en"
               ? "Your next move."
-              : "Ya casi tamo'."}
+              : "Ya casi terminamos."}
           </Text>
         </View>
       </View>

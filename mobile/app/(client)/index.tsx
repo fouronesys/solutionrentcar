@@ -160,7 +160,7 @@ export default function HomeScreen() {
         {/* Greeting */}
         <View style={styles.greetingBlock}>
           <Text style={styles.eyebrow}>
-            {locale === "en" ? "WELCOME" : "KLK"}
+            {locale === "en" ? "WELCOME" : "BIENVENIDO"}
             {firstName ? ` · ${firstName.toUpperCase()}` : ""}
           </Text>
           <Text style={styles.heading}>

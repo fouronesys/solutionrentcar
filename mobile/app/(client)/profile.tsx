@@ -209,7 +209,7 @@ export default function ProfileScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.greet}>
-                {locale === "en" ? "WELCOME BACK!" : "¡KLK DE NUEVO!"}
+                {locale === "en" ? "WELCOME BACK!" : "¡BIENVENIDO DE NUEVO!"}
               </Text>
               <Text style={styles.userName} numberOfLines={1}>
                 {user?.name} {user?.lastname ?? ""}
@@ -286,7 +286,7 @@ export default function ProfileScreen() {
             {
               icon: "help-circle-outline" as const,
               label: locale === "en" ? "Help & support" : "Ayuda y soporte",
-              sub: locale === "en" ? "We're here 24/7" : "Aquí pa' ti 24/7",
+              sub: locale === "en" ? "We're here 24/7" : "Disponibles para ti 24/7",
               onPress: () => Linking.openURL("mailto:hola@casarivasrentcar.com"),
             },
           ].map((item, idx) => (
