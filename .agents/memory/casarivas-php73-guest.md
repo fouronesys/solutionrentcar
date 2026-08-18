@@ -15,3 +15,6 @@ El hosting debe quedarse en PHP 7.3 (decisión del usuario). Todo `core/` y `CF-
 
 ## BD y credenciales
 `core/controller/Database.php` ya no tiene credenciales hardcodeadas: carga `core/db.local.php` (generado por el deploy desde secrets DB_*) o env vars DB_*. La contraseña vieja de Yowell (`u144787244_solutionsrent`) quedó expuesta en el historial de git — se recomendó rotarla.
+- Imágenes de autos: `CF-SYSTEMS/storage/` está excluido del mirror principal (con --delete); para subir archivos al storage se usa el segundo mirror de `deploy_assets/car_images/` → `/CF-SYSTEMS/storage/invoice_files/` (sin --delete). FTP directo desde Replit no es posible (puerto 21 bloqueado).
+- La API construye URLs de imagen derivando el prefijo de subdirectorio desde SCRIPT_NAME (el sistema vive bajo /RENTCAR/CASARIVAS-RENTCAR); si se muda de carpeta no hay que tocar nada.
+- El paso "Install lftp" del deploy se cuelga a veces por apt-get update; quedó con timeout de 5 min e instalación sin update primero. "mirror: max-retries exceeded" sin líneas de transferencia = no conectó; reintentar suele bastar.
