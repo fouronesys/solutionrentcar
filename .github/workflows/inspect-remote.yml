@@ -50,17 +50,30 @@ jobs:
           elif [ "$ACTION" = "deploy-central" ]; then
             # Sube los scripts centrales refactorizados (lotes + índice de usuarios)
             if [ -z "$ADMIN_KEY" ]; then echo "RENTCAR_ADMIN_KEY secret missing"; exit 1; fi
-            printf '%s' "$ADMIN_KEY" > /tmp/central_admin_key.txt
-            run_lftp "put scripts/central/rtcommon.php -o /RENTCAR/rtcommon.php; put scripts/central/login.php -o /RENTCAR/login.php; put scripts/central/update.php -o /RENTCAR/update.php; put scripts/central/indexer.php -o /RENTCAR/indexer.php; mkdir -p /RENTCAR/logs; put /tmp/central_admin_key.txt -o /RENTCAR/logs/central_admin_key.txt"
-            rm -f /tmp/central_admin_key.txt
-            echo "Deployed central scripts"
-            # Verificar que los endpoints admin fallan cerrado sin clave
+            # En el servidor solo se guarda el hash SHA-256 de la clave (inútil si se filtra)
+            printf '%s' "$ADMIN_KEY" | sha256sum | cut -d' ' -f1 > /tmp/central_admin_key.hash
+            deploy_out=$(run_lftp "put scripts/central/rtcommon.php -o /RENTCAR/rtcommon.php; put scripts/central/login.php -o /RENTCAR/login.php; put scripts/central/update.php -o /RENTCAR/update.php; put scripts/central/indexer.php -o /RENTCAR/indexer.php; mkdir -p /RENTCAR/logs; put /tmp/central_admin_key.hash -o /RENTCAR/logs/central_admin_key.hash")
+            rm -f /tmp/central_admin_key.hash
+            # Retirar la clave en texto plano de despliegues anteriores (si existe)
+            run_lftp "rm /RENTCAR/logs/central_admin_key.txt" >/dev/null || true
+            echo "$deploy_out"
+            if echo "$deploy_out" | grep -qi "error"; then echo "DEPLOY FAILED (FTP error)"; exit 1; fi
+            # Verificar tamaños de lo subido contra lo local
+            run_lftp "cls -la /RENTCAR/rtcommon.php /RENTCAR/login.php /RENTCAR/update.php /RENTCAR/indexer.php /RENTCAR/logs/central_admin_key.hash" > out/central-php-listing.txt
+            cat out/central-php-listing.txt
+            for f in rtcommon login update indexer; do
+              local_size=$(stat -c%s scripts/central/$f.php)
+              grep -q " $local_size .*$f\.php" out/central-php-listing.txt || { echo "VERIFY FAILED: $f.php size mismatch"; exit 1; }
+            done
+            # Los endpoints admin deben fallar cerrado sin clave
             code_upd=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "https://assanpos.com/RENTCAR/update.php")
             code_idx=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "https://assanpos.com/RENTCAR/indexer.php")
             echo "no-key http codes: update=$code_upd indexer=$code_idx" | tee out/central-authcheck.txt
+            [ "$code_upd" = "403" ] && [ "$code_idx" = "403" ] || { echo "AUTH CHECK FAILED"; exit 1; }
             # Selftest de la ruta índice→conexión→consulta de login (muestra de 10)
-            curl -s -m 120 "https://assanpos.com/RENTCAR/indexer.php?k=${ADMIN_KEY}&selftest=10" > out/central-selftest.txt || true
+            curl -s -m 120 -H "X-Admin-Key: ${ADMIN_KEY}" "https://assanpos.com/RENTCAR/indexer.php?selftest=10" > out/central-selftest.txt || true
             cat out/central-selftest.txt
+            grep -q "SELFTEST_FAIL=0" out/central-selftest.txt || { echo "SELFTEST FAILED"; exit 1; }
             run_lftp "cls -la /RENTCAR/*.php" > out/central-php-listing.txt || true
             cat out/central-php-listing.txt
 
@@ -69,7 +82,7 @@ jobs:
             : > out/index_build.txt
             for i in $(seq 1 30); do
               echo "== round $i ==" | tee -a out/index_build.txt
-              curl -s -m 120 "https://assanpos.com/RENTCAR/indexer.php?k=${ADMIN_KEY}" | tee -a out/index_build.txt
+              curl -s -m 120 -H "X-Admin-Key: ${ADMIN_KEY}" "https://assanpos.com/RENTCAR/indexer.php" | tee -a out/index_build.txt
               if grep -q "PENDIENTES=0" out/index_build.txt; then echo "INDEX COMPLETE"; break; fi
               sleep 10
             done
@@ -79,7 +92,7 @@ jobs:
             : > out/update_run.txt
             for i in $(seq 1 30); do
               echo "== round $i ==" | tee -a out/update_run.txt
-              curl -s -m 240 "https://assanpos.com/RENTCAR/update.php?k=${ADMIN_KEY}" | tee -a out/update_run.txt
+              curl -s -m 240 -H "X-Admin-Key: ${ADMIN_KEY}" "https://assanpos.com/RENTCAR/update.php" | tee -a out/update_run.txt
               if grep -q "PENDIENTES=0" out/update_run.txt; then echo "UPDATE COMPLETE"; break; fi
               sleep 10
             done

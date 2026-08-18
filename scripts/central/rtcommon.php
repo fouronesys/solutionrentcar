@@ -11,15 +11,17 @@
 define('RT_MAX_CONN_PER_REQUEST', 15); // margen bajo el límite (~20)
 
 /*
-| Protección de endpoints administrativos: exige ?k=<clave> igual al contenido
-| de logs/central_admin_key.txt (carpeta denegada por .htaccess). Falla cerrado:
-| sin archivo de clave o sin parámetro válido → 403 y exit.
+| Protección de endpoints administrativos. La clave se envía por header
+| X-Admin-Key (nunca por query string, para no quedar en access logs).
+| En el servidor solo se guarda su hash SHA-256 (logs/central_admin_key.hash),
+| inútil si el archivo llegara a ser leído. Falla cerrado: sin archivo de hash
+| o sin header válido → 403 y exit.
 */
 function rt_require_admin_key($base_path) {
-    $key_file = $base_path . '/logs/central_admin_key.txt';
-    $stored = file_exists($key_file) ? trim((string)file_get_contents($key_file)) : '';
-    $given = isset($_GET['k']) ? (string)$_GET['k'] : '';
-    if ($stored === '' || $given === '' || !hash_equals($stored, $given)) {
+    $hash_file = $base_path . '/logs/central_admin_key.hash';
+    $stored = file_exists($hash_file) ? trim((string)file_get_contents($hash_file)) : '';
+    $given = isset($_SERVER['HTTP_X_ADMIN_KEY']) ? (string)$_SERVER['HTTP_X_ADMIN_KEY'] : '';
+    if ($stored === '' || $given === '' || !hash_equals($stored, hash('sha256', $given))) {
         http_response_code(403);
         echo "Forbidden";
         exit;
