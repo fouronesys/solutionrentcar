@@ -30,20 +30,19 @@ jobs:
           run_lftp() {
             lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; $1; bye" 2>&1 || true
           }
-          run_lftp "cls -la /" > out/root-listing.txt
+          B=/RENTCAR
+          run_lftp "cls -la $B/" > out/root-listing.txt
           cat out/root-listing.txt
-          # Central login files
-          for f in index.php default.php login.php core/autoload.php; do
-            run_lftp "get /$f -o out/central_$(echo $f | tr '/' '_')" || true
+          # Central login files of the RENTCAR multi-tenant login
+          for f in index.php default.php login.php socket.php core/autoload.php core/controller/Lb.php core/controller/Database.php; do
+            run_lftp "get $B/$f -o out/central_$(echo $f | tr '/' '_')" || true
           done
-          run_lftp "cls -la /core/" > out/central-core-listing.txt || true
-          run_lftp "cls -laR /core/" >> out/central-core-listing.txt || true
-          # Each sibling installation: grab Database.php (redacted later)
-          dirs=$(awk '/\/$/{print $NF}' out/root-listing.txt | tr -d '/' | grep -v '^\.' || true)
+          run_lftp "cls -laR $B/core/" > out/central-core-listing.txt || true
+          # Each rentcar installation: grab Database.php (redacted later)
+          dirs=$(awk '/\/$/{print $NF}' out/root-listing.txt | awk -F/ '{print $(NF-1)}' | grep -Ev '^\.|^core$|^css$|^img$|^lib$' || true)
           echo "DIRS: $dirs"
           for d in $dirs; do
-            run_lftp "get /$d/core/controller/Database.php -o out/db_${d}.php" || true
-            run_lftp "cls -la /$d/core/" > "out/core_${d}.txt" || true
+            run_lftp "get $B/$d/core/controller/Database.php -o out/db_${d}.php" || true
           done
           # Redact any password-looking assignments before publishing
           for f in out/*.php out/*.txt; do
