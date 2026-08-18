@@ -18,30 +18,36 @@ jobs:
         run: |
           sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
 
-      - name: Inspect FTP root and central login
+      - name: Inspect RENTCAR root and sibling installs
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
         run: |
           set +x
           export LFTP_PASSWORD="$FTP_PASSWORD"
           mkdir -p out
-          lftp -u "$FTP_USER" --env-password "$FTP_HOST" <<'LFTP_EOF' > out/listing.txt 2>&1 || true
-            set ssl:verify-certificate no
-            set ftp:ssl-allow no
-            set net:max-retries 2
-            set net:timeout 20
-            cls -la /
-            cls -la /RENTCAR/ || echo "NO /RENTCAR"
-            cls -la /public_html/ || echo "NO /public_html"
-            bye
-          LFTP_EOF
-          cat out/listing.txt
-          # Try to fetch central login candidates from likely roots
-          for f in /index.php /RENTCAR/index.php /public_html/RENTCAR/index.php; do
-            name=$(echo "$f" | tr '/' '_')
-            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; get $f -o out/central$name; bye" || true
+          run_lftp() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; $1; bye" 2>&1 || true
+          }
+          run_lftp "cls -la /" > out/root-listing.txt
+          cat out/root-listing.txt
+          # Central login files
+          for f in index.php default.php login.php core/autoload.php; do
+            run_lftp "get /$f -o out/central_$(echo $f | tr '/' '_')" || true
+          done
+          run_lftp "cls -la /core/" > out/central-core-listing.txt || true
+          run_lftp "cls -laR /core/" >> out/central-core-listing.txt || true
+          # Each sibling installation: grab Database.php (redacted later)
+          dirs=$(awk '/\/$/{print $NF}' out/root-listing.txt | tr -d '/' | grep -v '^\.' || true)
+          echo "DIRS: $dirs"
+          for d in $dirs; do
+            run_lftp "get /$d/core/controller/Database.php -o out/db_${d}.php" || true
+            run_lftp "cls -la /$d/core/" > "out/core_${d}.txt" || true
+          done
+          # Redact any password-looking assignments before publishing
+          for f in out/*.php out/*.txt; do
+            [ -f "$f" ] && sed -i -E "s/(pass[a-zA-Z_]*['\"]?\s*(=|=>)\s*)['\"][^'\"]*['\"]/\1'REDACTED'/gI" "$f"
           done
           ls -la out/
 
