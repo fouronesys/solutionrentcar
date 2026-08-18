@@ -1,4 +1,4 @@
-name: Fix RENTCAR localhost patch (127.0.0.1)
+name: Fix RENTCAR localhost patch (dual-host fallback)
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
       - name: Install lftp
         run: sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
 
-      - name: Download current login.php and update.php from server
+      - name: Download current files from server
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
@@ -34,25 +34,105 @@ jobs:
             get /RENTCAR/update.php -o out/update.php
             bye
           "
-          echo "=== before patch ==="
-          grep -n "195.35\|127.0.0\|localhost\|PATCH" out/login.php out/update.php || true
 
-      - name: Patch 195.35.61.45 → 127.0.0.1
+      - name: Apply dual-host fallback (precise string replacement)
         run: |
           python3 << 'PYEOF'
-          for path in ['out/login.php', 'out/update.php']:
+          # ---------------------------------------------------------------
+          # update.php: replace the new PDO(...) call with a fallback loop
+          # ---------------------------------------------------------------
+          OLD_UPDATE = '''    try {
+
+        $pdo = new PDO(
+            "mysql:host={$info['host']};dbname={$info['db']};charset=utf8mb4",
+            $info['user'],
+            $info['pass'],
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );'''
+
+          NEW_UPDATE = '''    try {
+
+        // RENTCAR_HOST_PATCH: intenta 127.0.0.1, si da 2002 reintenta con 195.35.61.45
+        $_rtry_hosts = ($info['host'] === 'localhost' || $info['host'] === '127.0.0.1')
+            ? ['127.0.0.1', '195.35.61.45'] : [$info['host']];
+        $pdo = null; $_rtry_last = null;
+        foreach ($_rtry_hosts as $_rtry_h) {
+            try {
+                $pdo = new PDO(
+                    "mysql:host={$_rtry_h};dbname={$info['db']};charset=utf8mb4",
+                    $info['user'], $info['pass'],
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                );
+                break;
+            } catch (PDOException $_rtry_e) {
+                $_rtry_last = $_rtry_e;
+                if (strpos($_rtry_e->getMessage(), '2002') === false) throw $_rtry_e;
+            }
+        }
+        if ($pdo === null) throw $_rtry_last;'''
+
+          # ---------------------------------------------------------------
+          # login.php: replace the DSN + new PDO(...) block with fallback
+          # ---------------------------------------------------------------
+          OLD_LOGIN = '''        $dsn = "mysql:host=" . $db['host'] .
+               ";dbname=" . $db['dbname'] .
+               ";charset=utf8";
+
+        $pdo = new PDO(
+            $dsn,
+            $db['user'],
+            $db['password'],
+            array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            )
+        );'''
+
+          NEW_LOGIN = '''        // RENTCAR_HOST_PATCH: intenta 127.0.0.1, si da 2002 reintenta con 195.35.61.45
+        $_rtry_login_hosts = ($db['host'] === 'localhost' || $db['host'] === '127.0.0.1')
+            ? ['127.0.0.1', '195.35.61.45'] : [$db['host']];
+        $pdo = null; $_rtry_login_last = null;
+        foreach ($_rtry_login_hosts as $_rtry_login_h) {
+            try {
+                $pdo = new PDO(
+                    "mysql:host={$_rtry_login_h};dbname={$db['dbname']};charset=utf8",
+                    $db['user'], $db['password'],
+                    array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                          PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC)
+                );
+                break;
+            } catch (PDOException $_rtry_login_e) {
+                $_rtry_login_last = $_rtry_login_e;
+                if (strpos($_rtry_login_e->getMessage(), '2002') === false) throw $_rtry_login_e;
+            }
+        }
+        if ($pdo === null) throw $_rtry_login_last;'''
+
+          changes = {
+              'out/update.php': (OLD_UPDATE, NEW_UPDATE),
+              'out/login.php':  (OLD_LOGIN,  NEW_LOGIN),
+          }
+
+          for path, (old, new) in changes.items():
               txt = open(path).read()
-              orig = txt
-              txt = txt.replace("$db['host'] = '195.35.61.45'", "$db['host'] = '127.0.0.1'")
-              txt = txt.replace("$db_host = '195.35.61.45'", "$db_host = '127.0.0.1'")
+              # Remove any existing RENTCAR_HOST_PATCH simple lines first
+              import re
+              txt = re.sub(r'[ \t]*//[ \t]*RENTCAR_HOST_PATCH[^\n]*\n', '', txt)
+              txt = re.sub(r'[ \t]*if \(\$db_host === .localhost.[^\n]+RENTCAR_HOST_PATCH[^\n]*\n', '', txt)
+              txt = re.sub(r'[ \t]*if \(\$db\[.host.\] === .localhost.[^\n]+\n', '', txt)
+              if old in txt:
+                  txt = txt.replace(old, new, 1)
+                  print(f"{path}: PATCHED (PDO block replaced)")
+              else:
+                  print(f"{path}: WARNING — old block not found verbatim; dumping context")
+                  idx = txt.find('new PDO(')
+                  print(repr(txt[max(0,idx-200):idx+400]))
               open(path, 'w').write(txt)
-              print(f"{path}: {'CHANGED' if txt != orig else 'UNCHANGED'}")
-              for line in txt.splitlines():
-                  if any(x in line for x in ['127.0.0.1', '195.35', 'PATCH', 'localhost']):
-                      print(f"  {line.strip()}")
           PYEOF
 
-      - name: Upload patched files to server
+      - name: Upload patched files
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
@@ -71,7 +151,7 @@ jobs:
           "
           echo "Upload complete"
 
-      - name: Publish patched files to branch for audit
+      - name: Publish to branch for audit
         run: |
           git config user.name "fix-bot"
           git config user.email "fix@localhost"
@@ -81,5 +161,5 @@ jobs:
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -r /tmp/keep/out .
           git add out
-          git commit -m "fix output: 195.35.61.45 → 127.0.0.1"
+          git commit -m "fix output: dual-host fallback preciso"
           git push -f origin fix-output
