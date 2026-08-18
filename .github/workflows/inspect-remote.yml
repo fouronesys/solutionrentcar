@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to run: inspect | diag-hosts | cleanup'
+        description: 'Action to run: inspect | diag-hosts | fetch-lkrentacar | patch-lkrentacar | deploy-central | build-index | run-update | cleanup'
         required: true
         default: 'inspect'
 
@@ -27,6 +27,7 @@ jobs:
           FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
           ADMIN_KEY: ${{ secrets.RENTCAR_ADMIN_KEY }}
+          LKRENTACAR_DB_PASSWORD: ${{ secrets.LKRENTACAR_DB_PASSWORD }}
           ACTION: ${{ github.event.inputs.action }}
         run: |
           set +x
@@ -46,6 +47,54 @@ jobs:
             cat out/diag_result_rev.txt
             run_lftp "rm /RENTCAR/rtdiag.php"
             echo "Deleted rtdiag.php"
+
+          elif [ "$ACTION" = "fetch-lkrentacar" ]; then
+            # Download LK-RENTACAR Database.php and show credentials (password masked)
+            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php" || { echo "FTP get FAILED"; exit 1; }
+            echo "=== LK-RENTACAR Database.php ==="
+            grep -E '\$this->(host|user|ddbb)\s*=' /tmp/lkrentacar_db.php || true
+            # Show masked password to confirm a value is set (not empty)
+            pass_line=$(grep -E '\$this->pass\s*=' /tmp/lkrentacar_db.php || true)
+            if [ -n "$pass_line" ]; then
+              masked=$(echo "$pass_line" | sed "s/'\([^']*\)'/'\*\*\*\*\*'/g")
+              echo "$masked"
+              raw_pass=$(echo "$pass_line" | sed "s/.*'\(.*\)'.*/\1/")
+              pass_len=${#raw_pass}
+              echo "password length: $pass_len"
+            else
+              echo "WARNING: no \$this->pass line found"
+            fi
+
+          elif [ "$ACTION" = "patch-lkrentacar" ]; then
+            # Patch the Database.php password for LK-RENTACAR using LKRENTACAR_DB_PASSWORD secret
+            if [ -z "$LKRENTACAR_DB_PASSWORD" ]; then echo "ERROR: LKRENTACAR_DB_PASSWORD secret is not set in GitHub"; exit 1; fi
+            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php" || { echo "FTP get FAILED"; exit 1; }
+            echo "Downloaded Database.php — patching password..."
+            python3 << 'PYEOF'
+import re, os
+content = open('/tmp/lkrentacar_db.php').read()
+new_pass = os.environ['LKRENTACAR_DB_PASSWORD']
+patched = re.sub(r"(\$this->pass\s*=\s*')[^']*'", lambda m: m.group(1) + new_pass + "'", content)
+if patched == content:
+    print("WARNING: pattern not found or password already matches — file unchanged")
+else:
+    open('/tmp/lkrentacar_db.php', 'w').write(patched)
+    print("Password line patched OK")
+PYEOF
+            run_lftp "put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTACAR/core/controller/Database.php" || { echo "FTP put FAILED"; exit 1; }
+            echo "Re-uploaded Database.php"
+            # Verify: run diag for LK-RENTACAR specifically
+            run_lftp "put scripts/rtdiag.php -o /RENTCAR/rtdiag.php"
+            sleep 3
+            curl -s -m 60 "https://assanpos.com/RENTCAR/rtdiag.php?order=rev&host=socket" | grep -i "lk-rentacar\|LK-RENTACAR" > out/lkrentacar_diag.txt || true
+            cat out/lkrentacar_diag.txt
+            run_lftp "rm /RENTCAR/rtdiag.php"
+            if grep -qi "SOCKET:OK" out/lkrentacar_diag.txt; then
+              echo "✅ LK-RENTACAR now connects OK"
+            else
+              echo "❌ LK-RENTACAR still failing — check credentials or hPanel MySQL user"
+              exit 1
+            fi
 
           elif [ "$ACTION" = "deploy-central" ]; then
             # Sube los scripts centrales refactorizados (lotes + índice de usuarios)
