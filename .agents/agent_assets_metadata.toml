@@ -197,3 +197,10 @@ uri = "file://store-assets/icon-appstore-1024.png"
 type = "image"
 title = "Icono App Store (1024×1024)"
 description = "Icono de la app en el tamaño requerido por App Store Connect."
+
+[[outputs]]
+id = "vp4JLr212_O4wlBIY22NW"
+uri = "file://store-assets/feature-graphic-1024x500.png"
+type = "image"
+title = "Gráfico de funciones Google Play (1024×500)"
+description = "Con el branding dorado de Casa Rivas, el Explorer de la flota y el mensaje principal de la app."
