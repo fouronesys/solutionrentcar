@@ -1,0 +1,132 @@
+name: Apply dual-host fallback to RENTCAR login and update
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install lftp
+        run: sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Write fixer PHP script locally
+        run: |
+          mkdir -p out
+          cat > /tmp/rtfix.php << 'PHPEOF'
+<?php
+$root = $_SERVER['DOCUMENT_ROOT'];
+$files = [
+    $root . '/RENTCAR/update.php' => [
+        'search' => '        $pdo = new PDO(
+            "mysql:host={$info[\'host\']};dbname={$info[\'db\']};charset=utf8mb4",
+            $info[\'user\'],
+            $info[\'pass\'],
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );',
+        'replace' => '        // RENTCAR_HOST_PATCH v2: dual-host fallback
+        $_rh=($info[\'host\']==="localhost"||$info[\'host\']==="127.0.0.1")?["127.0.0.1","195.35.61.45"]:[$info[\'host\']];
+        $pdo=null;$_re=null;foreach($_rh as $_rhi){try{$pdo=new PDO("mysql:host={$_rhi};dbname={$info[\'db\']};charset=utf8mb4",$info[\'user\'],$info[\'pass\'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);break;}catch(PDOException $e){$_re=$e;if(strpos($e->getMessage(),"2002")===false)throw $e;}}if($pdo===null)throw $_re;',
+    ],
+    $root . '/RENTCAR/login.php' => [
+        'search' => '        $dsn = "mysql:host=" . $db[\'host\'] .
+               ";dbname=" . $db[\'dbname\'] .
+               ";charset=utf8";
+
+        $pdo = new PDO(
+            $dsn,
+            $db[\'user\'],
+            $db[\'password\'],
+            array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            )
+        );',
+        'replace' => '        // RENTCAR_HOST_PATCH v2: dual-host fallback
+        $_lh=($db[\'host\']==="localhost"||$db[\'host\']==="127.0.0.1")?["127.0.0.1","195.35.61.45"]:[$db[\'host\']];
+        $pdo=null;$_le=null;foreach($_lh as $_lhi){try{$pdo=new PDO("mysql:host={$_lhi};dbname={$db[\'dbname\']};charset=utf8",$db[\'user\'],$db[\'password\'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);break;}catch(PDOException $e){$_le=$e;if(strpos($e->getMessage(),"2002")===false)throw $e;}}if($pdo===null)throw $_le;',
+    ],
+];
+$results = [];
+foreach ($files as $path => $op) {
+    if (!file_exists($path)) { $results[] = "NOT FOUND: $path"; continue; }
+    $txt = file_get_contents($path);
+    // Remove old simple patches
+    $txt = preg_replace('/[ \t]*\/\/ RENTCAR_HOST_PATCH[^\n]*\n/', '', $txt);
+    $txt = preg_replace('/[ \t]*if\s*\(\$db_host\s*===\s*[^\n]+RENTCAR_HOST_PATCH[^\n]*\n/', '', $txt);
+    $txt = preg_replace('/[ \t]*if\s*\(\$db\[.host.\]\s*===\s*[\'"]localhost[^\n]+\n/', '', $txt);
+    if (strpos($txt, $op['search']) !== false) {
+        $txt = str_replace($op['search'], $op['replace'], $txt);
+        if (file_put_contents($path, $txt) !== false) {
+            $results[] = "OK: $path";
+        } else {
+            $results[] = "WRITE_FAILED: $path";
+        }
+    } else {
+        $results[] = "SEARCH_NOT_FOUND: $path — snippet not in file";
+        // Dump existing PDO line context for diagnosis
+        $lines = explode("\n", $txt);
+        foreach ($lines as $i => $line) {
+            if (strpos($line, 'new PDO') !== false || strpos($line, 'RENTCAR_HOST') !== false) {
+                $results[] = "  L" . ($i+1) . ": " . trim($line);
+            }
+        }
+    }
+}
+echo implode("\n", $results) . "\n";
+PHPEOF
+          echo "PHP fixer script written"
+
+      - name: Upload fixer and run via HTTP, then delete
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set +x
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "
+            set ssl:verify-certificate no
+            set ftp:ssl-allow no
+            set net:max-retries 2
+            set net:timeout 30
+            put /tmp/rtfix.php -o /RENTCAR/rtfix.php
+            bye
+          "
+          echo "Uploaded rtfix.php"
+          sleep 3
+          curl -s -m 30 "https://assanpos.com/RENTCAR/rtfix.php" > out/fix_result.txt
+          echo "=== Fix result ==="
+          cat out/fix_result.txt
+          # Delete the fixer script
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "
+            set ssl:verify-certificate no
+            set ftp:ssl-allow no
+            rm /RENTCAR/rtfix.php
+            bye
+          " || echo "Warning: could not delete rtfix.php (manual cleanup needed)"
+          echo "Deleted rtfix.php"
+
+      - name: Verify fixer is gone
+        run: |
+          code=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "https://assanpos.com/RENTCAR/rtfix.php")
+          echo "rtfix.php status: $code (should be 404)"
+
+      - name: Publish results to branch
+        if: always()
+        run: |
+          git config user.name "fix-bot"
+          git config user.email "fix@localhost"
+          cd /tmp && git clone --depth 1 "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/fouronesys/solutionrentcar" repo-out
+          cd repo-out
+          git checkout --orphan fix-output 2>/dev/null || git checkout fix-output
+          git rm -rf . >/dev/null 2>&1 || true
+          mkdir -p out && cp /home/runner/work/solutionrentcar/solutionrentcar/out/* out/ 2>/dev/null || true
+          git add out
+          git commit -m "dual-host fix output" || true
+          git push -f origin fix-output
