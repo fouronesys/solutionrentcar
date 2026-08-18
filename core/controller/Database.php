@@ -11,12 +11,11 @@ class Database {
     public $port;
 
     public function __construct(){
-        // Sin credenciales en el código: se cargan desde core/db.local.php
-        // (generado por el deploy) o desde variables de entorno.
-        $this->host   = getenv('DB_HOST') ?: '';
-        $this->user   = getenv('DB_USER') ?: '';
-        $this->pass   = getenv('DB_PASSWORD') ?: '';
-        $this->ddbb   = getenv('DB_NAME') ?: '';
+        // Valores por defecto (el deploy los reemplaza por los de la instancia)
+        $this->host   = 'srv500.hstgr.io';
+        $this->user   = 'u144787244_solutionsrent';
+        $this->pass   = 'PSsolutions99';
+        $this->ddbb   = 'u144787244_solutionsrent';
         $this->socket = '';
         $this->port   = 3306;
 

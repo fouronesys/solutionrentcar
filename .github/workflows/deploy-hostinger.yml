@@ -41,6 +41,36 @@ jobs:
           ];
           EOF
 
+      - name: Inyectar credenciales de la instancia en Database.php
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          if [ -z "$DB_NAME" ]; then echo "Sin secrets de BD, se omite"; exit 0; fi
+          F=core/controller/Database.php
+          php -r '
+            $f = $argv[1];
+            $c = file_get_contents($f);
+            $map = [
+              "host" => getenv("DB_HOST"),
+              "user" => getenv("DB_USER"),
+              "pass" => getenv("DB_PASSWORD"),
+              "ddbb" => getenv("DB_NAME"),
+            ];
+            foreach ($map as $k => $v) {
+              $c = preg_replace(
+                "/(\\\$this->{$k}\s*=\s*)\x27[^\x27]*\x27/",
+                "\$1\x27" . addslashes($v) . "\x27",
+                $c, 1, $n
+              );
+              if ($n !== 1) { fwrite(STDERR, "No se pudo inyectar {$k}\n"); exit(1); }
+            }
+            file_put_contents($f, $c);
+          ' "$F"
+          grep -c "srv500.hstgr.io" "$F" || echo "host reemplazado"
+
       - name: Mirror to Hostinger via FTP
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
