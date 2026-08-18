@@ -124,3 +124,52 @@ jobs:
               ./deploy_assets/car_images/ /CF-SYSTEMS/storage/invoice_files/
             bye
           LFTP_EOF
+
+      - name: Aplicar fallback dual-host en RENTCAR/login.php y update.php
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set +x
+          if [ -z "$FTP_USER" ]; then echo "Sin RENTCAR_FTP_USER, se omite"; exit 0; fi
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          cat > /tmp/rtfix.php << 'PHPEOF'
+<?php
+$root = $_SERVER['DOCUMENT_ROOT'];
+$files = [
+  $root.'/RENTCAR/update.php' => [
+    'search' => "        \$pdo = new PDO(\n            \"mysql:host={\$info['host']};dbname={\$info['db']};charset=utf8mb4\",\n            \$info['user'],\n            \$info['pass'],\n            [\n                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION\n            ]\n        );",
+    'replace' => "        // RENTCAR_HOST_PATCH v2: dual-host fallback\n        \$_rh=(\$info['host']===\"localhost\"||\$info['host']===\"127.0.0.1\")? [\"127.0.0.1\",\"195.35.61.45\"] :[\$info['host']];\n        \$pdo=null;\$_re=null;foreach(\$_rh as \$_rhi){try{\$pdo=new PDO(\"mysql:host={\$_rhi};dbname={\$info['db']};charset=utf8mb4\",\$info['user'],\$info['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);break;}catch(PDOException \$e){\$_re=\$e;if(strpos(\$e->getMessage(),\"2002\")===false)throw \$e;}}if(\$pdo===null)throw \$_re;",
+  ],
+  $root.'/RENTCAR/login.php' => [
+    'search' => "        \$dsn = \"mysql:host=\" . \$db['host'] .\n               \";dbname=\" . \$db['dbname'] .\n               \";charset=utf8\";\n\n        \$pdo = new PDO(\n            \$dsn,\n            \$db['user'],\n            \$db['password'],\n            array(\n                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC\n            )\n        );",
+    'replace' => "        // RENTCAR_HOST_PATCH v2: dual-host fallback\n        \$_lh=(\$db['host']===\"localhost\"||\$db['host']===\"127.0.0.1\")? [\"127.0.0.1\",\"195.35.61.45\"] :[\$db['host']];\n        \$pdo=null;\$_le=null;foreach(\$_lh as \$_lhi){try{\$pdo=new PDO(\"mysql:host={\$_lhi};dbname={\$db['dbname']};charset=utf8\",\$db['user'],\$db['password'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);break;}catch(PDOException \$e){\$_le=\$e;if(strpos(\$e->getMessage(),\"2002\")===false)throw \$e;}}if(\$pdo===null)throw \$_le;",
+  ],
+];
+$out=[];
+foreach($files as $path=>$op){
+  if(!file_exists($path)){$out[]="NOT_FOUND:$path";continue;}
+  $txt=file_get_contents($path);
+  $txt=preg_replace('/[ \t]*\/\/ RENTCAR_HOST_PATCH[^\n]*\n/','',$txt);
+  $txt=preg_replace('/[ \t]*if\s*\(\$db_host\s*===\s*[\'"][^\n]+\n/','',$txt);
+  $txt=preg_replace('/[ \t]*if\s*\(\$db\[.host.\]\s*===\s*[\'"]localhost[^\n]+\n/','',$txt);
+  if(strpos($txt,$op['search'])!==false){
+    $txt=str_replace($op['search'],$op['replace'],$txt);
+    file_put_contents($path,$txt);
+    $out[]="OK:$path";
+  } else {
+    $out[]="SEARCH_NOT_FOUND:$path";
+    foreach(explode("\n",$txt) as $i=>$l){
+      if(strpos($l,'new PDO')!==false||strpos($l,'RENTCAR_HOST')!==false)
+        $out[]=" L".($i+1).":".trim($l);
+    }
+  }
+}
+echo implode("\n",$out)."\n";
+PHPEOF
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; put /tmp/rtfix.php -o /RENTCAR/rtfix.php; bye" 2>&1 | grep -v "^lftp"
+          sleep 3
+          curl -s -m 30 "https://assanpos.com/RENTCAR/rtfix.php" || true
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; rm /RENTCAR/rtfix.php; bye" 2>&1 | grep -v "^lftp" || true
+          echo "Fix step done"
