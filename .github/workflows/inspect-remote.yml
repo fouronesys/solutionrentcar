@@ -84,14 +84,17 @@ import re, os, sys
 content = open('/tmp/lkrentacar_db.php').read()
 new_pass = os.environ['LKRENTACAR_DB_PASSWORD']
 
-# PHP-escape for a single-quoted string literal: escape \ and '
+# PHP-escape for a single-quoted string literal: escape \ then '
 php_escaped = new_pass.replace('\\', '\\\\').replace("'", "\\'")
 
 # Match $this->pass = '...' or $this->pass = "..." (both quote styles)
 pattern = r"""(\$this->pass\s*=\s*)(['"])[^'"]*\2"""
-replacement = r"\g<1>'" + php_escaped + "'"
 
-patched, count = re.subn(pattern, replacement, content)
+# Use a callable so Python does NOT reprocess backslashes in the replacement
+def make_replacement(m):
+    return m.group(1) + "'" + php_escaped + "'"
+
+patched, count = re.subn(pattern, make_replacement, content)
 if count == 0:
     print("ERROR: no \\$this->pass assignment found in Database.php", file=sys.stderr)
     sys.exit(1)
