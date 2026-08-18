@@ -1,0 +1,59 @@
+name: Inspect remote FTP (temporal)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        timeout-minutes: 5
+        run: |
+          sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Inspect FTP root and central login
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set +x
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          mkdir -p out
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" <<'LFTP_EOF' > out/listing.txt 2>&1 || true
+            set ssl:verify-certificate no
+            set ftp:ssl-allow no
+            set net:max-retries 2
+            set net:timeout 20
+            cls -la /
+            cls -la /RENTCAR/ || echo "NO /RENTCAR"
+            cls -la /public_html/ || echo "NO /public_html"
+            bye
+          LFTP_EOF
+          cat out/listing.txt
+          # Try to fetch central login candidates from likely roots
+          for f in /index.php /RENTCAR/index.php /public_html/RENTCAR/index.php; do
+            name=$(echo "$f" | tr '/' '_')
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; get $f -o out/central$name; bye" || true
+          done
+          ls -la out/
+
+      - name: Publish results to branch
+        run: |
+          git config user.name "inspect-bot"
+          git config user.email "inspect@localhost"
+          git checkout --orphan inspect-output
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          mkdir -p /tmp/keep && cp -r out /tmp/keep/
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/keep/out .
+          git add out
+          git commit -m "inspect output"
+          git push -f origin inspect-output
