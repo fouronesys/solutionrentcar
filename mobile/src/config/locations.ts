@@ -24,48 +24,18 @@ export interface Branch {
 
 export const BRANCHES: Branch[] = [
   {
-    id: "sd-piantini",
-    city: "Santo Domingo",
-    name: "Santo Domingo",
-    address: "Av. Abraham Lincoln 1003",
-    hours: "08:00 – 20:00",
-    phone: "+1 849-564-4488",
-    lat: 18.4764,
-    lng: -69.9312,
-  },
-  {
-    id: "sd-gazcue",
-    city: "Santo Domingo",
-    name: "Santo Domingo – Gazcue",
-    address: "Av. Independencia 456",
-    hours: "08:00 – 20:00",
-    phone: "+1 849-564-4488",
-    lat: 18.4721,
-    lng: -69.9019,
-  },
-  {
-    id: "punta-cana",
-    city: "Punta Cana",
-    name: "Punta Cana – Aeropuerto",
-    address: "Terminal Internacional AILA",
-    hours: "06:00 – 22:00",
-    phone: "+1 809-000-0002",
-    lat: 18.5674,
-    lng: -68.3597,
-  },
-  {
-    id: "santiago",
-    city: "Santiago",
-    name: "Santiago – Centro",
-    address: "Calle del Sol 78",
-    hours: "08:00 – 20:00",
-    phone: "+1 809-000-0003",
-    lat: 19.4517,
-    lng: -70.6970,
+    id: "caobanico",
+    city: "San José de las Matas",
+    name: "Casa Rivas RentCar",
+    address: "Cerca del km 16, Caobanico, San José de las Matas, Santiago",
+    hours: "Coordina tu entrega por WhatsApp",
+    phone: "+1 829-474-4659",
+    lat: 19.3610,
+    lng: -71.0103,
   },
 ];
 
-export const CITIES = ["Santo Domingo", "Punta Cana", "Santiago"];
+export const CITIES = ["San José de las Matas"];
 
 /**
  * A tappable pickup-point suggestion for the booking flow.

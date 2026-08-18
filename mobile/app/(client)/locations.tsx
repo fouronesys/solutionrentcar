@@ -32,9 +32,7 @@ import { BRANCHES, CITIES, type Branch } from "@/config/locations";
 // ─── City center coordinates ─────────────────────────────────────────────────
 
 const CITY_REGIONS: Record<string, { lat: number; lng: number; zoom: number }> = {
-  "Santo Domingo": { lat: 18.4735, lng: -69.9312, zoom: 13 },
-  "Punta Cana":    { lat: 18.5674, lng: -68.3597, zoom: 13 },
-  "Santiago":      { lat: 19.4517, lng: -70.6970, zoom: 13 },
+  "San José de las Matas": { lat: 19.3610, lng: -71.0103, zoom: 13 },
 };
 
 // ─── Native map: WebView (lazy import so web doesn't crash) ─────────────────
