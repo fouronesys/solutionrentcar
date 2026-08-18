@@ -18,7 +18,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install lftp
-        run: sudo apt-get update -qq && sudo apt-get install -y lftp
+        timeout-minutes: 5
+        run: |
+          sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
 
       - name: Generar db.local.php (BD propia de la instancia)
         env:
