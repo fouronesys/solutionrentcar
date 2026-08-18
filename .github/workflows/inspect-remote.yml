@@ -34,7 +34,7 @@ jobs:
           run_lftp "cls -la $B/" > out/root-listing.txt
           cat out/root-listing.txt
           # Central login files of the RENTCAR multi-tenant login
-          for f in index.php default.php login.php socket.php core/autoload.php core/controller/Lb.php core/controller/Database.php; do
+          for f in update.php test.php actualizar.php; do
             run_lftp "get $B/$f -o out/central_$(echo $f | tr '/' '_')" || true
           done
           run_lftp "cls -laR $B/core/" > out/central-core-listing.txt || true

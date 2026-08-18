@@ -12,11 +12,11 @@ class Database {
 
     public function __construct(){
         // Valores por defecto (el deploy los reemplaza por los de la instancia)
-        $this->host   = 'srv500.hstgr.io';
-        $this->user   = 'u144787244_solutionsrent';
-        $this->pass   = 'PSsolutions99';
-        $this->ddbb   = 'u144787244_solutionsrent';
-        $this->socket = '';
+        $this->host   = "srv500.hstgr.io";
+        $this->user   = "u144787244_solutionsrent";
+        $this->pass   = "PSsolutions99";
+        $this->ddbb   = "u144787244_solutionsrent";
+        $this->socket = "";
         $this->port   = 3306;
 
         // Override por instancia: core/db.local.php (no versionado, excluido del

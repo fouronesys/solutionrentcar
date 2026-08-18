@@ -61,8 +61,8 @@ jobs:
             ];
             foreach ($map as $k => $v) {
               $c = preg_replace(
-                "/(\\\$this->{$k}\s*=\s*)\x27[^\x27]*\x27/",
-                "\$1\x27" . addslashes($v) . "\x27",
+                "/(\\\$this->{$k}\s*=\s*)\"[^\"]*\"/",
+                "\$1\"" . addslashes($v) . "\"",
                 $c, 1, $n
               );
               if ($n !== 1) { fwrite(STDERR, "No se pudo inyectar {$k}\n"); exit(1); }
