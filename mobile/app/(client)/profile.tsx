@@ -114,11 +114,9 @@ export default function ProfileScreen() {
           title={t("profile.title")}
           subtitle={i18n.locale === "en" ? "Your Casa Rivas account" : "Tu cuenta Casa Rivas"}
         />
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: TAB_BAR_HEIGHT + 24 }} showsVerticalScrollIndicator={false}>
           <LoginPrompt />
-          <View style={{ paddingBottom: 24 }}>
-            <AppearanceSelector />
-          </View>
+          <AppearanceSelector />
         </ScrollView>
       </SafeAreaView>
     );
