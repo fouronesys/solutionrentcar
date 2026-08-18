@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to run: inspect | apply-fix | cleanup'
+        description: 'Action to run: inspect | diag-hosts | cleanup'
         required: true
         default: 'inspect'
 
@@ -36,150 +36,18 @@ jobs:
 
           mkdir -p out
 
-          if [ "$ACTION" = "apply-fix" ]; then
-            # Upload a PHP fixer script, run it via HTTP, then delete it
-            cat > /tmp/rtfix.php << 'PHPEOF'
-<?php
-// One-shot fixer: inject dual-host fallback into update.php and login.php
-$results = [];
-$files = [
-    '/RENTCAR/update.php' => [
-        'search'  => '        $pdo = new PDO(
-            "mysql:host={$info[\'host\']};dbname={$info[\'db\']};charset=utf8mb4",
-            $info[\'user\'],
-            $info[\'pass\'],
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-            ]
-        );',
-        'replace' => '        // RENTCAR_HOST_PATCH: dual-host fallback (127.0.0.1 → 195.35.61.45)
-        $_rtry_hosts = ($info[\'host\']==="localhost"||$info[\'host\']==="127.0.0.1") ? [\'127.0.0.1\',\'195.35.61.45\'] : [$info[\'host\']];
-        $pdo=null; $_rtry_last=null;
-        foreach($_rtry_hosts as $_rtry_h){
-            try{ $pdo=new PDO("mysql:host={$_rtry_h};dbname={$info[\'db\']};charset=utf8mb4",$info[\'user\'],$info[\'pass\'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]); break; }
-            catch(PDOException $_rtry_e){ $_rtry_last=$_rtry_e; if(strpos($_rtry_e->getMessage(),\'2002\')===false) throw $_rtry_e; }
-        }
-        if($pdo===null) throw $_rtry_last;',
-    ],
-    '/RENTCAR/login.php' => [
-        'search'  => '        $dsn = "mysql:host=" . $db[\'host\'] .
-               ";dbname=" . $db[\'dbname\'] .
-               ";charset=utf8";
-
-        $pdo = new PDO(
-            $dsn,
-            $db[\'user\'],
-            $db[\'password\'],
-            array(
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            )
-        );',
-        'replace' => '        // RENTCAR_HOST_PATCH: dual-host fallback (127.0.0.1 → 195.35.61.45)
-        $_lg_hosts=($db[\'host\']==="localhost"||$db[\'host\']==="127.0.0.1") ? [\'127.0.0.1\',\'195.35.61.45\'] : [$db[\'host\']];
-        $pdo=null; $_lg_last=null;
-        foreach($_lg_hosts as $_lg_h){
-            try{ $pdo=new PDO("mysql:host={$_lg_h};dbname={$db[\'dbname\']};charset=utf8",$db[\'user\'],$db[\'password\'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]); break; }
-            catch(PDOException $_lg_e){ $_lg_last=$_lg_e; if(strpos($_lg_e->getMessage(),\'2002\')===false) throw $_lg_e; }
-        }
-        if($pdo===null) throw $_lg_last;',
-    ],
-];
-foreach($files as $path => $ops){
-    $absPath = dirname(__DIR__) . $path; // from /RENTCAR/rtfix.php → go up to root then /RENTCAR/...
-    // Actually use the server path directly
-    $absPath = $_SERVER['DOCUMENT_ROOT'] . $path;
-    if(!file_exists($absPath)){ $results[]="NOT FOUND: $path"; continue; }
-    $txt = file_get_contents($absPath);
-    // Remove existing simple RENTCAR_HOST_PATCH lines
-    $txt = preg_replace('/[ \t]*\/\/ RENTCAR_HOST_PATCH[^\n]*\n/', '', $txt);
-    $txt = preg_replace('/[ \t]*if\s*\(\\\$db_host\s*===\s*[\'"][^\'"]*[\'"]\s*\|\|[^\n]+\n/', '', $txt);
-    $txt = preg_replace('/[ \t]*if\s*\(\\\$db\[.host.\]\s*===\s*[\'"][^\'"]*[\'"]\s*\|\|[^\n]+\n/', '', $txt);
-    if(strpos($txt, $ops['search'])!==false){
-        $txt = str_replace($ops['search'], $ops['replace'], $txt);
-        file_put_contents($absPath, $txt);
-        $results[] = "PATCHED: $path";
-    } else {
-        $results[] = "SEARCH NOT FOUND in $path";
-    }
-}
-echo implode("\n", $results) . "\n";
-PHPEOF
-            # Upload the fixer script
-            run_lftp "put /tmp/rtfix.php -o /RENTCAR/rtfix.php"
-            echo "Uploaded rtfix.php"
-            sleep 3
-            # Execute it via HTTP and capture output
-            curl -s -m 30 "https://assanpos.com/RENTCAR/rtfix.php" > out/fix_result.txt || true
-            cat out/fix_result.txt
-            # Delete it immediately
-            run_lftp "rm /RENTCAR/rtfix.php"
-            echo "Deleted rtfix.php"
-
-          elif [ "$ACTION" = "diag-hosts" ]; then
-            # Upload a one-shot diagnostic: for each installation, try socket/127.0.0.1/195.35.61.45
-            cat > /tmp/rtdiag.php << 'PHPEOF'
-<?php
-ini_set('display_errors', 0);
-error_reporting(0);
-header('Content-Type: text/plain; charset=utf-8');
-echo "pdo_mysql.default_socket=" . ini_get('pdo_mysql.default_socket') . "\n";
-echo "mysqli.default_socket=" . ini_get('mysqli.default_socket') . "\n\n";
-$base_path = __DIR__ . '/';
-$carpetas = array_filter(glob($base_path . '/*'), function ($dir) {
-    $excluidas = ['CLIENTES', 'CF-SYSTEMS', 'logs', 'PWA'];
-    return is_dir($dir) && !in_array(basename($dir), $excluidas);
-});
-$hosts = ['SOCKET' => 'localhost', 'LOCALIP' => '127.0.0.1', 'PUBIP' => '195.35.61.45'];
-$summary = [];
-foreach ($carpetas as $carpeta) {
-    $config_path = $carpeta . '/core/controller/Database.php';
-    if (!file_exists($config_path)) { echo basename($carpeta) . "|NO_CONFIG\n"; continue; }
-    $contenido = file_get_contents($config_path);
-    preg_match('/\$this->host\s*=\s*[\'"](.*?)[\'"]/', $contenido, $host);
-    preg_match('/\$this->user\s*=\s*[\'"](.*?)[\'"]/', $contenido, $user);
-    preg_match('/\$this->pass\s*=\s*[\'"](.*?)[\'"]/', $contenido, $pass);
-    preg_match('/\$this->ddbb\s*=\s*[\'"](.*?)[\'"]/', $contenido, $db);
-    $db_host = $host[1] ?? ''; $db_user = $user[1] ?? ''; $db_pass = $pass[1] ?? ''; $db_name = $db[1] ?? '';
-    if (empty($db_host) || empty($db_user) || empty($db_name)) { echo basename($carpeta) . "|INCOMPLETE\n"; continue; }
-    if ($db_host !== 'localhost' && $db_host !== '127.0.0.1') {
-        echo basename($carpeta) . "|CUSTOM_HOST:" . $db_host . "\n"; continue;
-    }
-    $line = basename($carpeta);
-    $ok = null;
-    foreach ($hosts as $tag => $h) {
-        try {
-            $pdo = new PDO("mysql:host={$h};dbname={$db_name};charset=utf8mb4", $db_user, $db_pass,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 4]);
-            $line .= "|{$tag}:OK";
-            if ($ok === null) $ok = $tag;
-            $pdo = null;
-        } catch (PDOException $e) {
-            $msg = $e->getMessage();
-            $code = 'ERR';
-            if (preg_match('/\[(\d{4})\]/', $msg, $m)) $code = $m[1];
-            elseif (strpos($msg, '2002') !== false) $code = '2002';
-            elseif (strpos($msg, '1045') !== false) $code = '1045';
-            elseif (strpos($msg, '1044') !== false) $code = '1044';
-            $line .= "|{$tag}:{$code}";
-        }
-    }
-    $key = $ok === null ? 'ALL_FAIL' : 'FIRST_OK_' . $ok;
-    $summary[$key] = ($summary[$key] ?? 0) + 1;
-    echo $line . "\n";
-}
-echo "\n== SUMMARY ==\n";
-foreach ($summary as $k => $v) echo "$k: $v\n";
-PHPEOF
-            run_lftp "put /tmp/rtdiag.php -o /RENTCAR/rtdiag.php"
+          if [ "$ACTION" = "diag-hosts" ]; then
+            # Upload the diagnostic from the repo, run it via HTTP, then delete it
+            run_lftp "put scripts/rtdiag.php -o /RENTCAR/rtdiag.php"
             echo "Uploaded rtdiag.php"
             sleep 3
-            curl -s -m 240 "https://assanpos.com/RENTCAR/rtdiag.php" > out/diag_result.txt || true
+            curl -s -m 300 "https://assanpos.com/RENTCAR/rtdiag.php" > out/diag_result.txt || true
             cat out/diag_result.txt
             run_lftp "rm /RENTCAR/rtdiag.php"
             echo "Deleted rtdiag.php"
 
           elif [ "$ACTION" = "cleanup" ]; then
+            run_lftp "rm /RENTCAR/rtdiag.php" || true
             run_lftp "rm /RENTCAR/rtfix.php" || true
             echo "Cleaned up"
 
