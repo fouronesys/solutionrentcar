@@ -14,16 +14,35 @@ $carpetas = array_filter(glob($base_path . '/*'), function ($dir) {
 $hosts = ['SOCKET' => 'localhost', 'LOCALIP' => '127.0.0.1', 'PUBIP' => '195.35.61.45'];
 if (isset($_GET['host']) && $_GET['host'] === 'socket') $hosts = ['SOCKET' => 'localhost'];
 if (isset($_GET['order']) && $_GET['order'] === 'rev') { $carpetas = array_reverse($carpetas); echo "ORDER=REVERSED\n"; }
+
+/**
+ * Extract a PHP string property value from a Database.php source, handling
+ * both single-quoted and double-quoted forms with proper escape sequences.
+ * Single-quoted PHP strings: only \\ and \' are meaningful escapes.
+ * Double-quoted PHP strings: full C-style escape set via stripcslashes.
+ */
+function rt_extract_prop($contenido, $prop) {
+    $escaped_prop = preg_quote($prop, '/');
+    // Single-quoted form: 'value' where value may contain \\ or \'
+    if (preg_match('/\$this->' . $escaped_prop . '\s*=\s*\'((?:[^\'\\\\]|\\\\.)*)\'/', $contenido, $m)) {
+        return preg_replace_callback('/\\\\([\'\\\\])/', function($mm){ return $mm[1]; }, $m[1]);
+    }
+    // Double-quoted form
+    if (preg_match('/\$this->' . $escaped_prop . '\s*=\s*"((?:[^"\\\\]|\\\\.)*)"/', $contenido, $m)) {
+        return stripcslashes($m[1]);
+    }
+    return '';
+}
+
 $summary = [];
 foreach ($carpetas as $carpeta) {
     $config_path = $carpeta . '/core/controller/Database.php';
     if (!file_exists($config_path)) { echo basename($carpeta) . "|NO_CONFIG\n"; continue; }
     $contenido = file_get_contents($config_path);
-    preg_match('/\$this->host\s*=\s*[\'"](.*?)[\'"]/', $contenido, $host);
-    preg_match('/\$this->user\s*=\s*[\'"](.*?)[\'"]/', $contenido, $user);
-    preg_match('/\$this->pass\s*=\s*[\'"](.*?)[\'"]/', $contenido, $pass);
-    preg_match('/\$this->ddbb\s*=\s*[\'"](.*?)[\'"]/', $contenido, $db);
-    $db_host = $host[1] ?? ''; $db_user = $user[1] ?? ''; $db_pass = $pass[1] ?? ''; $db_name = $db[1] ?? '';
+    $db_host = rt_extract_prop($contenido, 'host');
+    $db_user = rt_extract_prop($contenido, 'user');
+    $db_pass = rt_extract_prop($contenido, 'pass');
+    $db_name = rt_extract_prop($contenido, 'ddbb');
     if (empty($db_host) || empty($db_user) || empty($db_name)) { echo basename($carpeta) . "|INCOMPLETE\n"; continue; }
     if ($db_host !== 'localhost' && $db_host !== '127.0.0.1') {
         echo basename($carpeta) . "|CUSTOM_HOST:" . $db_host . "\n"; continue;

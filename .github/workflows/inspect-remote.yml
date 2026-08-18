@@ -56,18 +56,26 @@ jobs:
             [ -s /tmp/lkrentacar_db.php ] || { echo "Downloaded file is empty"; exit 1; }
             echo "=== LK-RENTACAR Database.php (non-credential lines) ==="
             grep -E '\$this->(host|user|ddbb)\s*=' /tmp/lkrentacar_db.php || true
-            # Show masked password and length (both quote styles)
+            # Show masked password and length (both quote styles, escape-aware)
             python3 << 'PYEOF'
 import re, sys
 content = open('/tmp/lkrentacar_db.php').read()
-m = re.search(r"""\$this->pass\s*=\s*(['"])(.*?)\1""", content)
+# Escape-aware: single-quoted (only \\ and \' are escapes) or double-quoted
+m = re.search(r"""\$this->pass\s*=\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")""", content)
 if not m:
     print("WARNING: no $this->pass assignment found", file=sys.stderr)
     sys.exit(1)
-q, pw = m.group(1), m.group(2)
+sq_raw, dq_raw = m.group(1), m.group(2)
+if sq_raw is not None:
+    q = "'"
+    pw_actual = re.sub(r"\\([\\'])", lambda mm: mm.group(1), sq_raw)
+else:
+    q = '"'
+    # For double-quoted just report raw length (conservative)
+    pw_actual = dq_raw
 print(f"quote style: {q!r}")
-print(f"password length: {len(pw)}")
-print(f"$this->pass = {q}{'*' * len(pw)}{q};")
+print(f"password length (actual chars): {len(pw_actual)}")
+print(f"$this->pass = {q}{'*' * len(pw_actual)}{q};")
 PYEOF
 
           elif [ "$ACTION" = "patch-lkrentacar" ]; then
@@ -87,12 +95,14 @@ new_pass = os.environ['LKRENTACAR_DB_PASSWORD']
 # PHP-escape for a single-quoted string literal: escape \ then '
 php_escaped = new_pass.replace('\\', '\\\\').replace("'", "\\'")
 
-# Match $this->pass = '...' or $this->pass = "..." (both quote styles)
-pattern = r"""(\$this->pass\s*=\s*)(['"])[^'"]*\2"""
+# Escape-aware pattern: matches existing single OR double-quoted value,
+# including any escaped chars inside (e.g. \' or \\).
+# The full assignment including trailing ; is matched so the indent is preserved.
+pattern = r"""\$this->pass\s*=\s*(?:'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")\s*;"""
 
-# Use a callable so Python does NOT reprocess backslashes in the replacement
+# Use a callable so Python does NOT reprocess backslashes in the replacement value.
 def make_replacement(m):
-    return m.group(1) + "'" + php_escaped + "'"
+    return "$this->pass = '" + php_escaped + "';"
 
 patched, count = re.subn(pattern, make_replacement, content)
 if count == 0:

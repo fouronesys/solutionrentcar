@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""
+r"""
 Unit tests for the patch-lkrentacar password-replacement logic.
 
 Tests cover the same code path used in the workflow's inline Python block:
   - PHP-escaping of \ and '
   - re.subn with a callable replacement (no double-processing of backslashes)
   - Both single-quoted and double-quoted $this->pass forms
-  - Special characters: apostrophe, single backslash, consecutive backslashes,
-    trailing backslash, combinations.
+  - Existing passwords that already contain escaped characters (\' or \\)
+  - Special characters in the new password: apostrophe, single backslash,
+    consecutive backslashes, trailing backslash, combinations.
 """
 import re
 import sys
@@ -22,13 +23,16 @@ def patch_pass(php_content: str, new_pass: str) -> tuple[str, int]:
     """
     Replace the $this->pass assignment in PHP content.
     Returns (patched_content, replacement_count).
-    Uses a callable so Python does NOT reprocess backslashes in the replacement.
+    Uses escape-aware pattern (handles \\' and \\\\ inside existing value)
+    and a callable so Python does NOT reprocess backslashes in the replacement.
     """
     escaped = php_escape(new_pass)
-    pattern = r"""(\$this->pass\s*=\s*)(['"])[^'"]*\2"""
+    # Escape-aware: matches existing single- or double-quoted values including
+    # escaped characters inside them (e.g. \\' or \\\\).
+    pattern = r"""\$this->pass\s*=\s*(?:'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")\s*;"""
 
     def make_replacement(m):
-        return m.group(1) + "'" + escaped + "'"
+        return "$this->pass = '" + escaped + "';"
 
     return re.subn(pattern, make_replacement, php_content)
 
@@ -132,6 +136,42 @@ def test_double_assignment_returns_two():
     assert count == 2, f"expected 2, got {count}"
     print("  PASS: double-assignment returns 2")
 
+# --- Tests where the EXISTING password in the PHP file already contains escapes ---
+# These verify the escape-aware replacement pattern can replace values that were
+# themselves written with PHP escape sequences (e.g. a prior patch with apostrophes).
+
+def test_existing_escaped_apostrophe():
+    # PHP source: $this->pass = 'it\'s';  (PHP runtime value: it's)
+    # Python string for the quoted form: "'it\\'s'"
+    run_test("existing escaped apostrophe",
+             "'it\\'s'",   # PHP source contains: 'it\'s'
+             "newpassword")
+
+def test_existing_escaped_backslash():
+    # PHP source: $this->pass = 'foo\\bar';  (PHP runtime value: foo\bar)
+    # Python string for the quoted form: "'foo\\\\bar'"
+    run_test("existing escaped backslash",
+             "'foo\\\\bar'",  # PHP source contains: 'foo\\bar'
+             "newpassword")
+
+def test_existing_trailing_escaped_backslash():
+    # PHP source: $this->pass = 'trail\\';  (PHP runtime value: trail\)
+    run_test("existing trailing escaped backslash",
+             "'trail\\\\'",  # PHP source contains: 'trail\\'
+             "replacement")
+
+def test_existing_escaped_apostrophe_replaced_with_special():
+    # Existing has escaped apostrophe; new password also has apostrophe
+    run_test("existing escaped apo → new with apo",
+             "'old\\'val'",  # PHP source: 'old\'val'
+             "new'value")
+
+def test_existing_double_quoted_with_escaped_quote():
+    # PHP source: $this->pass = "pass\"word";  (PHP runtime value: pass"word)
+    run_test("existing double-quoted with escaped quote",
+             '"pass\\"word"',  # PHP source contains: "pass\"word"
+             "newpassword")
+
 
 if __name__ == "__main__":
     tests = [
@@ -147,6 +187,11 @@ if __name__ == "__main__":
         test_no_change_needed,
         test_not_found_returns_zero,
         test_double_assignment_returns_two,
+        test_existing_escaped_apostrophe,
+        test_existing_escaped_backslash,
+        test_existing_trailing_escaped_backslash,
+        test_existing_escaped_apostrophe_replaced_with_special,
+        test_existing_double_quoted_with_escaped_quote,
     ]
     print(f"Running {len(tests)} tests...")
     failures = 0

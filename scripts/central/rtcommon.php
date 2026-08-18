@@ -37,20 +37,33 @@ function rt_folders($base_path) {
     return $dirs;
 }
 
+/**
+ * Extract a PHP string property value from Database.php source, handling
+ * both single-quoted and double-quoted forms with proper escape sequences.
+ * Single-quoted PHP strings: only \\ and \' are meaningful escapes.
+ * Double-quoted PHP strings: full C-style escape set via stripcslashes.
+ */
+function rt_php_prop($contenido, $prop) {
+    $ep = preg_quote($prop, '/');
+    if (preg_match('/\$this->' . $ep . '\s*=\s*\'((?:[^\'\\\\]|\\\\.)*)\'/', $contenido, $m)) {
+        return preg_replace_callback('/\\\\([\'\\\\])/', function($mm){ return $mm[1]; }, $m[1]);
+    }
+    if (preg_match('/\$this->' . $ep . '\s*=\s*"((?:[^"\\\\]|\\\\.)*)"/', $contenido, $m)) {
+        return stripcslashes($m[1]);
+    }
+    return '';
+}
+
 function rt_read_config($carpeta) {
     $config_path = $carpeta . '/core/controller/Database.php';
     if (!file_exists($config_path)) return null;
     $contenido = file_get_contents($config_path);
-    preg_match('/\$this->host\s*=\s*[\'"](.*?)[\'"]/', $contenido, $host);
-    preg_match('/\$this->user\s*=\s*[\'"](.*?)[\'"]/', $contenido, $user);
-    preg_match('/\$this->pass\s*=\s*[\'"](.*?)[\'"]/', $contenido, $pass);
-    preg_match('/\$this->ddbb\s*=\s*[\'"](.*?)[\'"]/', $contenido, $db);
     $cfg = [
         'folder' => basename($carpeta),
-        'host'   => $host[1] ?? '',
-        'user'   => $user[1] ?? '',
-        'pass'   => $pass[1] ?? '',
-        'db'     => $db[1] ?? '',
+        'host'   => rt_php_prop($contenido, 'host'),
+        'user'   => rt_php_prop($contenido, 'user'),
+        'pass'   => rt_php_prop($contenido, 'pass'),
+        'db'     => rt_php_prop($contenido, 'ddbb'),
     ];
     if ($cfg['host'] === '' || $cfg['user'] === '' || $cfg['db'] === '') return null;
     return $cfg;
