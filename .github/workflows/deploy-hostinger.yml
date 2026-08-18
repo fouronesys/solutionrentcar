@@ -71,8 +71,11 @@ jobs:
               --exclude-glob test/ \
               --exclude-glob home/ \
               --exclude-glob CF-SYSTEMS/storage/ \
+              --exclude-glob deploy_assets/ \
               --exclude-glob firmas/ \
               --exclude-glob backups/ \
               ./ /
+            mirror --reverse --verbose --parallel=4 \
+              ./deploy_assets/car_images/ /CF-SYSTEMS/storage/invoice_files/
             bye
           LFTP_EOF
