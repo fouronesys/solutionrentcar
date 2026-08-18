@@ -49,20 +49,20 @@ jobs:
             echo "Deleted rtdiag.php"
 
           elif [ "$ACTION" = "fetch-lkrentacar" ]; then
-            # Download via run_lftp (same function used by other actions); verify by file presence
-            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php"
+            # Folder on server is LK-RENTCAR (no A before R)
+            run_lftp "get /RENTCAR/LK-RENTCAR/core/controller/Database.php -o /tmp/lkrentacar_db.php"
             [ -s /tmp/lkrentacar_db.php ] || { echo "FTP get FAILED: file missing or empty after transfer"; exit 1; }
             echo "FTP get OK ($(stat -c%s /tmp/lkrentacar_db.php) bytes)"
-            echo "=== LK-RENTACAR Database.php (non-credential lines) ==="
+            echo "=== LK-RENTCAR Database.php (non-credential lines) ==="
             grep -E '\$this->(host|user|ddbb)\s*=' /tmp/lkrentacar_db.php || true
             # Show masked password and length — standalone script, no heredoc
             python3 scripts/lk_fetch_pass.py
 
           elif [ "$ACTION" = "patch-lkrentacar" ]; then
-            # Patch the Database.php password for LK-RENTACAR using LKRENTACAR_DB_PASSWORD secret
+            # Patch the Database.php password for LK-RENTCAR using LKRENTACAR_DB_PASSWORD secret
             if [ -z "$LKRENTACAR_DB_PASSWORD" ]; then echo "ERROR: LKRENTACAR_DB_PASSWORD secret is not set in GitHub"; exit 1; fi
-            # Download via run_lftp; verify by file presence
-            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php"
+            # Folder on server is LK-RENTCAR (no A before R)
+            run_lftp "get /RENTCAR/LK-RENTCAR/core/controller/Database.php -o /tmp/lkrentacar_db.php"
             [ -s /tmp/lkrentacar_db.php ] || { echo "FTP get FAILED: file missing or empty after transfer"; exit 1; }
             echo "FTP get OK ($(stat -c%s /tmp/lkrentacar_db.php) bytes)"
             echo "Patching password..."
@@ -72,8 +72,8 @@ jobs:
             local_size=$(stat -c%s /tmp/lkrentacar_db.php)
             echo "Uploading patched file (${local_size} bytes)..."
             # Upload via run_lftp; verify by re-downloading and comparing size
-            run_lftp "put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTACAR/core/controller/Database.php"
-            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_verify.php"
+            run_lftp "put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTCAR/core/controller/Database.php"
+            run_lftp "get /RENTCAR/LK-RENTCAR/core/controller/Database.php -o /tmp/lkrentacar_verify.php"
             remote_size=$(stat -c%s /tmp/lkrentacar_verify.php 2>/dev/null || echo "0")
             echo "local_size=${local_size} remote_size=${remote_size}"
             [ "$remote_size" = "$local_size" ] || { echo "SIZE MISMATCH after upload (remote=${remote_size} local=${local_size}) — re-run to retry"; exit 1; }
