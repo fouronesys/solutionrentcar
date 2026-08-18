@@ -41,8 +41,8 @@ jobs:
             run_lftp "put scripts/rtdiag.php -o /RENTCAR/rtdiag.php"
             echo "Uploaded rtdiag.php"
             sleep 3
-            curl -s -m 300 "https://assanpos.com/RENTCAR/rtdiag.php" > out/diag_result.txt || true
-            cat out/diag_result.txt
+            curl -s -m 300 "https://assanpos.com/RENTCAR/rtdiag.php?order=rev&host=socket" > out/diag_result_rev.txt || true
+            cat out/diag_result_rev.txt
             run_lftp "rm /RENTCAR/rtdiag.php"
             echo "Deleted rtdiag.php"
 

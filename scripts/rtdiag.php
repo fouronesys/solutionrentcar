@@ -12,6 +12,8 @@ $carpetas = array_filter(glob($base_path . '/*'), function ($dir) {
     return is_dir($dir) && !in_array(basename($dir), $excluidas);
 });
 $hosts = ['SOCKET' => 'localhost', 'LOCALIP' => '127.0.0.1', 'PUBIP' => '195.35.61.45'];
+if (isset($_GET['host']) && $_GET['host'] === 'socket') $hosts = ['SOCKET' => 'localhost'];
+if (isset($_GET['order']) && $_GET['order'] === 'rev') { $carpetas = array_reverse($carpetas); echo "ORDER=REVERSED\n"; }
 $summary = [];
 foreach ($carpetas as $carpeta) {
     $config_path = $carpeta . '/core/controller/Database.php';
