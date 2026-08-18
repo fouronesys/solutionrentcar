@@ -90,30 +90,27 @@ jobs:
               }
 
               // ── Patrón B ────────────────────────────────────────────────────────────
-              // login.php (y scripts similares) pueden leer el host con otro nombre.
-              // Buscamos el momento en que se arma el DSN PDO con una variable de host.
-              // Ejemplo:  "mysql:host={$info['host']};dbname=..."
-              //           "mysql:host=$host;dbname=..."
-              //           "mysql:host={$db_host};dbname=..."
+              // login.php y otros scripts pueden usar variables distintas para el host.
+              // Buscamos el DSN PDO y detectamos qué variable de host usa.
+              //
+              // Casos conocidos:
+              //   "mysql:host=" . $db['host'] . "..."   ← login.php
+              //   "mysql:host={$info['host']}..."        ← variante array
+              //   "mysql:host={$db_host}..."             ← variante escalar
+              //   "mysql:host=$host..."                  ← variante escalar simple
               if (strpos($patched, 'mysql:host=') !== false) {
-                  // Insertar un bloque de normalización justo antes del primer new PDO(
-                  $insertBefore = 'new PDO(';
-                  $pos = strpos($patched, $insertBefore);
-                  if ($pos !== false) {
-                      // Buscar inicio de la línea del new PDO
-                      $lineStart = strrpos(substr($patched, 0, $pos), "\n");
-                      $lineStart = ($lineStart === false) ? 0 : $lineStart + 1;
-                      $indent = '';
-                      $line = substr($patched, $lineStart, $pos - $lineStart);
-                      if (preg_match('/^(\s+)/', $line, $m)) {
-                          $indent = $m[1];
-                      }
-
-                      // Detectar el nombre de la variable de host usada en el DSN
-                      // Miramos la línea del DSN (dentro de los 200 caracteres que siguen)
-                      $snippet = substr($patched, $pos, 200);
+                  // Buscar la línea que contiene el DSN con mysql:host=
+                  $dsnPos = strpos($patched, 'mysql:host=');
+                  if ($dsnPos !== false) {
+                      // Extraer un snippet amplio para detectar la variable
+                      $snippet = substr($patched, $dsnPos, 300);
                       $hostVar = null;
-                      if (preg_match("/mysql:host=\{?\\\$info\['host'\]\}?/", $snippet)) {
+                      // Patrón: . $db['host'] . o . $db["host"] .
+                      if (preg_match('/mysql:host="\s*\.\s*\$(\w+)\[\'host\'\]/', $snippet, $mm)
+                          || preg_match('/mysql:host="\s*\.\s*\$(\w+)\["host"\]/', $snippet, $mm)) {
+                          $hostVar = '$' . $mm[1] . '[\'host\']';
+                      // Patrón: {$info['host']} o {$db_host}
+                      } elseif (preg_match("/mysql:host=\{?\\\$info\['host'\]\}?/", $snippet)) {
                           $hostVar = '$info[\'host\']';
                       } elseif (preg_match("/mysql:host=\{?\\\$db_host\}?/", $snippet)) {
                           $hostVar = '$db_host';
@@ -121,16 +118,23 @@ jobs:
                           $hostVar = '$host';
                       }
 
-                      // Si encontramos la variable, inyectamos el override justo antes del new PDO
                       if ($hostVar !== null && strpos($patched, $patchTag) === false) {
+                          // Encontrar el inicio de la línea del DSN para obtener la indentación
+                          $lineStart = strrpos(substr($patched, 0, $dsnPos), "\n");
+                          $lineStart = ($lineStart === false) ? 0 : $lineStart + 1;
+                          $line = substr($patched, $lineStart, $dsnPos - $lineStart);
+                          $indent = '';
+                          if (preg_match('/^(\s+)/', $line, $m)) {
+                              $indent = $m[1];
+                          }
+
                           $override  = $indent . "// " . $patchTag . ": mapear localhost → IP TCP real\n";
                           $override .= $indent . "if ({$hostVar} === 'localhost' || {$hostVar} === '127.0.0.1') {$hostVar} = '{$realHost}';\n";
                           $patched = substr($patched, 0, $lineStart) . $override . substr($patched, $lineStart);
                           echo "✅ Patrón B parcheado en $file (var: $hostVar)\n";
                       } elseif ($hostVar === null) {
-                          echo "⚠️  Patrón B: mysql:host encontrado pero variable de host no identificada en $file\n";
-                          // Fallback: reemplazar literales 'localhost' en contexto de DSN
-                          // sólo dentro de la cadena mysql:host=
+                          echo "⚠️  Patrón B: mysql:host encontrado pero variable no identificada en $file\n";
+                          // Fallback: reemplazar literales 'localhost' concatenados en el DSN
                           $patchedFb = preg_replace(
                               '/("mysql:host=)(localhost|127\.0\.0\.1)(;)/',
                               '$1' . $realHost . '$3 // ' . $patchTag,
@@ -139,6 +143,13 @@ jobs:
                           if ($patchedFb !== $patched) {
                               $patched = $patchedFb;
                               echo "✅ Patrón B fallback (literal) aplicado en $file\n";
+                          } else {
+                              echo "⚠️  Patrón B fallback también falló — revisar $file manualmente\n";
+                              foreach (explode("\n", $original) as $i => $l) {
+                                  if (stripos($l, 'mysql:host') !== false || stripos($l, 'dsn') !== false) {
+                                      echo "    L" . ($i+1) . ": $l\n";
+                                  }
+                              }
                           }
                       }
                   }
