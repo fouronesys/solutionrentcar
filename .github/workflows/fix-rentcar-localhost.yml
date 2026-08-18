@@ -1,0 +1,210 @@
+name: Fix RENTCAR localhost → host real
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        timeout-minutes: 5
+        run: |
+          sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Descargar login.php y update.php del servidor
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set +x
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          mkdir -p out
+          run_lftp() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" \
+              -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; $1; bye" 2>&1
+          }
+          B=/RENTCAR
+          echo "=== Descargando login.php ==="
+          run_lftp "get $B/login.php -o out/login.php"
+          echo "=== Descargando update.php ==="
+          run_lftp "get $B/update.php -o out/update.php"
+          ls -la out/
+
+      - name: Escribir script PHP de parche
+        run: |
+          cat > /tmp/patch.php << 'PHPEOF'
+          <?php
+          /**
+           * Parche para scripts centrales RENTCAR:
+           * Reemplaza "localhost" / "127.0.0.1" por la IP TCP real del servidor
+           * en los puntos donde se usa el host extraído de Database.php de cada instalación.
+           *
+           * La raíz del problema: los Database.php de instalaciones antiguas tienen
+           *   $this->host = "localhost"
+           * que necesita conexión por socket Unix.  En Hostinger (PHP-FPM sin socket
+           * configurado en ese contexto) falla con SQLSTATE[HY000][2002].
+           * El fix en los scripts centrales es más seguro que editar cada Database.php.
+           */
+
+          $REAL_HOST = '195.35.61.45';
+          $PATCH_TAG = 'RENTCAR_HOST_PATCH';
+
+          function applyPatch(string $file, string $realHost, string $patchTag): void {
+              if (!file_exists($file)) {
+                  echo "❌ Archivo no encontrado: $file\n";
+                  return;
+              }
+
+              $original = file_get_contents($file);
+
+              if (strpos($original, $patchTag) !== false) {
+                  echo "ℹ️  Ya parcheado: $file\n";
+                  return;
+              }
+
+              $patched = $original;
+
+              // ── Patrón A ────────────────────────────────────────────────────────────
+              // update.php extrae el host así:
+              //   $db_host = $host[1] ?? '';
+              // Insertamos el override en la línea siguiente.
+              if (preg_match('/\$db_host\s*=\s*\$host\[1\]\s*\?\?\s*[\'"]\'";/', $patched)
+                  || preg_match('/\$db_host\s*=\s*\$host\[1\]\s*\?\?\s*\'\'/', $patched)
+                  || preg_match('/\$db_host\s*=\s*\$host\[1\]/', $patched)) {
+
+                  $patched = preg_replace(
+                      '/(\$db_host\s*=\s*\$host\[1\][^;]*;)/',
+                      '$1' . "\n    " . 'if ($db_host === \'localhost\' || $db_host === \'127.0.0.1\') $db_host = \'' . $realHost . '\'; // ' . $patchTag,
+                      $patched,
+                      1
+                  );
+                  echo "✅ Patrón A parcheado en $file\n";
+              }
+
+              // ── Patrón B ────────────────────────────────────────────────────────────
+              // login.php (y scripts similares) pueden leer el host con otro nombre.
+              // Buscamos el momento en que se arma el DSN PDO con una variable de host.
+              // Ejemplo:  "mysql:host={$info['host']};dbname=..."
+              //           "mysql:host=$host;dbname=..."
+              //           "mysql:host={$db_host};dbname=..."
+              if (strpos($patched, 'mysql:host=') !== false) {
+                  // Insertar un bloque de normalización justo antes del primer new PDO(
+                  $insertBefore = 'new PDO(';
+                  $pos = strpos($patched, $insertBefore);
+                  if ($pos !== false) {
+                      // Buscar inicio de la línea del new PDO
+                      $lineStart = strrpos(substr($patched, 0, $pos), "\n");
+                      $lineStart = ($lineStart === false) ? 0 : $lineStart + 1;
+                      $indent = '';
+                      $line = substr($patched, $lineStart, $pos - $lineStart);
+                      if (preg_match('/^(\s+)/', $line, $m)) {
+                          $indent = $m[1];
+                      }
+
+                      // Detectar el nombre de la variable de host usada en el DSN
+                      // Miramos la línea del DSN (dentro de los 200 caracteres que siguen)
+                      $snippet = substr($patched, $pos, 200);
+                      $hostVar = null;
+                      if (preg_match("/mysql:host=\{?\\\$info\['host'\]\}?/", $snippet)) {
+                          $hostVar = '$info[\'host\']';
+                      } elseif (preg_match("/mysql:host=\{?\\\$db_host\}?/", $snippet)) {
+                          $hostVar = '$db_host';
+                      } elseif (preg_match("/mysql:host=\{?\\\$host\}?/", $snippet)) {
+                          $hostVar = '$host';
+                      }
+
+                      // Si encontramos la variable, inyectamos el override justo antes del new PDO
+                      if ($hostVar !== null && strpos($patched, $patchTag) === false) {
+                          $override  = $indent . "// " . $patchTag . ": mapear localhost → IP TCP real\n";
+                          $override .= $indent . "if ({$hostVar} === 'localhost' || {$hostVar} === '127.0.0.1') {$hostVar} = '{$realHost}';\n";
+                          $patched = substr($patched, 0, $lineStart) . $override . substr($patched, $lineStart);
+                          echo "✅ Patrón B parcheado en $file (var: $hostVar)\n";
+                      } elseif ($hostVar === null) {
+                          echo "⚠️  Patrón B: mysql:host encontrado pero variable de host no identificada en $file\n";
+                          // Fallback: reemplazar literales 'localhost' en contexto de DSN
+                          // sólo dentro de la cadena mysql:host=
+                          $patchedFb = preg_replace(
+                              '/("mysql:host=)(localhost|127\.0\.0\.1)(;)/',
+                              '$1' . $realHost . '$3 // ' . $patchTag,
+                              $patched
+                          );
+                          if ($patchedFb !== $patched) {
+                              $patched = $patchedFb;
+                              echo "✅ Patrón B fallback (literal) aplicado en $file\n";
+                          }
+                      }
+                  }
+              }
+
+              if ($patched === $original) {
+                  echo "⚠️  Sin cambios en $file — revisar manualmente\n";
+                  echo "    grep host: \n";
+                  foreach (explode("\n", $original) as $i => $l) {
+                      if (stripos($l, 'host') !== false || stripos($l, 'pdo') !== false) {
+                          echo "    L" . ($i+1) . ": $l\n";
+                      }
+                  }
+                  return;
+              }
+
+              file_put_contents($file, $patched);
+              echo "💾 Guardado: $file\n";
+          }
+
+          applyPatch('out/update.php', $REAL_HOST, $PATCH_TAG);
+          applyPatch('out/login.php',  $REAL_HOST, $PATCH_TAG);
+          PHPEOF
+          echo "Script PHP de parche escrito en /tmp/patch.php"
+
+      - name: Aplicar parche
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          php /tmp/patch.php
+          echo "=== Líneas de host en update.php ==="
+          grep -n 'host\|localhost\|PATCH\|PDO' out/update.php | head -20
+          echo "=== Líneas de host en login.php ==="
+          grep -n 'host\|localhost\|PATCH\|PDO' out/login.php 2>/dev/null | head -20 || echo "(login.php no encontrado)"
+
+      - name: Subir archivos parcheados al servidor via FTP
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set +x
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          run_lftp() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" \
+              -e "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; $1; bye" 2>&1
+          }
+          B=/RENTCAR
+          echo "=== Subiendo update.php ==="
+          run_lftp "put out/update.php -o $B/update.php"
+          if [ -f out/login.php ]; then
+            echo "=== Subiendo login.php ==="
+            run_lftp "put out/login.php -o $B/login.php"
+          else
+            echo "⚠️  login.php no descargado — no se sube"
+          fi
+          echo "✅ Upload completo"
+
+      - name: Publicar archivos parcheados en rama fix-output (auditoría)
+        run: |
+          git config user.name "fix-bot"
+          git config user.email "fix@localhost"
+          git checkout --orphan fix-output
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          mkdir -p /tmp/keep && cp -r out /tmp/keep/
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/keep/out .
+          git add out
+          git commit -m "RENTCAR localhost patch aplicado — login.php + update.php"
+          git push -f origin fix-output
