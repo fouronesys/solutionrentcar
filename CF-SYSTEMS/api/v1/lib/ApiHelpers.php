@@ -20,7 +20,17 @@ class ApiHelpers {
 
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $base = $scheme . '://' . $host;
+
+        // The app may live in a subdirectory (e.g. /RENTCAR/CASARIVAS-RENTCAR).
+        // Derive that prefix from the executing script path, which always
+        // contains "/CF-SYSTEMS/".
+        $prefix = '';
+        $script = $_SERVER['SCRIPT_NAME'] ?? '';
+        $pos = strpos($script, '/CF-SYSTEMS/');
+        if ($pos !== false && $pos > 0) {
+            $prefix = substr($script, 0, $pos);
+        }
+        $base = $scheme . '://' . $host . $prefix;
 
         // Bare filename → invoice_files folder.
         if (strpos($relative, '/') === false) {
