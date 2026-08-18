@@ -11,6 +11,7 @@ El hosting debe quedarse en PHP 7.3 (decisión del usuario). Todo `core/` y `CF-
 - La app usa una cuenta cliente `casarivas.guest` (persona id 4 en la BD de Casa Rivas) para mostrar el catálogo sin login. Credenciales embebidas en el bundle por diseño (no secretas).
 - **Solo lectura**: el login marca claim `guest=1` y `ApiAuth::require` rechaza métodos != GET con 403. La app solo hace guest-retry en GETs.
 - Las env vars `EXPO_PUBLIC_GUEST_USERNAME/PASSWORD` (shared) pisan los defaults del código en el bundle — si el guest falla con invalid_credentials, revisar esas env vars primero.
+- Lo mismo aplica a los builds EAS: las envs `preview`/`production` en los servidores de Expo tenían `8090000000` en ambas (scope SHARED) y rompían el guest en el APK ("Token requerido o inválido"). Corregido a `casarivas.guest`/`crguest2026` scope PROJECT y borradas las SHARED. Si reaparece el error de token en un build, verificar con `eas env:list --environment X --include-sensitive`.
 - Metro cachea agresivo: tras cambiar código o env vars, borrar `/tmp/metro-*`, `mobile/.expo`, `mobile/node_modules/.cache` y reiniciar el workflow; verificar con grep sobre el bundle servido.
 
 ## BD y credenciales
