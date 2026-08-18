@@ -49,40 +49,35 @@ jobs:
             echo "Deleted rtdiag.php"
 
           elif [ "$ACTION" = "fetch-lkrentacar" ]; then
-            # Strict FTP download — no || true so failures propagate
-            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
-              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php; bye" \
-              2>&1 && echo "FTP get OK" || { echo "FTP get FAILED"; exit 1; }
-            [ -s /tmp/lkrentacar_db.php ] || { echo "Downloaded file is empty"; exit 1; }
+            # Download via run_lftp (same function used by other actions); verify by file presence
+            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php"
+            [ -s /tmp/lkrentacar_db.php ] || { echo "FTP get FAILED: file missing or empty after transfer"; exit 1; }
+            echo "FTP get OK ($(stat -c%s /tmp/lkrentacar_db.php) bytes)"
             echo "=== LK-RENTACAR Database.php (non-credential lines) ==="
             grep -E '\$this->(host|user|ddbb)\s*=' /tmp/lkrentacar_db.php || true
-            # Show masked password and length — delegate to standalone script (no heredoc)
+            # Show masked password and length — standalone script, no heredoc
             python3 scripts/lk_fetch_pass.py
 
           elif [ "$ACTION" = "patch-lkrentacar" ]; then
             # Patch the Database.php password for LK-RENTACAR using LKRENTACAR_DB_PASSWORD secret
             if [ -z "$LKRENTACAR_DB_PASSWORD" ]; then echo "ERROR: LKRENTACAR_DB_PASSWORD secret is not set in GitHub"; exit 1; fi
-            # Strict FTP download
-            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
-              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php; bye" \
-              2>&1 && echo "FTP get OK" || { echo "FTP get FAILED"; exit 1; }
-            [ -s /tmp/lkrentacar_db.php ] || { echo "Downloaded file is empty"; exit 1; }
+            # Download via run_lftp; verify by file presence
+            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_db.php"
+            [ -s /tmp/lkrentacar_db.php ] || { echo "FTP get FAILED: file missing or empty after transfer"; exit 1; }
+            echo "FTP get OK ($(stat -c%s /tmp/lkrentacar_db.php) bytes)"
             echo "Patching password..."
             python3 scripts/lk_patch_pass.py || { echo "Patch script failed"; exit 1; }
-            # PHP syntax check on the patched file
+            # PHP syntax check before uploading
             php -l /tmp/lkrentacar_db.php || { echo "PHP syntax error in patched file — aborting upload"; exit 1; }
             local_size=$(stat -c%s /tmp/lkrentacar_db.php)
             echo "Uploading patched file (${local_size} bytes)..."
-            # Strict FTP upload
-            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
-              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTACAR/core/controller/Database.php; bye" \
-              2>&1 && echo "FTP put OK" || { echo "FTP put FAILED"; exit 1; }
-            # Verify upload size
-            remote_size=$(lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
-              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 30; cls -la /RENTCAR/LK-RENTACAR/core/controller/Database.php; bye" \
-              2>/dev/null | awk '{print $5}' | head -1 || echo "unknown")
+            # Upload via run_lftp; verify by re-downloading and comparing size
+            run_lftp "put /tmp/lkrentacar_db.php -o /RENTCAR/LK-RENTACAR/core/controller/Database.php"
+            run_lftp "get /RENTCAR/LK-RENTACAR/core/controller/Database.php -o /tmp/lkrentacar_verify.php"
+            remote_size=$(stat -c%s /tmp/lkrentacar_verify.php 2>/dev/null || echo "0")
             echo "local_size=${local_size} remote_size=${remote_size}"
             [ "$remote_size" = "$local_size" ] || { echo "SIZE MISMATCH after upload (remote=${remote_size} local=${local_size}) — re-run to retry"; exit 1; }
+            echo "Upload verified OK"
             # Verify connectivity via rtdiag
             run_lftp "put scripts/rtdiag.php -o /RENTCAR/rtdiag.php"
             sleep 3
