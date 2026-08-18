@@ -290,7 +290,7 @@ export default function CarDetail() {
             <Text style={styles.price}>
               {money(car.price_day ?? car.price)}
             </Text>
-            <Text style={styles.priceLabel}>/ {t("cars.perDay")}</Text>
+            <Text style={styles.priceLabel}>{t("cars.perDay")}</Text>
           </View>
         </View>
 
