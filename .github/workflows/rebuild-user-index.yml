@@ -1,0 +1,40 @@
+name: Rebuild user index (daily)
+
+# Reconstruye el índice email→instalación al menos una vez al día.
+# También puede lanzarse manualmente desde la pestaña Actions.
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 03:00 UTC todos los días
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Rebuild index (rescan + loop until PENDIENTES=0)
+        env:
+          ADMIN_KEY: ${{ secrets.RENTCAR_ADMIN_KEY }}
+        run: |
+          set -euo pipefail
+          BASE_URL="https://assanpos.com/RENTCAR/indexer.php"
+
+          # Primer request: reinicia el índice desde cero
+          echo "== rescan =="
+          curl -sf -m 120 -H "X-Admin-Key: ${ADMIN_KEY}" "${BASE_URL}?rescan=1"
+
+          # Bucle: escanea en lotes hasta que no queden instalaciones pendientes
+          for i in $(seq 1 40); do
+            echo "== round $i =="
+            RESPONSE=$(curl -sf -m 120 -H "X-Admin-Key: ${ADMIN_KEY}" "${BASE_URL}" || true)
+            echo "$RESPONSE"
+            if echo "$RESPONSE" | grep -q "PENDIENTES=0"; then
+              echo "INDEX COMPLETE after $i round(s)"
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "WARNING: index loop ended without PENDIENTES=0 (partial index saved)"
+          exit 1
