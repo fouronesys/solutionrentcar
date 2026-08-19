@@ -1,0 +1,21 @@
+-- Casa Rivas vehicle-image associations before correction on 2026-08-19
+START TRANSACTION;
+UPDATE cars SET invoice_file='cr_3_range-rover-sport-2019.jpg' WHERE id=3;
+UPDATE cars SET invoice_file='cr_4_toyota-highlander-2022.jpg' WHERE id=4;
+UPDATE cars SET invoice_file='cr_5_toyota-highlander-2024.jpg' WHERE id=5;
+UPDATE cars SET invoice_file='cr_6_ford-explorer-2022.jpg' WHERE id=6;
+UPDATE cars SET invoice_file='cr_7_mercedes-gle350-2020.jpg' WHERE id=7;
+UPDATE cars SET invoice_file='cr_8_toyota-rav4-2021.jpg' WHERE id=8;
+UPDATE cars SET invoice_file='cr_9_honda-crv-2022.jpg' WHERE id=9;
+UPDATE cars SET invoice_file='cr_11_honda-crv-ex-2019.jpg' WHERE id=11;
+UPDATE cars SET invoice_file='cr_12_toyota-camry-se-2020.jpg' WHERE id=12;
+UPDATE cars SET invoice_file='cr_13_jeep-grand-cherokee-2019.jpg' WHERE id=13;
+UPDATE cars SET invoice_file='cr_14_jeep-grand-cherokee-laredo-2021.jpg' WHERE id=14;
+UPDATE cars SET invoice_file='cr_15_ford-explorer-limited-2021.jpg' WHERE id=15;
+UPDATE cars SET invoice_file='cr_16_toyota-highlander-xle-2023.jpg' WHERE id=16;
+UPDATE cars SET invoice_file='cr_17_honda-crv-exl-2024.jpg' WHERE id=17;
+UPDATE cars SET invoice_file='cr_18_honda-crv-exl-2022.jpg' WHERE id=18;
+UPDATE cars SET invoice_file='cr_19_toyota-4runner-2012.jpg' WHERE id=19;
+UPDATE cars SET invoice_file='cr_20_hyundai-grand-starex-2019.jpg' WHERE id=20;
+UPDATE galery SET invoice_file='cr_15_ford-explorer-limited-2021.jpg' WHERE id=1 AND car_id=15;
+COMMIT;
