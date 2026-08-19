@@ -317,3 +317,17 @@ mtime_ms = 1787141413040
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/eb87c686-e6d5-441e-a968-4bf6b15d1e6e/01243a9c-2287-40b5-b4f8-50b9dc614af9"
 storage_version_token = "1787141464129478"
 content_type = "image/png"
+
+[[outputs]]
+id = "FSJuC09oGJpzPTwydljyC"
+uri = "file://attached_assets/appstore-ipad-13-01-catalog.png"
+type = "image"
+title = "Captura para iPad de 13 pulgadas"
+description = "Captura real del catálogo de Casa Rivas RentCar en 2064 × 2752 px, lista para cargar en App Store Connect."
+logical_id = "1388e18e-a3e8-4ec4-bfda-5f3cc9c52ab2"
+content_hash = "sha256:a718b81c64702b02a5f2d5658beedfea4a4938eecbc36385fadb2230e1657f8d"
+size = 3862936
+mtime_ms = 1787143262978
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/1388e18e-a3e8-4ec4-bfda-5f3cc9c52ab2/8a5be54e-6aad-49e0-ad30-fc240a09aa91"
+storage_version_token = "1787143284214952"
+content_type = "image/png"
