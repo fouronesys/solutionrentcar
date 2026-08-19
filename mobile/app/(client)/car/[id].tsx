@@ -190,7 +190,9 @@ export default function CarDetail() {
   };
 
   const handleBookPress = () => {
-    const params: Record<string, string> = { carId: String(car.id) };
+    const params: { carId: string; start?: string; end?: string } = {
+      carId: String(car.id),
+    };
     if (datesSet) {
       params.start = toDbDateTime(dateStart);
       params.end = toDbDateTime(dateEnd);
