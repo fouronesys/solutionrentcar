@@ -331,3 +331,59 @@ mtime_ms = 1787143262978
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/1388e18e-a3e8-4ec4-bfda-5f3cc9c52ab2/8a5be54e-6aad-49e0-ad30-fc240a09aa91"
 storage_version_token = "1787143284214952"
 content_type = "image/png"
+
+[[outputs]]
+id = "Fy7StxwStycfeBDw0SBdd"
+uri = "file://attached_assets/Casa-Rivas-iPad-13-App-Store-Screenshots.zip"
+type = "unspecified"
+title = "Paquete completo para iPad de 13 pulgadas"
+description = "ZIP con cuatro capturas reales — catálogo, inicio, detalle y ubicaciones — todas en 2064 × 2752 px, PNG RGB sin transparencia."
+logical_id = "6aa87adf-b54b-4d4a-97b3-cbd42018b116"
+content_hash = "sha256:5e1a6f83010cbb52346f365c6e55de3b134010b7703d3d2661449a8837ad68f0"
+size = 6201480
+mtime_ms = 1787143425774
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/6aa87adf-b54b-4d4a-97b3-cbd42018b116/8368cc38-1d1f-425a-9746-86fd76fdd9d1"
+storage_version_token = "1787143435177220"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "ABKD0xafWPNe3_eH45Sbw"
+uri = "file://attached_assets/appstore-ipad-13-02-home.png"
+type = "image"
+title = "iPad 13″ — Inicio"
+description = "Pantalla de inicio con accesos principales y vehículos destacados."
+logical_id = "555d282f-a96e-414b-bed3-0eb2a552502c"
+content_hash = "sha256:ba4316254526841c2db7086800022e558dd2f01785e25591e0ff113f6fad066c"
+size = 740240
+mtime_ms = 1787143363298
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/555d282f-a96e-414b-bed3-0eb2a552502c/a4ae69e2-23b6-46f8-9a40-be5db2104114"
+storage_version_token = "1787143435884911"
+content_type = "image/png"
+
+[[outputs]]
+id = "a7ccHpQNfThJ1T6sqcgGV"
+uri = "file://attached_assets/appstore-ipad-13-03-vehicle-detail.png"
+type = "image"
+title = "iPad 13″ — Detalle del vehículo"
+description = "Vehículo real con precio, especificaciones y botón de reserva."
+logical_id = "c6c8dddc-864d-4e8d-a061-3e3f48f3b1b0"
+content_hash = "sha256:712efb24f087385b361deb946ca2caad118c409032e296cf13dcee3b2a1a6bc6"
+size = 1239223
+mtime_ms = 1787143376102
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/c6c8dddc-864d-4e8d-a061-3e3f48f3b1b0/8b478834-c7fd-4725-ad6e-dd1cfe2fc48d"
+storage_version_token = "1787143436566447"
+content_type = "image/png"
+
+[[outputs]]
+id = "ccj0wcl9ZWS_fJMBI9-xY"
+uri = "file://attached_assets/appstore-ipad-13-04-locations.png"
+type = "image"
+title = "iPad 13″ — Ubicaciones"
+description = "Mapa, sucursal y opciones de navegación mediante Waze o Maps."
+logical_id = "b1a25fa8-5d0b-46d4-860e-61d9212b18da"
+content_hash = "sha256:0a20eeb7443275e546b464aa3452029a8a2cf07c77d253d58cb51874362c73b6"
+size = 421454
+mtime_ms = 1787143390426
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/b1a25fa8-5d0b-46d4-860e-61d9212b18da/8681ca41-18e7-4f23-8729-ec80246517a9"
+storage_version_token = "1787143437434047"
+content_type = "image/png"
