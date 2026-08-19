@@ -247,3 +247,73 @@ mtime_ms = 1787115621756
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/79a28803-6847-4fa7-b2c0-af996a76d947/f3d36e36-3f6d-4117-94c4-0d2370f7e2bf"
 storage_version_token = "1787115629354726"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "IOv-2w_vxYPVGE9t5v6wP"
+uri = "file://attached_assets/Casa-Rivas-App-Store-Screenshots.zip"
+type = "unspecified"
+title = "Paquete de screenshots para App Store"
+description = "ZIP con cuatro capturas verticales de Casa Rivas RentCar, cada una en 1290 × 2796 px para iPhone de 6.9 pulgadas."
+logical_id = "28880413-1444-4e25-a6d2-d02fe258a124"
+content_hash = "sha256:f5f90a1bb7e8c0c94e7beb6822b145b57cbefb2c2bae4ff0209cc665ea48ac65"
+size = 4771634
+mtime_ms = 1787141450018
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/28880413-1444-4e25-a6d2-d02fe258a124/a0845ed4-224b-4287-bd0c-fc4f890244f6"
+storage_version_token = "1787141461507861"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "ctZMm9-2TmTsSSK8NlnCH"
+uri = "file://attached_assets/appstore-ios-01-catalog.png"
+type = "image"
+title = "1. Catálogo de vehículos"
+description = "Captura del catálogo con filtros y vehículos disponibles."
+logical_id = "c27d1453-7cd2-4be1-986f-ecca1e727331"
+content_hash = "sha256:96225e62cdd486aa190b71f4a2c449c912568531a9ffe6e82312a43e36f9f5c3"
+size = 2190628
+mtime_ms = 1787141360332
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/c27d1453-7cd2-4be1-986f-ecca1e727331/f8ebc8af-d6a8-407c-bd70-727853a5d662"
+storage_version_token = "1787141462265135"
+content_type = "image/png"
+
+[[outputs]]
+id = "6toyV8dt0PHToTQVDuSUs"
+uri = "file://attached_assets/appstore-ios-02-vehicle-detail.png"
+type = "image"
+title = "2. Detalle del vehículo"
+description = "Captura del vehículo, precio, especificaciones y botón de reserva."
+logical_id = "5b011a0d-eaff-41e3-bf63-57c4fd598c28"
+content_hash = "sha256:e68298cd1dc220647a37595d55c2b0aa69afbcce4df2e8b81133516913b75620"
+size = 1451975
+mtime_ms = 1787141374528
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/5b011a0d-eaff-41e3-bf63-57c4fd598c28/7eec6f3e-66cd-4d82-852c-110c63b11340"
+storage_version_token = "1787141462909906"
+content_type = "image/png"
+
+[[outputs]]
+id = "OP-Nj2fbotLkOXaM41ybm"
+uri = "file://attached_assets/appstore-ios-03-locations.png"
+type = "image"
+title = "3. Ubicaciones"
+description = "Captura del mapa y la sucursal de Casa Rivas RentCar."
+logical_id = "4c5341a2-a088-4602-a1d5-b6ca8c637dfc"
+content_hash = "sha256:cae104dbd029fed26d1467febc02fd70e2c8a8ee592c9310e8e494b9146e4350"
+size = 385665
+mtime_ms = 1787141395568
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/4c5341a2-a088-4602-a1d5-b6ca8c637dfc/01bd8c7c-8e56-495d-a423-03576bcd43aa"
+storage_version_token = "1787141463525474"
+content_type = "image/png"
+
+[[outputs]]
+id = "dXSFQ39r8foe_vnEq1FM4"
+uri = "file://attached_assets/appstore-ios-04-home.png"
+type = "image"
+title = "4. Pantalla de inicio"
+description = "Captura de la portada con accesos al catálogo y ubicaciones."
+logical_id = "eb87c686-e6d5-441e-a968-4bf6b15d1e6e"
+content_hash = "sha256:bae1abde31859971e14a81f8b6241277b2f55278724ac44dc9753afdd4e49d94"
+size = 783927
+mtime_ms = 1787141413040
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/eb87c686-e6d5-441e-a968-4bf6b15d1e6e/01243a9c-2287-40b5-b4f8-50b9dc614af9"
+storage_version_token = "1787141464129478"
+content_type = "image/png"
