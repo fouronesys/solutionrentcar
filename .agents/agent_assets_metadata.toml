@@ -11,24 +11,28 @@ id = "0caEbDpIpdQa-mR_hp76_"
 uri = "file://attached_assets/solutions_logo_1024.png"
 type = "image"
 title = "Solutions Rent Car — Logo 1024x1024 (fondo blanco)"
+logical_id = "825aa72a-092c-4d65-9294-6816161601d7"
 
 [[outputs]]
 id = "1e0F1GIgoSdueJvbrs9Mg"
 uri = "file://attached_assets/store_assets/appstore_icon_1024.png"
 type = "image"
 title = "App Store icon — 1024x1024 (sin transparencia, RGB)"
+logical_id = "f7249d55-50ce-44f9-9e8b-2f04de9b21e5"
 
 [[outputs]]
 id = "4vZrLB0S0S94xGUg-gEDk"
 uri = "file://attached_assets/store_assets/playstore_icon_512.png"
 type = "image"
 title = "Play Store icon — 512x512"
+logical_id = "7fd1e385-a92b-4a44-ad4a-2a4b83c14ef6"
 
 [[outputs]]
 id = "Du4BghnTvBLZn4oGhMm64"
 uri = "file://attached_assets/store_assets/playstore_feature_1024x500.png"
 type = "image"
 title = "Play Store Feature Graphic — 1024x500"
+logical_id = "578c9e38-cd57-42fd-a98e-2f2e3d870146"
 
 [[outputs]]
 id = "EEna8hjcasHteKZfFisNM"
@@ -36,6 +40,7 @@ uri = "file://store-assets/yowell-store-screenshots.zip"
 type = "unspecified"
 title = "Screenshots para App Store y Google Play"
 description = "8 capturas por tienda (tema oscuro y claro, en español) en los tamaños oficiales: iOS 1290×2796 (iPhone 6.7\") y Android 1080×1920, más el feature graphic 1024×500 para Google Play."
+logical_id = "64f839c5-474b-4bd0-b220-82b9b55f723d"
 
 [[outputs]]
 id = "BPXR5TQKB3B432nBhokMS"
@@ -43,6 +48,7 @@ uri = "file://store-assets/googleplay-phone/play-store-icon-512.png"
 type = "image"
 title = "Icono Google Play (512×512)"
 description = "PNG de 512×512 para el icono de la ficha en Play Console."
+logical_id = "1899dba5-77be-4512-b871-e381eb059fc9"
 
 [[outputs]]
 id = "0Qsr8K3b8VXTW-Z1qBp9R"
@@ -50,6 +56,7 @@ uri = "file://store-assets/appstore-ios-6.7/appstore-icon-1024.png"
 type = "image"
 title = "Icono App Store (1024×1024)"
 description = "PNG de 1024×1024, el mismo icono iOS del build. Apple lo toma del binario, pero sirve como referencia o para App Store Connect si te lo pide."
+logical_id = "1e174739-6159-47ef-86de-12cf5e43118b"
 
 [[outputs]]
 id = "YloXhB5SfX1k2pfeLi8jF"
@@ -57,6 +64,7 @@ uri = "file://store-assets/icon-512-white.png"
 type = "image"
 title = "Icono 512 — fondo blanco"
 description = "Escudo Yowell sobre blanco, acorde a la marca (blanco + rojo). Recomendado para Play Store."
+logical_id = "9dd79928-92a2-409c-bc17-786a304d7b9d"
 
 [[outputs]]
 id = "9Z5S2XXc-cJFhJzLEK3_C"
@@ -64,6 +72,7 @@ uri = "file://store-assets/icon-512-dark.png"
 type = "image"
 title = "Icono 512 — fondo oscuro"
 description = "Escudo Yowell sobre degradado oscuro, a juego con el tema dark de la app."
+logical_id = "059acee1-c564-4a91-8d61-6c7083525a54"
 
 [[outputs]]
 id = "trbdBv7etq3ZHTg5ndWdf"
@@ -71,6 +80,7 @@ uri = "file://store-assets/yowell-iconos.zip"
 type = "unspecified"
 title = "Iconos Yowell (zip)"
 description = "Los dos iconos 512×512 (fondo blanco y fondo oscuro) en un solo zip."
+logical_id = "022e377d-628a-40e1-a88a-a8ab97f17e9f"
 
 [[outputs]]
 id = "SVIchajeZ73f4YktPCp5Y"
@@ -78,6 +88,7 @@ uri = "file://store-screenshots/appstore/home-1290x2796.png"
 type = "image"
 title = "App Store · Inicio"
 description = "Screenshot limpio, sin diseño añadido"
+logical_id = "6897a121-7375-4127-b97c-1c8b894ccb93"
 
 [[outputs]]
 id = "czKD0nI5QfwPCHVfYOS1r"
@@ -85,6 +96,7 @@ uri = "file://store-screenshots/appstore/cars-1290x2796.png"
 type = "image"
 title = "App Store · Flota"
 description = "Screenshot limpio, sin diseño añadido"
+logical_id = "13eca2b4-c889-4aa7-accd-df4408e093c7"
 
 [[outputs]]
 id = "xZzkRORX5vhQdaWL4WmuX"
@@ -92,6 +104,7 @@ uri = "file://store-screenshots/appstore/car_detail-1290x2796.png"
 type = "image"
 title = "App Store · Detalle del auto"
 description = "Screenshot limpio, sin diseño añadido"
+logical_id = "1e96216f-9936-436b-93ea-db3293b04175"
 
 [[outputs]]
 id = "pHyj6lBupcKj0HS63t31R"
@@ -99,6 +112,7 @@ uri = "file://store-screenshots/appstore/book_top-1290x2796.png"
 type = "image"
 title = "App Store · Reserva"
 description = "Screenshot limpio, sin diseño añadido"
+logical_id = "19d89fde-f74a-4202-87bc-bf8e3de3b7e8"
 
 [[outputs]]
 id = "6TqW4EFupHc9ido9QYuSv"
@@ -106,6 +120,7 @@ uri = "file://store-screenshots/googleplay/home-1080x1920.png"
 type = "image"
 title = "Google Play · Inicio"
 description = "Screenshot limpio, sin diseño añadido"
+logical_id = "7d7a979e-a107-469a-a382-c6de6c15b4d3"
 
 [[outputs]]
 id = "graUfW13Ks1EDoyhPOHRR"
@@ -113,6 +128,7 @@ uri = "file://store-screenshots/googleplay/book_bottom-1080x1920.png"
 type = "image"
 title = "Google Play · Confirma por WhatsApp"
 description = "Screenshot para la ficha de la tienda"
+logical_id = "ddbbc0c8-1bf6-4fd9-ab8d-e4daae7e04df"
 
 [[outputs]]
 id = "l-tge4AKzy_C_dGTMiiKk"
@@ -120,6 +136,7 @@ uri = "file://store-screenshots/googleplay/book_top-1080x1920.png"
 type = "image"
 title = "Google Play · Reserva"
 description = "Screenshot limpio, sin diseño añadido"
+logical_id = "9d752f4b-89a9-4033-bad5-3e0ec857b10c"
 
 [[outputs]]
 id = "7GYm9kUNHgTKKRhm6eR00"
@@ -127,6 +144,7 @@ uri = "file://store-screenshots/appstore-diseno/home-1290x2796.png"
 type = "image"
 title = "App Store · «MUÉVETE»"
 description = "Diseño de tienda con fotos de stock y frase secuencial"
+logical_id = "9a5742db-2d91-4a8e-bb13-7a5210dc3af0"
 
 [[outputs]]
 id = "F-zvN0Qoyn9lnC0nrYsL_"
@@ -134,6 +152,7 @@ uri = "file://store-screenshots/appstore-diseno/cars-1290x2796.png"
 type = "image"
 title = "App Store · «A TU»"
 description = "Diseño de tienda con fotos de stock y frase secuencial"
+logical_id = "a0656feb-1097-4081-89bf-f9c26d549f43"
 
 [[outputs]]
 id = "Hm9C8_KyOWSw7X4SStsgQ"
@@ -141,6 +160,7 @@ uri = "file://store-screenshots/appstore-diseno/car_detail-1290x2796.png"
 type = "image"
 title = "App Store · «MANERA»"
 description = "Diseño de tienda con fotos de stock y frase secuencial"
+logical_id = "79b4282f-67ff-4281-8575-ea406b003f83"
 
 [[outputs]]
 id = "ZBxwYbEL_2i6DLq4J6Nc6"
@@ -148,6 +168,7 @@ uri = "file://store-screenshots/appstore-diseno/book_top-1290x2796.png"
 type = "image"
 title = "App Store · «CON YOWELL» (corregido)"
 description = "Texto completo, sin cortes en los bordes"
+logical_id = "33592339-300a-4a1b-b9a4-66ee497df814"
 
 [[outputs]]
 id = "WAP9G6-lW2aPeJXdS-qPC"
@@ -155,6 +176,7 @@ uri = "file://store-screenshots/appstore-diseno/book_bottom-1290x2796.png"
 type = "image"
 title = "App Store · «RENT-CAR» (corregido)"
 description = "Texto completo, sin cortes en los bordes"
+logical_id = "7f85e339-9cf7-4d82-89c4-91992e93e704"
 
 [[outputs]]
 id = "kkD3zMSc-1wy2TONbwyXZ"
@@ -162,6 +184,7 @@ uri = "file://store-screenshots/googleplay-diseno/home-1080x1920.png"
 type = "image"
 title = "Google Play · «MUÉVETE»"
 description = "Diseño de tienda con fotos de stock y frase secuencial"
+logical_id = "101d59db-dc9a-43cd-8242-01d5194a378c"
 
 [[outputs]]
 id = "5Ews6EJoDbsASQIPVLIYL"
@@ -169,6 +192,7 @@ uri = "file://store-screenshots/googleplay-diseno/book_bottom-1080x1920.png"
 type = "image"
 title = "Google Play · «RENT-CAR»"
 description = "Diseño de tienda con fotos de stock y frase secuencial"
+logical_id = "bf067777-00b0-4346-a2c2-c0b61e7c545e"
 
 [[outputs]]
 id = "GZXqZdk03WD-fbrBh9QdM"
@@ -176,6 +200,7 @@ uri = "file://store-screenshots/googleplay-diseno/book_top-1080x1920.png"
 type = "image"
 title = "Google Play · «CON YOWELL» (corregido)"
 description = "Texto completo, sin cortes en los bordes"
+logical_id = "b284c92d-0c56-4d89-93f6-5daa1f323903"
 
 [[outputs]]
 id = "HQEvTMZihY2QRrkvLZAnD"
@@ -183,6 +208,7 @@ uri = "file://store-assets/screenshots-tiendas.zip"
 type = "unspecified"
 title = "Screenshots de tiendas (sin barra negra)"
 description = "10 capturas recapturadas: 5 Google Play (1080×1920) y 5 App Store (1290×2796), ahora sin la barra negra inferior."
+logical_id = "bf9c90c5-17ac-4ef4-b8f6-7a0fb45f2b4c"
 
 [[outputs]]
 id = "Amc-KzSOY-sP8zBEli2g0"
@@ -190,6 +216,7 @@ uri = "file://store-assets/icon-googleplay-512.png"
 type = "image"
 title = "Icono Google Play (512×512)"
 description = "Icono de la app en el tamaño requerido por Play Console."
+logical_id = "177b112a-e9c9-4f45-a52c-810572760b03"
 
 [[outputs]]
 id = "jTqnsxrIfUFvIwZ2sViW1"
@@ -197,6 +224,7 @@ uri = "file://store-assets/icon-appstore-1024.png"
 type = "image"
 title = "Icono App Store (1024×1024)"
 description = "Icono de la app en el tamaño requerido por App Store Connect."
+logical_id = "aafa7b20-32f8-45b0-9bdb-6e18dbf4971c"
 
 [[outputs]]
 id = "vp4JLr212_O4wlBIY22NW"
@@ -204,3 +232,18 @@ uri = "file://store-assets/feature-graphic-1024x500.png"
 type = "image"
 title = "Gráfico de funciones Google Play (1024×500)"
 description = "Versión pulida: tipografía editorial, fondo degradado limpio y el Explorer recortado con sombra suave."
+logical_id = "af3cb219-3c6f-491f-a974-eb19bf6da140"
+
+[[outputs]]
+id = "SvpTy_8MtuPY6lhkrQEIn"
+uri = "file://attached_assets/candidatas-vehiculos-reales.jpg"
+type = "image"
+title = "Candidatas encontradas en invoice_files"
+description = "Muestra de 12 fotos reales de vehículos localizadas entre los archivos del sistema. Confirma si este es el conjunto que debe usarse antes de cambiar las asignaciones."
+logical_id = "79a28803-6847-4fa7-b2c0-af996a76d947"
+content_hash = "sha256:a2905c24e46e27b2626b7be10e70a62e1fdc98ee046709410febf0c6632d7a5f"
+size = 414803
+mtime_ms = 1787115621756
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/79a28803-6847-4fa7-b2c0-af996a76d947/f3d36e36-3f6d-4117-94c4-0d2370f7e2bf"
+storage_version_token = "1787115629354726"
+content_type = "image/jpeg"
