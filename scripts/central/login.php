@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 require __DIR__ . '/rtcommon.php';
 
-$username = isset($_POST['username']) ? trim($_POST['username']) : '';
+$username = isset($_POST['username']) ? strtolower(trim($_POST['username'])) : '';
 $password_raw = isset($_POST['password']) ? $_POST['password'] : '';
 
 if ($username === '' || $password_raw === '') {
@@ -26,9 +26,21 @@ function rt_try_login($cfg, $username, $password) {
     if (isset($c['error'])) return $c;
     try {
         $stmt = $c['pdo']->prepare(
-            "SELECT * FROM user WHERE email = :username AND password = :password LIMIT 1"
+            "SELECT id, stock_id
+             FROM user
+             WHERE (
+                 LOWER(TRIM(email)) = :email
+                 OR LOWER(TRIM(username)) = :username
+             )
+             AND password = :password
+             AND status = 1
+             LIMIT 1"
         );
-        $stmt->execute(['username' => $username, 'password' => $password]);
+        $stmt->execute([
+            'email' => $username,
+            'username' => $username,
+            'password' => $password
+        ]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return ['ok' => true, 'row' => $row ?: null];
     } catch (Exception $e) {
@@ -103,10 +115,13 @@ foreach (rt_folders($base_path) as $carpeta) {
 }
 
 $quota_hit = false;
+$attempted_folders = [];
 
 /* 1) Camino rápido: el índice sabe en qué instalación vive el email (1-2 conexiones) */
 foreach (rt_index_lookup($idx, $username) as $folder) {
     if (!isset($configs[$folder])) continue;
+    if (rt_quota_left() <= 0) { $quota_hit = true; break; }
+    $attempted_folders[$folder] = true;
     $r = rt_try_login($configs[$folder], $username, $password);
     if (isset($r['row']) && $r['row']) {
         if ($idx_dirty) rt_index_save($base_path, $idx);
@@ -120,6 +135,7 @@ if (!$quota_hit) {
     foreach (rt_index_lookup_phone($idx, $username) as $folder) {
         if (!isset($configs[$folder])) continue;
         if (rt_quota_left() <= 0) { $quota_hit = true; break; }
+        $attempted_folders[$folder] = true;
         $r = rt_try_client_login($configs[$folder], $username, $password_raw);
         if (isset($r['row']) && $r['row']) {
             if ($idx_dirty) rt_index_save($base_path, $idx);
@@ -135,10 +151,18 @@ if (!$quota_hit) {
     foreach ($configs as $folder => $cfg) {
         if (isset($idx['folders'][$folder])) continue;      // ya escaneada
         if (rt_quota_left() <= 1) break;                     // reservar margen
+        $attempted_folders[$folder] = true;
         $s = rt_index_scan_folder($idx, $cfg);
         if (isset($s['error'])) {
             if ($s['error'] === 'QUOTA') { $quota_hit = true; break; }
-            continue;                                        // AUTH/OTHER: seguir
+            $idx['folders'][$folder] = [
+                'scanned_at' => date('c'),
+                'users' => [],
+                'phones' => [],
+                'note' => $s['error']
+            ];
+            $idx_dirty = true;
+            continue;
         }
         $idx_dirty = true;
         if (in_array(strtolower($username), $idx['folders'][$folder]['users'], true)) {
@@ -163,6 +187,85 @@ if (!$quota_hit) {
     }
 }
 
+/*
+| 3) El identificador puede pertenecer a un usuario creado después del último
+| escaneo. Refrescar instalaciones ya conocidas, empezando por la más antigua.
+| Si no caben todas en este request, el siguiente intento continúa con las
+| restantes porque scanned_at se actualiza en cada lote.
+*/
+$refresh_pending = false;
+if (!$quota_hit) {
+    $refresh_candidates = [];
+    foreach (rt_index_refresh_candidates($idx, $configs) as $cfg) {
+        if (!isset($attempted_folders[$cfg['folder']])) {
+            $refresh_candidates[] = $cfg;
+        }
+    }
+    $processed = 0;
+
+    foreach ($refresh_candidates as $cfg) {
+        if (rt_quota_left() <= 1) {
+            $refresh_pending = true;
+            break;
+        }
+
+        $folder = $cfg['folder'];
+        $attempted_folders[$folder] = true;
+        $s = rt_index_scan_folder($idx, $cfg);
+        if (isset($s['error'])) {
+            if ($s['error'] === 'QUOTA') {
+                $quota_hit = true;
+                $refresh_pending = true;
+                break;
+            }
+            $idx['folders'][$folder]['scanned_at'] = date('c');
+            $idx['folders'][$folder]['note'] = $s['error'];
+            $idx_dirty = true;
+            $processed++;
+            continue;
+        }
+
+        $idx_dirty = true;
+        $processed++;
+
+        if (in_array($username, $idx['folders'][$folder]['users'] ?? [], true)) {
+            $r = rt_try_login($cfg, $username, $password);
+            if (isset($r['row']) && $r['row']) {
+                rt_index_save($base_path, $idx);
+                rt_login_success($r['row'], $folder);
+            }
+            if (isset($r['error']) && $r['error'] === 'QUOTA') {
+                $quota_hit = true;
+                $refresh_pending = true;
+                break;
+            }
+        }
+
+        $phone_matches = array_intersect(
+            rt_phone_variants($username),
+            $idx['folders'][$folder]['phones'] ?? []
+        );
+        if ($phone_matches !== []) {
+            if (rt_quota_left() <= 0) {
+                $refresh_pending = true;
+                break;
+            }
+            $r = rt_try_client_login($cfg, $username, $password_raw);
+            if (isset($r['row']) && $r['row']) {
+                rt_index_save($base_path, $idx);
+                rt_client_login_success($r['row'], $folder);
+            }
+            if (isset($r['error']) && $r['error'] === 'QUOTA') {
+                $quota_hit = true;
+                $refresh_pending = true;
+                break;
+            }
+        }
+    }
+
+    if ($processed < count($refresh_candidates)) $refresh_pending = true;
+}
+
 if ($idx_dirty) rt_index_save($base_path, $idx);
 
 $pending = 0;
@@ -170,7 +273,11 @@ foreach ($configs as $folder => $cfg) {
     if (!isset($idx['folders'][$folder])) $pending++;
 }
 
-if ($quota_hit || ($pending > 0 && rt_index_lookup($idx, $username) === [] && rt_index_lookup_phone($idx, $username) === [])) {
+if (
+    $quota_hit
+    || $refresh_pending
+    || ($pending > 0 && rt_index_lookup($idx, $username) === [] && rt_index_lookup_phone($idx, $username) === [])
+) {
     // No se pudo verificar contra todas las instalaciones en este request
     echo json_encode([
         'success' => false,

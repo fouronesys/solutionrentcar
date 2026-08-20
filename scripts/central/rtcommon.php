@@ -54,6 +54,21 @@ function rt_php_prop($contenido, $prop) {
     return '';
 }
 
+/* Lee valores escalares del array devuelto por core/db.local.php sin ejecutarlo. */
+function rt_php_array_value($contenido, $key) {
+    $ek = preg_quote($key, '/');
+    if (preg_match('/[\'"]' . $ek . '[\'"]\s*=>\s*\'((?:[^\'\\\\]|\\\\.)*)\'/', $contenido, $m)) {
+        return preg_replace_callback('/\\\\([\'\\\\])/', function($mm){ return $mm[1]; }, $m[1]);
+    }
+    if (preg_match('/[\'"]' . $ek . '[\'"]\s*=>\s*"((?:[^"\\\\]|\\\\.)*)"/', $contenido, $m)) {
+        return stripcslashes($m[1]);
+    }
+    if (preg_match('/[\'"]' . $ek . '[\'"]\s*=>\s*([0-9]+)/', $contenido, $m)) {
+        return $m[1];
+    }
+    return '';
+}
+
 function rt_read_config($carpeta) {
     $config_path = $carpeta . '/core/controller/Database.php';
     if (!file_exists($config_path)) return null;
@@ -64,7 +79,20 @@ function rt_read_config($carpeta) {
         'user'   => rt_php_prop($contenido, 'user'),
         'pass'   => rt_php_prop($contenido, 'pass'),
         'db'     => rt_php_prop($contenido, 'ddbb'),
+        'port'   => 3306,
     ];
+
+    $local_path = $carpeta . '/core/db.local.php';
+    if (file_exists($local_path)) {
+        $local = file_get_contents($local_path);
+        foreach (['host' => 'host', 'user' => 'user', 'pass' => 'pass', 'ddbb' => 'db'] as $source => $target) {
+            $value = rt_php_array_value($local, $source);
+            if ($value !== '') $cfg[$target] = $value;
+        }
+        $port = (int)rt_php_array_value($local, 'port');
+        if ($port > 0) $cfg['port'] = $port;
+    }
+
     if ($cfg['host'] === '' || $cfg['user'] === '' || $cfg['db'] === '') return null;
     return $cfg;
 }
@@ -77,15 +105,23 @@ function rt_read_config($carpeta) {
 | Cuenta conexiones intentadas en $GLOBALS['rt_conn_count'].
 */
 function rt_connect($cfg, $charset = 'utf8mb4') {
-    $hosts = ($cfg['host'] === 'localhost' || $cfg['host'] === '127.0.0.1')
-        ? ['localhost', '127.0.0.1']
-        : [$cfg['host']];
+    if ($cfg['host'] === 'localhost') {
+        $hosts = ['localhost', '127.0.0.1'];
+    } elseif ($cfg['host'] === '127.0.0.1') {
+        $hosts = ['127.0.0.1', 'localhost'];
+    } else {
+        $hosts = [$cfg['host']];
+    }
     $last = null;
-    foreach ($hosts as $h) {
+    foreach ($hosts as $position => $h) {
+        if (rt_quota_left() <= 0) {
+            return ['error' => 'QUOTA', 'msg' => 'connection budget exhausted'];
+        }
         $GLOBALS['rt_conn_count'] = ($GLOBALS['rt_conn_count'] ?? 0) + 1;
         try {
+            $port = isset($cfg['port']) ? (int)$cfg['port'] : 3306;
             $pdo = new PDO(
-                "mysql:host={$h};dbname={$cfg['db']};charset={$charset}",
+                "mysql:host={$h};port={$port};dbname={$cfg['db']};charset={$charset}",
                 $cfg['user'], $cfg['pass'],
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 4]
             );
@@ -93,13 +129,20 @@ function rt_connect($cfg, $charset = 'utf8mb4') {
         } catch (PDOException $e) {
             $last = $e;
             $msg = $e->getMessage();
-            if (strpos($msg, '2002') !== false) {
-                // socket/TCP denegado: casi siempre es la cuota por request
+            $msg_lower = strtolower($msg);
+            $is_quota = strpos($msg_lower, 'operation not permitted') !== false
+                || strpos($msg_lower, 'too many connections') !== false
+                || strpos($msg_lower, 'max_user_connections') !== false
+                || strpos($msg_lower, 'user resource') !== false;
+            if ($is_quota) {
                 return ['error' => 'QUOTA', 'msg' => $msg];
             }
             if (strpos($msg, '1045') !== false || strpos($msg, '1044') !== false) {
                 // probar siguiente host no ayuda con credenciales inválidas
                 return ['error' => 'AUTH', 'msg' => $msg];
+            }
+            if (strpos($msg, '2002') !== false && $position < count($hosts) - 1) {
+                continue;
             }
         }
     }
@@ -110,7 +153,7 @@ function rt_quota_left() {
     return RT_MAX_CONN_PER_REQUEST - ($GLOBALS['rt_conn_count'] ?? 0);
 }
 
-/* ---------- índice de usuarios (email → carpetas) ---------- */
+/* ---------- índice de usuarios (email/username → carpetas) ---------- */
 
 function rt_index_path($base_path) {
     $dir = $base_path . '/logs';
@@ -139,20 +182,31 @@ function rt_index_save($base_path, $idx) {
     @file_put_contents(rt_index_path($base_path), json_encode($idx), LOCK_EX);
 }
 
-/* Escanea una instalación y guarda sus emails en el índice. */
+/* Escanea una instalación y guarda sus identificadores de acceso en el índice. */
 function rt_index_scan_folder(&$idx, $cfg) {
     $c = rt_connect($cfg);
     if (isset($c['error'])) return $c;
-    $emails = [];
+    $users = [];
     $phones = [];
     try {
-        $st = $c['pdo']->query("SELECT email FROM user");
-        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $em) {
-            $em = strtolower(trim((string)$em));
-            if ($em !== '') $emails[] = $em;
+        $st = $c['pdo']->query("SELECT email, username FROM user");
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            foreach (['email', 'username'] as $field) {
+                $value = strtolower(trim((string)$row[$field]));
+                if ($value !== '') $users[] = $value;
+            }
         }
     } catch (Exception $e) {
-        // sin tabla user: seguir, quizá haya person
+        // Algunas instalaciones antiguas no tienen username.
+        try {
+            $st = $c['pdo']->query("SELECT email FROM user");
+            foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $em) {
+                $em = strtolower(trim((string)$em));
+                if ($em !== '') $users[] = $em;
+            }
+        } catch (Exception $ignored) {
+            // sin tabla user: seguir, quizá haya person
+        }
     }
     try {
         // clientes: login con teléfono (guardar normalizado a solo dígitos)
@@ -169,10 +223,10 @@ function rt_index_scan_folder(&$idx, $cfg) {
     $c['pdo'] = null;
     $idx['folders'][$cfg['folder']] = [
         'scanned_at' => date('c'),
-        'users'      => array_values(array_unique($emails)),
+        'users'      => array_values(array_unique($users)),
         'phones'     => array_values(array_unique($phones)),
     ];
-    return ['ok' => true, 'count' => count($emails) + count($phones)];
+    return ['ok' => true, 'count' => count($users) + count($phones)];
 }
 
 function rt_index_lookup($idx, $email) {
@@ -181,6 +235,35 @@ function rt_index_lookup($idx, $email) {
     foreach ($idx['folders'] as $folder => $data) {
         if (in_array($email, $data['users'] ?? [], true)) $out[] = $folder;
     }
+    return $out;
+}
+
+/*
+| Ordena las instalaciones ya indexadas desde la menos reciente.
+| En un fallo de índice esto permite refrescarlas por lotes sin superar
+| el límite de conexiones MySQL del hosting.
+*/
+function rt_index_refresh_candidates($idx, $configs) {
+    $rows = [];
+    foreach ($configs as $folder => $cfg) {
+        if (!isset($idx['folders'][$folder])) continue;
+        $rows[] = [
+            'folder'     => $folder,
+            'scanned_at' => isset($idx['folders'][$folder]['scanned_at'])
+                ? (string)$idx['folders'][$folder]['scanned_at']
+                : '',
+            'config'     => $cfg,
+        ];
+    }
+
+    usort($rows, function ($a, $b) {
+        $by_date = strcmp($a['scanned_at'], $b['scanned_at']);
+        if ($by_date !== 0) return $by_date;
+        return strcmp($a['folder'], $b['folder']);
+    });
+
+    $out = [];
+    foreach ($rows as $row) $out[] = $row['config'];
     return $out;
 }
 

@@ -3,4 +3,5 @@
 - [Hostinger FTP deploy](hostinger-ftp-deploy.md) — usar la IP de hPanel como FTP_HOST; cuenta enjaulada, mirror a `/`; puerto 21 bloqueado desde Replit.
 - [Casa Rivas PHP 7.3 y guest](casarivas-php73-guest.md) — el servidor debe correr PHP 7.3 (código downgradeado con Rector); sesión guest solo lectura y caché de Metro.
 - [Git push quirks](git-push-quirks.md) — gitPush callback es la única vía de push pero puede fallar UNKNOWN; commit por shell requiere identidad inline.
+- [Login central multiinstancia](rentcar-central-conn-quota.md) — el índice debe refrescar usuarios nuevos por lotes sin superar la cuota MySQL del hosting.
 - [Recuperación de fotos vehiculares](vehicle-photo-recovery.md) — fotos originales pueden existir solo en Hostinger; correlacionar prefijos uniqid con fechas antes de reasignar.
