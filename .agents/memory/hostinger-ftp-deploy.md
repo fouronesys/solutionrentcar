@@ -23,3 +23,11 @@ Para inventariar muchos sistemas bajo la cuenta FTP, listar primero las carpetas
 **Why:** el primer recorrido recursivo terminó antes de alcanzar todas las instalaciones y confundió vistas sin `session_start()` con controladores defectuosos.
 
 **How to apply:** separar siempre vistas, guardias de sesión y controladores; probar redirecciones sin seguirlas y registrar el `Location` antes de evaluar el código HTTP final.
+
+## Sesiones FTP por lotes
+
+El binario `lftp` disponible en los runners usados para estas auditorías acepta comandos por `-e`, pero no la opción `-f`; para lotes se debe construir una sola cadena `-e` y desactivar el fallo global por archivo inexistente.
+
+**Why:** usar `-f` hizo que los listados y descargas parecieran vacíos aunque la conexión y la lectura FTP fueran correctas.
+
+**How to apply:** validar siempre la sintaxis del binario del runner con un comando inofensivo antes de lanzar un inventario grande y registrar por separado el estado de cada descarga.
