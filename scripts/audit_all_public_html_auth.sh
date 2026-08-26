@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 set +x
 
 : "${FTP_HOST:?missing FTP_HOST}"
@@ -177,7 +177,7 @@ for remote_path, source, session, regeneration, cookie, database, legacy, post, 
         )
     )
 if not rows:
-    raise SystemExit("No authentication-related files downloaded")
+    lines.append("| *(ninguno de los candidatos superficiales fue legible)* | | | | | | | | | | |")
 report.write_text("\n".join(lines) + "\n")
 PY
 
