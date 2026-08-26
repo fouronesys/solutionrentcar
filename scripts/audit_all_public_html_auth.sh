@@ -29,6 +29,32 @@ awk '
 printf 'excluded=PRESTAMOS,prestamos\n' >out/public-html-scan-status.txt
 printf 'folders=%s\n' "$(wc -l </tmp/public-html-folders.txt | tr -d ' ')" >>out/public-html-scan-status.txt
 
+# Capture only one directory level for every application. This is enough to
+# discover whether an app exposes a PHP entry point without walking assets.
+: >/tmp/public-html-directory-commands
+while IFS= read -r folder; do
+  printf 'cls -la /%s\n' "$folder" >>/tmp/public-html-directory-commands
+done </tmp/public-html-folders.txt
+LFTP_PASSWORD="$FTP_PASSWORD" lftp -u "$FTP_USER" --env-password "$FTP_HOST" \
+  -e "$(cat <<EOF
+set ssl:verify-certificate no
+set ftp:ssl-allow no
+set net:max-retries 1
+set net:timeout 20
+set cmd:fail-exit no
+$(cat /tmp/public-html-directory-commands)
+bye
+EOF
+)" >out/public-html-system-listings.txt 2>&1 || true
+
+run_lftp "find /CF-SYSTEMS" >out/public-html-cf-find.txt 2>&1 || true
+
+# Verify that the account can read a known file from the successful listing.
+run_lftp "get /CF-SYSTEMS/desktop.ini -o /tmp/public-html-auth/read-test" \
+  >out/public-html-read-test-status.txt 2>&1 || true
+printf 'read_test_bytes=%s\n' "$(wc -c </tmp/public-html-auth/read-test 2>/dev/null || printf 0)" \
+  >>out/public-html-scan-status.txt
+
 # Download a bounded set of common entry points in one FTP session. This
 # avoids a recursive traversal and avoids opening one FTP connection per file.
 : >/tmp/public-html-auth-paths.txt
@@ -59,7 +85,7 @@ while IFS= read -r remote_path; do
 done </tmp/public-html-auth-paths.txt
 
 LFTP_PASSWORD="$FTP_PASSWORD" lftp -u "$FTP_USER" --env-password "$FTP_HOST" \
-  -f <(cat <<EOF
+  -e "$(cat <<EOF
 set ssl:verify-certificate no
 set ftp:ssl-allow no
 set net:max-retries 1
@@ -68,7 +94,7 @@ set cmd:fail-exit no
 $(cat /tmp/public-html-get-commands)
 bye
 EOF
-) >/tmp/public-html-get.log 2>&1 || true
+)" >/tmp/public-html-get.log 2>&1 || true
 grep -E '(/|not found|No such|failed|denied|error|cannot|Permission)' /tmp/public-html-get.log |
   sed -E 's/[Pp]assword[^[:space:]]*/password [redacted]/g' >out/public-html-get-status.txt || true
 
