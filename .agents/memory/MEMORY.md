@@ -6,3 +6,4 @@
 - [Login central multiinstancia](rentcar-central-conn-quota.md) — el índice debe refrescar usuarios nuevos por lotes sin superar la cuota MySQL del hosting.
 - [Recuperación de fotos vehiculares](vehicle-photo-recovery.md) — fotos originales pueden existir solo en Hostinger; correlacionar prefijos uniqid con fechas antes de reasignar.
 - [Estructura remota de GRUAS](gruas-remote-layout.md) — el front público está en `/GRUAS`, pero el núcleo puede vivir bajo `/GRUAS/DEMO`.
+- [Validación de acceso GRUAS](gruas-access-validation.md) — el rollout requiere credenciales propias de GRUAS; no sustituirlas por la cuenta de otro sistema ni avanzar ante 401/503.
