@@ -16,7 +16,7 @@ jobs:
 
       - name: Download sanitized GRUAS login files
         env:
-          FTP_HOST: ${{ secrets.GRUAS_INSPECT_FTP_HOST }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.GRUAS_INSPECT_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.GRUAS_INSPECT_FTP_PASSWORD }}
         run: |
