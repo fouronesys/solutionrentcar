@@ -1,0 +1,77 @@
+name: Deploy GRUAS login (temporary)
+
+on:
+  push:
+    branches: [deploy-gruas-login]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Replace GRUAS login with rollback protection
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.PUBLIC_HTML_UPLOAD_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.PUBLIC_HTML_UPLOAD_FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          set +x
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+
+          restore_login() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+              "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; rm -f /GRUAS/login.php; mv /GRUAS/.login.php.rollback /GRUAS/login.php; bye" \
+              >/tmp/gruas-restore.log 2>&1 || true
+          }
+
+          if ! lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+            "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; put scripts/installation-login.php -o /GRUAS/login.php.next; rm -f /GRUAS/.login.php.rollback; mv /GRUAS/login.php /GRUAS/.login.php.rollback; mv /GRUAS/login.php.next /GRUAS/login.php; bye" \
+            >/tmp/gruas-deploy.log 2>&1; then
+            restore_login
+            cat /tmp/gruas-deploy.log
+            exit 1
+          fi
+
+          smoke_test() {
+            get_status() {
+              curl -sS --max-time 20 -o "$1" -w '%{http_code}' "$2"
+            }
+
+            get_status /tmp/gruas-get.json https://assanpos.com/GRUAS/login.php > /tmp/gruas-get.status
+            test "$(cat /tmp/gruas-get.status)" = "400"
+            grep -q '"success":false' /tmp/gruas-get.json
+            grep -qi 'Set-Cookie: PHPSESSID=.*secure.*httponly.*samesite=lax' /tmp/gruas-get.headers 2>/dev/null || {
+              curl -sS -D /tmp/gruas-get.headers -o /dev/null https://assanpos.com/GRUAS/login.php
+              grep -qi 'Set-Cookie: PHPSESSID=.*secure.*httponly.*samesite=lax' /tmp/gruas-get.headers
+            }
+
+            post_status=$(curl -sS --max-time 20 -o /tmp/gruas-empty.json -w '%{http_code}' \
+              -X POST -d 'username=&password=' https://assanpos.com/GRUAS/login.php)
+            test "$post_status" = "400"
+            grep -q '"success":false' /tmp/gruas-empty.json
+
+            fake_status=$(curl -sS --max-time 20 -o /tmp/gruas-fake.json -w '%{http_code}' \
+              -X POST -d 'username=__gruas_smoke_test__&password=invalid' https://assanpos.com/GRUAS/login.php)
+            test "$fake_status" = "401" || test "$fake_status" = "503"
+            grep -q '"success":false' /tmp/gruas-fake.json
+          }
+
+          curl -sS -D /tmp/gruas-get.headers -o /tmp/gruas-get-body https://assanpos.com/GRUAS/login.php >/dev/null
+          if ! smoke_test; then
+            restore_login
+            cat /tmp/gruas-get.json /tmp/gruas-empty.json /tmp/gruas-fake.json 2>/dev/null || true
+            exit 1
+          fi
+
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
+            "set ssl:verify-certificate no; set ftp:ssl-allow no; rm -f /GRUAS/.login.php.rollback; bye" \
+            >/tmp/gruas-cleanup.log 2>&1
+          sha256sum scripts/installation-login.php
