@@ -15,3 +15,11 @@ No borrar el archivo vivo antes de promover su reemplazo. Guardar temporales en 
 **Why:** un timeout entre `rm` y `mv` puede dejar el endpoint ausente, y una copia `.tmp` bajo el webroot puede exponer el código fuente. El FTP de Hostinger usado aquí sí admitió reemplazo `RNTO` tras una prueba inofensiva.
 
 **How to apply:** antes de un hot-swap, comprobar 403/404 para staging, demostrar `RNTO` con archivos inofensivos, comparar bytes tras promover/restaurar y exigir limpieza de temporales antes de declarar éxito.
+
+## Auditorías de instalaciones múltiples
+
+Para inventariar muchos sistemas bajo la cuenta FTP, listar primero las carpetas de primer nivel y consultar solo los puntos de entrada conocidos. Evitar `find /` recursivo como mecanismo principal: el volumen de archivos puede agotar el tiempo y producir un inventario incompleto.
+
+**Why:** el primer recorrido recursivo terminó antes de alcanzar todas las instalaciones y confundió vistas sin `session_start()` con controladores defectuosos.
+
+**How to apply:** separar siempre vistas, guardias de sesión y controladores; probar redirecciones sin seguirlas y registrar el `Location` antes de evaluar el código HTTP final.
