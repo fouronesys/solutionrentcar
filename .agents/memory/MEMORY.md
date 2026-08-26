@@ -5,3 +5,4 @@
 - [Git push quirks](git-push-quirks.md) — gitPush callback es la única vía de push pero puede fallar UNKNOWN; commit por shell requiere identidad inline.
 - [Login central multiinstancia](rentcar-central-conn-quota.md) — el índice debe refrescar usuarios nuevos por lotes sin superar la cuota MySQL del hosting.
 - [Recuperación de fotos vehiculares](vehicle-photo-recovery.md) — fotos originales pueden existir solo en Hostinger; correlacionar prefijos uniqid con fechas antes de reasignar.
+- [Estructura remota de GRUAS](gruas-remote-layout.md) — el front público está en `/GRUAS`, pero el núcleo puede vivir bajo `/GRUAS/DEMO`.
