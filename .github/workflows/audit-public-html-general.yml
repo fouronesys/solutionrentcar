@@ -21,7 +21,7 @@ jobs:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.PUBLIC_HTML_AUDIT_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.PUBLIC_HTML_AUDIT_FTP_PASSWORD }}
-        run: bash scripts/audit_public_html_general.sh
+        run: bash scripts/audit_all_public_html_auth.sh
 
       - name: Publish sanitized report
         if: always()
