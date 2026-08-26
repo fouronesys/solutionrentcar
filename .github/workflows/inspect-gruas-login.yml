@@ -1,7 +1,8 @@
 name: Inspect GRUAS login (temporary)
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [inspect-gruas]
 
 permissions:
   contents: read
