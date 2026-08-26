@@ -12,9 +12,18 @@
 
 declare(strict_types=1);
 
-$appRoot = is_file(__DIR__ . '/core/controller/Database.php')
-    ? __DIR__
-    : dirname(__DIR__);
+$appRoot = null;
+foreach ([__DIR__, __DIR__ . '/DEMO'] as $candidateRoot) {
+    if (is_file($candidateRoot . '/core/controller/Database.php')) {
+        $appRoot = $candidateRoot;
+        break;
+    }
+}
+
+if ($appRoot === null) {
+    http_response_code(500);
+    exit('No se encontró la estructura de la instalación.');
+}
 
 require_once $appRoot . '/core/controller/Database.php';
 
