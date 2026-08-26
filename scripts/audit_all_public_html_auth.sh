@@ -27,37 +27,24 @@ awk '
 printf 'excluded=PRESTAMOS,prestamos\n' >out/public-html-scan-status.txt
 printf 'folders=%s\n' "$(wc -l </tmp/public-html-folders.txt | tr -d ' ')" >>out/public-html-scan-status.txt
 
-# A bounded recursive listing is used only to discover auth-named files. The
-# first-level index files are collected separately so systems with generic
-# filenames are not missed.
-set +e
-timeout 240s env LFTP_PASSWORD="$FTP_PASSWORD" \
-  lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e \
-  "set ssl:verify-certificate no; set ftp:ssl-allow no; set net:max-retries 1; set net:timeout 20; find /; bye" \
-  >/tmp/public-html-find.txt 2>/tmp/public-html-find-error.txt
-find_status=$?
-set -e
-printf 'recursive_discovery_exit=%s\n' "$find_status" >>out/public-html-scan-status.txt
-
+# Download a bounded set of common entry points in one FTP session. This
+# avoids a recursive traversal and avoids opening one FTP connection per file.
 : >/tmp/public-html-auth-paths.txt
 for root_file in /index.php /login.php /default.php /actualizar.php /update.php; do
   printf '%s\n' "$root_file" >>/tmp/public-html-auth-paths.txt
 done
 while IFS= read -r folder; do
-  printf '/%s/index.php\n' "$folder" >>/tmp/public-html-auth-paths.txt
+  for suffix in \
+    /index.php /login.php /auth.php /session.php \
+    /core/app/action/users-action.php /core/app/view/login-view.php \
+    /core/controller/login.php /api/v1/handlers/auth.php /api/v1/index.php; do
+    printf '/%s%s\n' "$folder" "$suffix" >>/tmp/public-html-auth-paths.txt
+  done
 done </tmp/public-html-folders.txt
-
-awk '
-  {
-    path = $NF
-    if (path !~ /^\//) path = $0
-    if (path ~ /^\/([Pp][Rr][Ee][Ss][Tt][Aa][Mm][Oo][Ss])\//) next
-    if (path ~ /\/(auth|login|session|user|token|jwt)[^/]*\.(php|inc)$/) print path
-  }
-' /tmp/public-html-find.txt >>/tmp/public-html-auth-paths.txt
 sort -u /tmp/public-html-auth-paths.txt -o /tmp/public-html-auth-paths.txt
 
 : >/tmp/public-html-auth-map.tsv
+: >/tmp/public-html-get-commands
 index=0
 while IFS= read -r remote_path; do
   [ -n "$remote_path" ] || continue
@@ -66,7 +53,30 @@ while IFS= read -r remote_path; do
   esac
   index=$((index + 1))
   local_path="/tmp/public-html-auth/${index}.source"
-  if run_lftp "get $remote_path -o $local_path" >/tmp/public-html-get.log 2>&1 && [ -s "$local_path" ]; then
+  printf 'get %s -o %s\n' "$remote_path" "$local_path" >>/tmp/public-html-get-commands
+done </tmp/public-html-auth-paths.txt
+
+LFTP_PASSWORD="$FTP_PASSWORD" lftp -u "$FTP_USER" --env-password "$FTP_HOST" \
+  -f <(cat <<EOF
+set ssl:verify-certificate no
+set ftp:ssl-allow no
+set net:max-retries 1
+set net:timeout 20
+set cmd:fail-exit no
+$(cat /tmp/public-html-get-commands)
+bye
+EOF
+) >/tmp/public-html-get.log 2>&1 || true
+
+index=0
+while IFS= read -r remote_path; do
+  [ -n "$remote_path" ] || continue
+  case "$remote_path" in
+    /PRESTAMOS/*|/prestamos/*) continue ;;
+  esac
+  index=$((index + 1))
+  local_path="/tmp/public-html-auth/${index}.source"
+  if [ -s "$local_path" ]; then
     printf '%s\t%s\n' "$index" "$remote_path" >>/tmp/public-html-auth-map.tsv
   fi
 done </tmp/public-html-auth-paths.txt
