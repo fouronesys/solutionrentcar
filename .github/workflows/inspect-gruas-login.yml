@@ -17,8 +17,8 @@ jobs:
       - name: Download sanitized GRUAS login files
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.GRUAS_INSPECT_FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.GRUAS_INSPECT_FTP_PASSWORD }}
+          FTP_USER: ${{ secrets.PUBLIC_HTML_UPLOAD_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.PUBLIC_HTML_UPLOAD_FTP_PASSWORD }}
         run: |
           set -euo pipefail
           set +x
