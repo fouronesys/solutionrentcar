@@ -1,0 +1,40 @@
+name: Audit general public_html FTP (temporal)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Audit read-only public_html
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.PUBLIC_HTML_AUDIT_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.PUBLIC_HTML_AUDIT_FTP_PASSWORD }}
+        run: bash scripts/audit_public_html_general.sh
+
+      - name: Publish sanitized report
+        if: always()
+        run: |
+          [ -d out ] || exit 0
+          git config user.name "inspect-bot"
+          git config user.email "inspect@localhost"
+          git checkout --orphan inspect-output || git checkout inspect-output
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          mkdir -p /tmp/keep
+          cp -r out /tmp/keep/
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/keep/out .
+          git add out
+          git commit -m "general public_html audit output"
+          git push -f origin inspect-output
