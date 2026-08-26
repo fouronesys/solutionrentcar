@@ -13,6 +13,8 @@ run_lftp() {
 
 mkdir -p /tmp/public-html-auth out
 run_lftp "cls -la /" >out/public-html-root-listing.txt 2>&1
+run_lftp "cls -la /CF-SYSTEMS; cls -la /CF-SYSTEMS/api; cls -la /CF-SYSTEMS/api/v1; cls -la /CF-SYSTEMS/api/v1/handlers" \
+  >out/public-html-cf-structure.txt 2>&1 || true
 
 awk '
   /^d/ && $NF ~ /^\/[A-Za-z0-9._-]+\/$/ {
@@ -67,6 +69,8 @@ $(cat /tmp/public-html-get-commands)
 bye
 EOF
 ) >/tmp/public-html-get.log 2>&1 || true
+grep -E '(/|not found|No such|failed|denied|error|cannot|Permission)' /tmp/public-html-get.log |
+  sed -E 's/[Pp]assword[^[:space:]]*/password [redacted]/g' >out/public-html-get-status.txt || true
 
 index=0
 while IFS= read -r remote_path; do
