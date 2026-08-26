@@ -16,6 +16,12 @@ No borrar el archivo vivo antes de promover su reemplazo. Guardar temporales en 
 
 **How to apply:** antes de un hot-swap, comprobar 403/404 para staging, demostrar `RNTO` con archivos inofensivos, comparar bytes tras promover/restaurar y exigir limpieza de temporales antes de declarar éxito.
 
+La cuenta FTP y el host deben validarse como pareja contra la ruta de la instalación: dos cuentas del mismo hosting pueden resolver al mismo servidor y, aun así, ver raíces enjauladas distintas.
+
+**Why:** una cuenta válida para el proyecto principal no necesariamente puede leer o escribir otra instalación bajo `public_html`, y el error resultante puede parecer una ruta inexistente o un fallo de red.
+
+**How to apply:** antes de cualquier promoción aislada, probar lectura del archivo vivo con exactamente la misma cuenta y host que se usarán para el reemplazo; retirar las credenciales auxiliares al terminar.
+
 ## Auditorías de instalaciones múltiples
 
 Para inventariar muchos sistemas bajo la cuenta FTP, listar primero las carpetas de primer nivel y consultar solo los puntos de entrada conocidos. Evitar `find /` recursivo como mecanismo principal: el volumen de archivos puede agotar el tiempo y producir un inventario incompleto.
