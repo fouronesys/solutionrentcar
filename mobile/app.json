@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.casarivas.rentcar",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Necesitamos la cámara para capturar fotos del vehículo y firmas.",
@@ -50,6 +50,12 @@
       "expo-router",
       "expo-secure-store",
       "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Usamos tu ubicación actual cuando pulsas «Usar mi ubicación actual» para mostrarte la sucursal de Casa Rivas más cercana y completar el lugar de recogida; por ejemplo, para sugerirte la sucursal más cercana al reservar un vehículo. No rastreamos tu ubicación en segundo plano."
+        }
+      ],
       [
         "expo-splash-screen",
         {
