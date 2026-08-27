@@ -36,5 +36,14 @@
         "image": "latest"
       }
     }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "jesusgarcia2k18@icloud.com",
+        "ascAppId": "6803073338",
+        "appleTeamId": "UK8PJSPGB8"
+      }
+    }
   }
 }

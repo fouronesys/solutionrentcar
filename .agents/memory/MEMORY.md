@@ -8,3 +8,4 @@
 - [Recuperación de fotos vehiculares](vehicle-photo-recovery.md) — fotos originales pueden existir solo en Hostinger; correlacionar prefijos uniqid con fechas antes de reasignar.
 - [Estructura remota de GRUAS](gruas-remote-layout.md) — el front público está en `/GRUAS`, pero el núcleo puede vivir bajo `/GRUAS/DEMO`.
 - [Validación de acceso GRUAS](gruas-access-validation.md) — el rollout requiere credenciales propias de GRUAS; no sustituirlas por la cuenta de otro sistema ni avanzar ante 401/503.
+- [Límite de envío a App Store](appstore-submission-boundary.md) — EAS puede subir el IPA, pero seleccionar el build y reenviar una revisión requieren acceso separado a App Store Connect.
