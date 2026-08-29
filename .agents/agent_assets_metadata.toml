@@ -807,3 +807,17 @@ mtime_ms = 1788032483370
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/9df6cbb4-da50-4560-9985-8360f6a0d226/3ffc8771-e693-49c9-a666-b3f8557d343d"
 storage_version_token = "1788032502395057"
 content_type = "image/png"
+
+[[outputs]]
+id = "efAZLfRkb2rAIb9KfTOc3"
+uri = "file://attached_assets/casa-rivas-store-screenshots-final.zip"
+type = "unspecified"
+title = "Casa Rivas — Capturas finales App Store y Google Play"
+description = "ZIP con las dos series finales: playstore/ en 1080 × 1920 px y appstore/ en 1290 × 2796 px, ambas con capturas 01–04 y un README de referencia."
+logical_id = "53c2f031-a9e6-4eec-94b8-23776bce2118"
+content_hash = "sha256:dc82173e3ee2177ee419ba28c706232d5ac65b62823c1ad2068e697e6defc36f"
+size = 8352122
+mtime_ms = 1788033552738
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/53c2f031-a9e6-4eec-94b8-23776bce2118/13269144-b19a-4216-909b-c701713fe416"
+storage_version_token = "1788033564262113"
+content_type = "application/octet-stream"
