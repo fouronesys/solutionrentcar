@@ -41,7 +41,7 @@ export function ScreenHeader({
 
       <View style={styles.logoWrap}>
         <Image
-          source={require("../../assets/branding/casa-rivas-rent-car-logo.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />

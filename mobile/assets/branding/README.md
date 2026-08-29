@@ -5,10 +5,10 @@ These files were prepared from the supplied logo:
 - `yowell-rent-car-source.jpg` — original source image, kept for reference.
 - `yowell-lockup.png` — cleaned transparent master for splash and brand
   surfaces.
-- `casa-rivas-rent-car-logo.png` — updated square in-app lockup with the
-  original CR crest and a gold “Rent Car” label.
-- `casa-rivas-rent-car-splash.png` — native splash variant using the same
-  updated lockup.
+- `casa-rivas-rent-car-logo.png` — optional reference lockup; it is not used
+  by the internal app screens.
+- `casa-rivas-rent-car-splash.png` — optional reference splash; the app keeps
+  using the original `../splash.png`.
 - `casa-rivas-rent-car-app-icon.png` — black-and-gold app icon lockup with the
   CR crest, Casa Rivas name and “Rent Car” descriptor.
 - `casa-rivas-rent-car-adaptive-icon.png` — Android adaptive icon using the

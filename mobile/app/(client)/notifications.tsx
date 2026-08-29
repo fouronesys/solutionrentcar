@@ -52,7 +52,7 @@ function Hero({
     <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
       <View style={styles.heroBrandRow}>
         <View style={styles.heroLogo}>
-          <Image source={require("../../assets/branding/casa-rivas-rent-car-logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
+          <Image source={require("../../assets/images/logo.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
         </View>
         <Text style={styles.heroBrandLabel}>CASA RIVAS RENTCAR</Text>
       </View>
