@@ -52,7 +52,7 @@ export default function SignScreen() {
           </Pressable>
           <View style={styles.heroBrandRow}>
             <View style={styles.heroLogo}>
-              <Image source={require("../../../assets/images/logo.png")} style={{ width: 30, height: 30 }} resizeMode="contain" />
+              <Image source={require("../../../assets/branding/casa-rivas-rent-car-logo.png")} style={{ width: 30, height: 30 }} resizeMode="contain" />
             </View>
             <Text style={styles.heroBrandLabel}>CASA RIVAS RENTCAR</Text>
           </View>

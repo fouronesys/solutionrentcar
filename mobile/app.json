@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/branding/casa-rivas-rent-car-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -59,7 +59,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash.png",
+          "image": "./assets/branding/casa-rivas-rent-car-splash.png",
           "resizeMode": "contain",
           "backgroundColor": "#000000",
           "imageWidth": 220

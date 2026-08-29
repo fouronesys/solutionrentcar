@@ -286,7 +286,7 @@ export default function BookScreen() {
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
         <Image
-          source={require("../../../assets/images/logo.png")}
+          source={require("../../../assets/branding/casa-rivas-rent-car-logo.png")}
           style={styles.headerLogo}
           contentFit="contain"
         />

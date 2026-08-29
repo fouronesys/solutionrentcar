@@ -78,7 +78,7 @@ export default function ClientLogin() {
           <View style={styles.brandBlock}>
             <View style={styles.logoWrap}>
               <Image
-                source={require("../../assets/images/logo.png")}
+                source={require("../../assets/branding/casa-rivas-rent-car-logo.png")}
                 style={{ width: 80, height: 80 }}
                 resizeMode="contain"
               />
