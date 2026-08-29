@@ -751,3 +751,59 @@ mtime_ms = 1788031944371
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/29e5e4f5-6ced-4370-a44e-adf134573e0b/0da9d0f8-0fe4-4009-abcc-cf9143a6ad02"
 storage_version_token = "1788031965877183"
 content_type = "image/png"
+
+[[outputs]]
+id = "fHP8eUYrm-uy5cDqzgLuK"
+uri = "file://attached_assets/appstore-screenshots-v1/01-inicio.png"
+type = "image"
+title = "App Store — 01 Inicio"
+description = "1290 × 2796 px. Mockup iPhone con barra iOS y Dynamic Island separado de la captura."
+logical_id = "92561563-c144-4bc4-a129-dcf2db46970a"
+content_hash = "sha256:bdcb48771c350518ea76908a5fda9e7eb7e1642a507101a8107d10ac6d65b746"
+size = 994417
+mtime_ms = 1788032426746
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/92561563-c144-4bc4-a129-dcf2db46970a/2a504af0-4ec6-4bd1-a958-a0fa5c872215"
+storage_version_token = "1788032500162638"
+content_type = "image/png"
+
+[[outputs]]
+id = "qPOudFD1NcG0KAvfZphJl"
+uri = "file://attached_assets/appstore-screenshots-v1/02-catalogo.png"
+type = "image"
+title = "App Store — 02 Catálogo"
+description = "1290 × 2796 px. Catálogo de vehículos dentro del mockup iPhone."
+logical_id = "1d68eebf-295e-41ed-937b-9fbeb2104a52"
+content_hash = "sha256:a95a752ead1c115a6c7a9cb2bbd630d3b2c42f4b80dc56966649bfe823a28d7b"
+size = 1989793
+mtime_ms = 1788032446714
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/1d68eebf-295e-41ed-937b-9fbeb2104a52/48441951-78b4-4c7e-a808-bb4b052fe764"
+storage_version_token = "1788032501067017"
+content_type = "image/png"
+
+[[outputs]]
+id = "en1eHXZju8Lh21hQpjELJ"
+uri = "file://attached_assets/appstore-screenshots-v1/03-reserva.png"
+type = "image"
+title = "App Store — 03 Reserva"
+description = "1290 × 2796 px. Pantalla de reserva completa dentro del mockup iPhone."
+logical_id = "e21a767f-0e83-4b3a-b3a5-451b3770140c"
+content_hash = "sha256:ba581c6449655dd0c8c5d6e536a1e3aaefbb1a5252e54d70a5adf60c3005553d"
+size = 1382883
+mtime_ms = 1788032465462
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/e21a767f-0e83-4b3a-b3a5-451b3770140c/7cd08ca0-a092-4bc7-b70c-b16b5d0c7938"
+storage_version_token = "1788032501731111"
+content_type = "image/png"
+
+[[outputs]]
+id = "h-ebcRy3NiMoMMvhCCv9K"
+uri = "file://attached_assets/appstore-screenshots-v1/04-sucursales.png"
+type = "image"
+title = "App Store — 04 Sucursales"
+description = "1290 × 2796 px. Mapa y sucursales dentro del mockup iPhone."
+logical_id = "9df6cbb4-da50-4560-9985-8360f6a0d226"
+content_hash = "sha256:658adce2ca8592c5528ccf89455625dedede2ade6f6e7ddd5881ea83e88eb956"
+size = 658265
+mtime_ms = 1788032483370
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/9df6cbb4-da50-4560-9985-8360f6a0d226/3ffc8771-e693-49c9-a666-b3f8557d343d"
+storage_version_token = "1788032502395057"
+content_type = "image/png"
