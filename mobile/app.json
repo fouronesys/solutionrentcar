@@ -5,7 +5,7 @@
     "scheme": "casarivasrentcar",
     "version": "1.4.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/branding/casa-rivas-rent-car-app-icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -26,12 +26,12 @@
         "NSPhotoLibraryUsageDescription": "Para adjuntar fotos a las reservas y firmas.",
         "NSUserNotificationsUsageDescription": "Para enviarte avisos sobre tus reservas y pagos."
       },
-      "icon": "./assets/icon-ios.png"
+      "icon": "./assets/branding/casa-rivas-rent-car-app-icon.png"
     },
     "android": {
       "package": "com.casarivas.rentcar",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/branding/casa-rivas-rent-car-adaptive-icon.png",
         "backgroundColor": "#000000"
       },
       "permissions": [

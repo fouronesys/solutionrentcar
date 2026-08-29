@@ -9,6 +9,10 @@ These files were prepared from the supplied logo:
   original CR crest and a gold “Rent Car” label.
 - `casa-rivas-rent-car-splash.png` — native splash variant using the same
   updated lockup.
+- `casa-rivas-rent-car-app-icon.png` — black-and-gold app icon lockup with the
+  CR crest, Casa Rivas name and “Rent Car” descriptor.
+- `casa-rivas-rent-car-adaptive-icon.png` — Android adaptive icon using the
+  same black-and-gold lockup.
 - `../images/logo.png` — fixed 500 × 500 transparent in-app logo.
 - `../icon.png` and `../icon-ios.png` — fixed 1024 × 1024 light/blue app icon
   variants.
