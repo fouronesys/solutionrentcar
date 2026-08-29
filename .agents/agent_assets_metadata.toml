@@ -415,3 +415,59 @@ mtime_ms = 1788030465615
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/47d6e0b4-cdb8-4d03-8be8-ab94c43185d8/a9b944d8-53ef-4096-b19c-c660723e426f"
 storage_version_token = "1788030472222225"
 content_type = "image/png"
+
+[[outputs]]
+id = "H-W_cgBZRggYIkHh8TSx1"
+uri = "file://attached_assets/playstore-screenshots/01-inicio.png"
+type = "image"
+title = "Captura 1 — Inicio"
+description = "1080 × 1920 px. Presenta la propuesta principal: explorar, elegir y reservar."
+logical_id = "62054bfd-9b10-4b30-9c52-72dfed2c804a"
+content_hash = "sha256:3825be3355cf0c6202b76651b5be950f93d9444ed036092c6e5dd400f10049cc"
+size = 710656
+mtime_ms = 1788030823311
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/62054bfd-9b10-4b30-9c52-72dfed2c804a/0ef91284-fad7-4b2c-a378-cf9274f76ba5"
+storage_version_token = "1788030863903860"
+content_type = "image/png"
+
+[[outputs]]
+id = "oK9bXJcYRnKdxP2sCIsGT"
+uri = "file://attached_assets/playstore-screenshots/02-catalogo.png"
+type = "image"
+title = "Captura 2 — Catálogo"
+description = "1080 × 1920 px. Muestra la flota y los filtros para encontrar un vehículo."
+logical_id = "8de836f3-1028-4125-81cb-9a149f8a326d"
+content_hash = "sha256:09db5ce15e5757cbd61292e2f347e01967f0d212284c6f5b9190fd138a33eaea"
+size = 1348388
+mtime_ms = 1788030831811
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/8de836f3-1028-4125-81cb-9a149f8a326d/8a61074f-961e-442a-a9f7-b0c4b1b2f9b1"
+storage_version_token = "1788030865025213"
+content_type = "image/png"
+
+[[outputs]]
+id = "QHrmPPYdD-1yC62a3v9Go"
+uri = "file://attached_assets/playstore-screenshots/03-reserva.png"
+type = "image"
+title = "Captura 3 — Reserva"
+description = "1080 × 1920 px. Muestra precio, fechas, especificaciones y botón de reserva."
+logical_id = "8c3214c2-d340-474d-8895-aee19475b1db"
+content_hash = "sha256:166d157af9623f0efd929faa4cda66c589b761ac4cb6fbb8054722e9aa9e8663"
+size = 955710
+mtime_ms = 1788030840519
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/8c3214c2-d340-474d-8895-aee19475b1db/83a3f1c5-0a9e-4af8-a81a-cefc397f8fdd"
+storage_version_token = "1788030865767914"
+content_type = "image/png"
+
+[[outputs]]
+id = "UUy3IbUd6N5agAfexc9hu"
+uri = "file://attached_assets/playstore-screenshots/04-sucursales.png"
+type = "image"
+title = "Captura 4 — Sucursales"
+description = "1080 × 1920 px. Muestra el mapa y las opciones para llegar a Casa Rivas."
+logical_id = "8735b1cf-10d8-4393-bb92-d067c6c8dca1"
+content_hash = "sha256:769b30309c2bf50bf4227a6d073b895c4666846bc03f30c31d28e20ef4cd8ef6"
+size = 491117
+mtime_ms = 1788030848247
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/8735b1cf-10d8-4393-bb92-d067c6c8dca1/04f07dd8-36b3-4e4f-90f2-d2ee1b534047"
+storage_version_token = "1788030866451089"
+content_type = "image/png"
