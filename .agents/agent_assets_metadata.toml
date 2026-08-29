@@ -387,3 +387,17 @@ mtime_ms = 1787143390426
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/b1a25fa8-5d0b-46d4-860e-61d9212b18da/8681ca41-18e7-4f23-8729-ec80246517a9"
 storage_version_token = "1787143437434047"
 content_type = "image/png"
+
+[[outputs]]
+id = "sTWG4ldbQEe_4DsTBMpml"
+uri = "file://mobile/assets/branding/casa-rivas-rent-car-app-icon.png"
+type = "image"
+title = "Icono Casa Rivas Rent Car"
+description = "Icono nuevo de la aplicación en PNG transparente, 1024 × 1024 px. Puedes usarlo como icono de la ficha de Google Play."
+logical_id = "1e174b16-e5ca-42bd-aee0-f79ea10044d2"
+content_hash = "sha256:e1fb772e861033950d5a554df2db3387f1041c13216c6833062aad35694e0b5e"
+size = 229917
+mtime_ms = 1788014732735
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/1e174b16-e5ca-42bd-aee0-f79ea10044d2/55cdf715-72f9-4a9c-ae2f-cd63bcd6e685"
+storage_version_token = "1788030396111102"
+content_type = "image/png"
