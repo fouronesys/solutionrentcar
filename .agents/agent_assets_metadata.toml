@@ -639,3 +639,59 @@ mtime_ms = 1788031423747
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/fa60e61f-f831-4fe6-ac21-85f99354fc5b/9139b761-0beb-445b-a2fe-95b1463b4988"
 storage_version_token = "1788031440468441"
 content_type = "image/png"
+
+[[outputs]]
+id = "1TZer77C9cTwPpudHPjnP"
+uri = "file://attached_assets/playstore-screenshots-v5/01-inicio.png"
+type = "image"
+title = "Play Store v5 — 01 Inicio"
+description = "1080 × 1920 px. Mockup Android con barra de estado y acentos dorados en las esquinas."
+logical_id = "a1c7226e-bbea-436c-a1af-999d7e5cc459"
+content_hash = "sha256:c50c06e36bc9a9e99263b4c80df85f34a49f00e56c61969ff5f7eef1fe6ef294"
+size = 731369
+mtime_ms = 1788031705506
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/a1c7226e-bbea-436c-a1af-999d7e5cc459/a496759a-8ec3-4d82-9737-1fded99be9d0"
+storage_version_token = "1788031757139394"
+content_type = "image/png"
+
+[[outputs]]
+id = "6Ce4i3G4UYTvMq2SYPCAh"
+uri = "file://attached_assets/playstore-screenshots-v5/02-catalogo.png"
+type = "image"
+title = "Play Store v5 — 02 Catálogo"
+description = "1080 × 1920 px. Captura de catálogo dentro del mockup Android."
+logical_id = "4ee0d201-8c00-43ca-a067-77634411c919"
+content_hash = "sha256:371e48f834b9baac41525dee99b8463b6ea73121dbbdaa89aaa74e20c76e3fc7"
+size = 1418013
+mtime_ms = 1788031716334
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/4ee0d201-8c00-43ca-a067-77634411c919/602637cb-18ea-4311-890f-dda54881b976"
+storage_version_token = "1788031757996493"
+content_type = "image/png"
+
+[[outputs]]
+id = "J_k2gLcYs71RyWTSYrsUv"
+uri = "file://attached_assets/playstore-screenshots-v5/03-reserva.png"
+type = "image"
+title = "Play Store v5 — 03 Reserva"
+description = "1080 × 1920 px. Pantalla completa de reserva dentro del mockup Android."
+logical_id = "c99e4f09-1491-453b-9e98-1169276058e6"
+content_hash = "sha256:a030595fdf552c0fcedb974dc5ff91aba0c737909a3a9609a0d49fabac16b4ce"
+size = 996119
+mtime_ms = 1788031727806
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/c99e4f09-1491-453b-9e98-1169276058e6/1e5318f6-d822-45c0-928b-4374ae883ce7"
+storage_version_token = "1788031758716283"
+content_type = "image/png"
+
+[[outputs]]
+id = "usGSoVLcO7pqZLCNOH6p-"
+uri = "file://attached_assets/playstore-screenshots-v5/04-sucursales.png"
+type = "image"
+title = "Play Store v5 — 04 Sucursales"
+description = "1080 × 1920 px. Pantalla de sucursales con mapa dentro del mockup Android."
+logical_id = "6110fbf1-1e34-4450-ae6e-c0c466414595"
+content_hash = "sha256:e6f2625030f22d5136d9f8298b7004bdfb994b684d9f83868dda1a672de2ee76"
+size = 496193
+mtime_ms = 1788031739494
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/6110fbf1-1e34-4450-ae6e-c0c466414595/8537fdc1-6104-413a-816b-7b553d56ea96"
+storage_version_token = "1788031759378977"
+content_type = "image/png"
