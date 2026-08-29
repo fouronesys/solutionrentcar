@@ -17,7 +17,7 @@ import Animated, {
 import { colors, font } from "@/theme/colors";
 import { useThemedStyles } from "@/theme/ThemeContext";
 
-const logo = require("../../assets/branding/casa-rivas-rent-car-logo.png");
+const logo = require("../../assets/images/logo.png");
 
 const LOGO_SIZE = 196;
 const { width: SCREEN_W } = Dimensions.get("window");
