@@ -26,6 +26,7 @@ jobs:
   build:
     name: Gradle build
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: mobile
@@ -74,6 +75,19 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: bash scripts/android-import-signing.sh
 
+      - name: Cache native Android build
+        uses: actions/cache@v4
+        with:
+          path: |
+            mobile/android/.cxx
+            mobile/android/app/.cxx
+          key: ${{ runner.os }}-android-cxx-${{ hashFiles('mobile/yarn.lock', 'mobile/app.json', 'mobile/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-android-cxx-
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Gradle assemble / bundle
         working-directory: mobile/android
         env:
@@ -81,7 +95,15 @@ jobs:
           ORG_GRADLE_PROJECT_SOLUTIONS_RENT_CAR_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ORG_GRADLE_PROJECT_SOLUTIONS_RENT_CAR_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ORG_GRADLE_PROJECT_SOLUTIONS_RENT_CAR_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew ${{ env.BUILD_TYPE }} --no-daemon --stacktrace
+        run: >-
+          ./gradlew ${{ env.BUILD_TYPE }}
+          --no-daemon
+          --no-parallel
+          --max-workers=2
+          --build-cache
+          --console=plain
+          --stacktrace
+          -PreactNativeArchitectures=arm64-v8a
 
       - name: Locate artifact
         id: art
