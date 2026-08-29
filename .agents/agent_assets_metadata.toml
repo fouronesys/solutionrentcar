@@ -471,3 +471,59 @@ mtime_ms = 1788030848247
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/8735b1cf-10d8-4393-bb92-d067c6c8dca1/04f07dd8-36b3-4e4f-90f2-d2ee1b534047"
 storage_version_token = "1788030866451089"
 content_type = "image/png"
+
+[[outputs]]
+id = "M7FWu8k1WCuj7wPvjNFDi"
+uri = "file://attached_assets/playstore-screenshots-v2/01-inicio.png"
+type = "image"
+title = "Play Store v2 — 01 Inicio"
+description = "1080 × 1920 px. Inspirada en fichas premium: promesa clara + pantalla principal protagonista."
+logical_id = "f405732b-0343-4165-a8aa-8dd86a2729ef"
+content_hash = "sha256:b42d9fe76b6711eeda9fc13913281e1d23205b8c7a8c7819ba7b18cc4dcc3157"
+size = 756812
+mtime_ms = 1788031053959
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/f405732b-0343-4165-a8aa-8dd86a2729ef/a506081a-274d-414f-8d94-cffb5173e2b1"
+storage_version_token = "1788031098923937"
+content_type = "image/png"
+
+[[outputs]]
+id = "lJbGIikm-2UZtbV5i1ViC"
+uri = "file://attached_assets/playstore-screenshots-v2/02-catalogo.png"
+type = "image"
+title = "Play Store v2 — 02 Catálogo"
+description = "1080 × 1920 px. Lleva la secuencia a la exploración de la flota."
+logical_id = "a3c14539-1d7a-431c-b136-a6cf5db632a1"
+content_hash = "sha256:7d40ec86c33f93e0ab6ec2682a31fcaf72e2cb21b45b6fbce23cac79aa95f47c"
+size = 1439752
+mtime_ms = 1788031064071
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/a3c14539-1d7a-431c-b136-a6cf5db632a1/85262a54-bacc-4a17-a71b-9ce507799f17"
+storage_version_token = "1788031099723343"
+content_type = "image/png"
+
+[[outputs]]
+id = "IsfcF3_yMUkMLEPS6fI1A"
+uri = "file://attached_assets/playstore-screenshots-v2/03-reserva.png"
+type = "image"
+title = "Play Store v2 — 03 Reserva"
+description = "1080 × 1920 px. Enfatiza precio, detalles y acción de reserva."
+logical_id = "f0201c7c-f05a-4146-93c8-aa742355e8cd"
+content_hash = "sha256:3588427f5db23df3944be83049b50cadeaa91a72e1a9b20d6b6eef8ccba7ba2f"
+size = 1014882
+mtime_ms = 1788031073639
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/f0201c7c-f05a-4146-93c8-aa742355e8cd/66b92929-1372-47a3-b0ec-c60b9dbf989e"
+storage_version_token = "1788031100476245"
+content_type = "image/png"
+
+[[outputs]]
+id = "AlzCo4C85Qi7oayG-4LjS"
+uri = "file://attached_assets/playstore-screenshots-v2/04-sucursales.png"
+type = "image"
+title = "Play Store v2 — 04 Sucursales"
+description = "1080 × 1920 px. Cierra con confianza y facilidad para llegar."
+logical_id = "e85be7a7-8c92-440e-9556-1d860354e175"
+content_hash = "sha256:6f82e517ee9dd888ac985b9f39f308109fb6147450926ea792723323745d41ed"
+size = 517928
+mtime_ms = 1788031082299
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/e85be7a7-8c92-440e-9556-1d860354e175/6e5945ec-f4ef-4cbb-be65-2ffcef6f28d9"
+storage_version_token = "1788031101150306"
+content_type = "image/png"
