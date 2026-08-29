@@ -527,3 +527,59 @@ mtime_ms = 1788031082299
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/e85be7a7-8c92-440e-9556-1d860354e175/6e5945ec-f4ef-4cbb-be65-2ffcef6f28d9"
 storage_version_token = "1788031101150306"
 content_type = "image/png"
+
+[[outputs]]
+id = "n45lN78jRGitkbdh2WY6F"
+uri = "file://attached_assets/playstore-screenshots-v3/01-inicio.png"
+type = "image"
+title = "Play Store v3 — 01 Inicio"
+description = "1080 × 1920 px. Fondo oscuro, sin marca duplicada ni líneas decorativas."
+logical_id = "6eb0e015-55b1-4ed9-a722-05d725012f2c"
+content_hash = "sha256:d8e8a227643e6622403022a86a0e4dfbeba17067a7fbddbdddc1953a0ae4e298"
+size = 757844
+mtime_ms = 1788031196319
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/6eb0e015-55b1-4ed9-a722-05d725012f2c/829cb07f-336b-4f88-b7e0-b630a542ca26"
+storage_version_token = "1788031246689832"
+content_type = "image/png"
+
+[[outputs]]
+id = "pg0FoM9y_m14UG4wVWgcX"
+uri = "file://attached_assets/playstore-screenshots-v3/02-catalogo.png"
+type = "image"
+title = "Play Store v3 — 02 Catálogo"
+description = "1080 × 1920 px. Secuencia de exploración de la flota."
+logical_id = "151685b4-18ac-4d08-ace2-75c4e28e239e"
+content_hash = "sha256:944918fd4370bcaa2b0c3cd51e50beaff6f9c6dd14dc186e706e5ec0bfa50385"
+size = 1473758
+mtime_ms = 1788031206803
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/151685b4-18ac-4d08-ace2-75c4e28e239e/0ef04a22-6b6a-40b6-8f1e-b7bf2d4ed59d"
+storage_version_token = "1788031247836453"
+content_type = "image/png"
+
+[[outputs]]
+id = "hCPYJ3-Kt7OxyxseLeNSJ"
+uri = "file://attached_assets/playstore-screenshots-v3/03-reserva.png"
+type = "image"
+title = "Play Store v3 — 03 Reserva"
+description = "1080 × 1920 px. Precio, fechas y detalles de reserva."
+logical_id = "4c4b3c05-5ab1-4e7d-8439-d2c85f8daee1"
+content_hash = "sha256:1cea7f1b84b354bbd3fb0cb41e916f398fafbcc767b79e71fffb1a824314c9e6"
+size = 1029553
+mtime_ms = 1788031217207
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/4c4b3c05-5ab1-4e7d-8439-d2c85f8daee1/46845b41-829a-47f9-b7ea-80ff7c6f7f48"
+storage_version_token = "1788031248578765"
+content_type = "image/png"
+
+[[outputs]]
+id = "cmFA6cEJ8ErRzIGqso1FA"
+uri = "file://attached_assets/playstore-screenshots-v3/04-sucursales.png"
+type = "image"
+title = "Play Store v3 — 04 Sucursales"
+description = "1080 × 1920 px. Mapa y opciones para llegar."
+logical_id = "bf84ad7b-6360-4111-bcbd-ba230187160b"
+content_hash = "sha256:15cd1b9df03bd164b190cd51d7c590cbb56f4a9d48003d2791dd9cdb2f211f62"
+size = 512268
+mtime_ms = 1788031226911
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:50c1ec71-8f9b-4696-866c-219e101274e7/bf84ad7b-6360-4111-bcbd-ba230187160b/f8a418dc-7d31-4528-b4b4-75f6354ac30e"
+storage_version_token = "1788031249228502"
+content_type = "image/png"
