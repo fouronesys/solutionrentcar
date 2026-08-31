@@ -1,0 +1,144 @@
+name: Inspect Casa Rivas DB (temporal)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install lftp
+        run: sudo apt-get install -y lftp || { sudo apt-get update -qq && sudo apt-get install -y lftp; }
+
+      - name: Read-only database inspection
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          set +x
+
+          REMOTE_SCRIPT="/RENTCAR/CASARIVAS-RENTCAR/casarivas-db-check.php"
+          CHECK_URL="https://assanpos.com/RENTCAR/CASARIVAS-RENTCAR/casarivas-db-check.php"
+          REPAIR_KEY="$(openssl rand -hex 32)"
+
+          cat > /tmp/casarivas-db-check.php <<'PHP'
+          <?php
+          ini_set('display_errors', '0');
+          error_reporting(0);
+          header('Content-Type: application/json; charset=utf-8');
+
+          $expectedKey = 'REPAIR_KEY_PLACEHOLDER';
+          $providedKey = (string)($_SERVER['HTTP_X_REPAIR_KEY'] ?? '');
+          if ($providedKey === '' || !hash_equals($expectedKey, $providedKey)) {
+              http_response_code(403);
+              echo json_encode(['ok' => false, 'error' => 'forbidden']);
+              exit;
+          }
+
+          require_once __DIR__ . '/core/controller/Database.php';
+          $con = Database::getCon();
+          if (!$con) {
+              http_response_code(500);
+              echo json_encode(['ok' => false, 'error' => 'db_unavailable']);
+              exit;
+          }
+
+          $result = $con->query(
+              'SELECT DATABASE() AS database_name, CURRENT_USER() AS db_user'
+          );
+          $connection = $result ? $result->fetch_assoc() : [];
+
+          $countResult = $con->query(
+              'SELECT COUNT(*) AS total, MIN(id) AS min_id, MAX(id) AS max_id FROM cars'
+          );
+          if (!$countResult) {
+              http_response_code(500);
+              echo json_encode([
+                  'ok' => false,
+                  'error' => 'cars_count_failed',
+                  'mysql_errno' => (int)$con->errno,
+              ]);
+              exit;
+          }
+          $count = $countResult->fetch_assoc();
+
+          $byStatus = [];
+          $statusResult = $con->query(
+              'SELECT status, COUNT(*) AS total FROM cars GROUP BY status ORDER BY status'
+          );
+          if ($statusResult) {
+              while ($row = $statusResult->fetch_assoc()) {
+                  $byStatus[] = [
+                      'status' => (int)$row['status'],
+                      'total' => (int)$row['total'],
+                  ];
+              }
+          }
+
+          $byStock = [];
+          $stockResult = $con->query(
+              'SELECT stock_id, COUNT(*) AS total FROM cars GROUP BY stock_id ORDER BY stock_id'
+          );
+          if ($stockResult) {
+              while ($row = $stockResult->fetch_assoc()) {
+                  $byStock[] = [
+                      'stock_id' => (int)$row['stock_id'],
+                      'total' => (int)$row['total'],
+                  ];
+              }
+          }
+
+          echo json_encode([
+              'ok' => true,
+              'connection' => [
+                  'database' => (string)($connection['database_name'] ?? ''),
+                  'db_user' => (string)($connection['db_user'] ?? ''),
+              ],
+              'cars' => [
+                  'total' => (int)($count['total'] ?? 0),
+                  'min_id' => $count['min_id'] === null ? null : (int)$count['min_id'],
+                  'max_id' => $count['max_id'] === null ? null : (int)$count['max_id'],
+                  'by_status' => $byStatus,
+                  'by_stock_id' => $byStock,
+              ],
+          ], JSON_UNESCAPED_UNICODE);
+          PHP
+
+          sed -i "s/REPAIR_KEY_PLACEHOLDER/${REPAIR_KEY}/" /tmp/casarivas-db-check.php
+
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "
+            set ssl:verify-certificate no;
+            set ftp:ssl-allow no;
+            set net:max-retries 3;
+            set net:timeout 30;
+            put /tmp/casarivas-db-check.php -o ${REMOTE_SCRIPT};
+            bye
+          "
+
+          cleanup() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "
+              set ssl:verify-certificate no;
+              set ftp:ssl-allow no;
+              set net:max-retries 2;
+              set net:timeout 30;
+              rm ${REMOTE_SCRIPT};
+              bye
+            " >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          status="$(curl -sS -o /tmp/casarivas-db-check.json -w '%{http_code}' \
+            -H "X-Repair-Key: ${REPAIR_KEY}" \
+            "${CHECK_URL}")"
+          echo "Read-only check HTTP ${status}"
+          if [ "$status" != "200" ]; then
+            echo "Read-only database check failed."
+            exit 1
+          fi
+          jq -c '{ok, connection, cars}' /tmp/casarivas-db-check.json
