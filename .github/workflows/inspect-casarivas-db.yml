@@ -75,6 +75,29 @@ jobs:
           }
           $count = $countResult->fetch_assoc();
 
+          $carsDatabases = [];
+          $schemasResult = $con->query(
+              "SELECT table_schema FROM information_schema.tables
+               WHERE table_name = 'cars' ORDER BY table_schema"
+          );
+          if ($schemasResult) {
+              while ($schemaRow = $schemasResult->fetch_assoc()) {
+                  $schema = (string)$schemaRow['table_schema'];
+                  if (strpos($schema, 'u144787244_') !== 0) continue;
+                  $safeSchema = str_replace('`', '``', $schema);
+                  $schemaCountResult = $con->query(
+                      "SELECT COUNT(*) AS total FROM `{$safeSchema}`.`cars`"
+                  );
+                  if ($schemaCountResult) {
+                      $schemaCount = $schemaCountResult->fetch_assoc();
+                      $carsDatabases[] = [
+                          'database' => $schema,
+                          'total' => (int)($schemaCount['total'] ?? 0),
+                      ];
+                  }
+              }
+          }
+
           $byStatus = [];
           $statusResult = $con->query(
               'SELECT status, COUNT(*) AS total FROM cars GROUP BY status ORDER BY status'
@@ -114,6 +137,7 @@ jobs:
                   'by_status' => $byStatus,
                   'by_stock_id' => $byStock,
               ],
+              'cars_databases_visible' => $carsDatabases,
           ], JSON_UNESCAPED_UNICODE);
           PHP
 
