@@ -108,21 +108,119 @@ jobs:
           $created = false;
           $changedRows = 0;
           if (count($rows) === 0) {
-              $safeUsername = $con->real_escape_string($username);
-              $safePassword = $con->real_escape_string($expectedPassword);
-              $insert = "INSERT INTO person
-                  (reference,no,rnc,passport,issuedlicense,invoice_file,passport_file,license_file,home_file,
-                   invoice_date,passport_date,license_date,home_date,
-                   name,address,address2,email,phone,phone2,license,license2,expirelicense,nationality,
-                   username,password,user_id,is_rental,stock_id,location,latitud,longitud,language,created_at,estado)
-                  VALUES
-                  ('GUEST','','','','','','','','',
-                   '0000-00-00','0000-00-00','0000-00-00','0000-00-00',
-                   'Casa Rivas Rent Car','','','','casarivas.guest','','','','',
-                   '$safeUsername','$safePassword',0,1,0,2,'','','ES',NOW(),'Soltero')";
+              $columnsResult = $con->query('SHOW COLUMNS FROM person');
+              if (!$columnsResult) {
+                  http_response_code(500);
+                  echo json_encode([
+                      'ok' => false,
+                      'error' => 'schema_lookup_failed',
+                      'mysql_errno' => (int)$con->errno,
+                  ]);
+                  exit;
+              }
+
+              $available = [];
+              $required = [];
+              while ($column = $columnsResult->fetch_assoc()) {
+                  $field = (string)$column['Field'];
+                  $available[$field] = true;
+                  if ((string)$column['Null'] === 'NO' &&
+                      $column['Default'] === null &&
+                      strpos((string)$column['Extra'], 'auto_increment') === false) {
+                      $required[$field] = true;
+                  }
+              }
+
+              $candidateValues = [
+                  'image' => '',
+                  'reference' => 'GUEST',
+                  'no' => '',
+                  'code' => 'CASARIVAS-GUEST',
+                  'name' => 'Casa Rivas Rent Car',
+                  'name2' => '',
+                  'lastname' => '',
+                  'company' => '',
+                  'address' => '',
+                  'address1' => '',
+                  'address2' => '',
+                  'phone' => $username,
+                  'phone1' => $username,
+                  'phone2' => '',
+                  'email' => '',
+                  'email1' => '',
+                  'is_active_access' => 0,
+                  'has_credit' => 0,
+                  'credit_limit' => 0,
+                  'rnc' => '',
+                  'passport' => '',
+                  'issuedlicense' => '',
+                  'invoice_file' => '',
+                  'passport_file' => '',
+                  'license_file' => '',
+                  'home_file' => '',
+                  'invoice_date' => '0000-00-00',
+                  'passport_date' => '0000-00-00',
+                  'license_date' => '0000-00-00',
+                  'home_date' => '0000-00-00',
+                  'license' => '',
+                  'license2' => '',
+                  'expirelicense' => '',
+                  'nationality' => '',
+                  'username' => $username,
+                  'password' => $expectedPassword,
+                  'user_id' => 0,
+                  'is_rental' => 1,
+                  'stock_id' => 0,
+                  'location' => 2,
+                  'latitud' => '',
+                  'longitud' => '',
+                  'language' => 'ES',
+                  'estado' => 'Soltero',
+                  'kind' => 0,
+                  's_id' => 0,
+                  'is_id' => 0,
+                  'is_type' => 0,
+              ];
+              if (isset($available['created_at'])) {
+                  $candidateValues['created_at'] = '__NOW__';
+              }
+
+              $insertFields = [];
+              $insertValues = [];
+              foreach ($candidateValues as $field => $value) {
+                  if (!isset($available[$field])) continue;
+                  $insertFields[] = '`' . str_replace('`', '``', $field) . '`';
+                  if ($value === '__NOW__') {
+                      $insertValues[] = 'NOW()';
+                  } else {
+                      $insertValues[] = "'" . $con->real_escape_string((string)$value) . "'";
+                  }
+                  unset($required[$field]);
+              }
+
+              if (!isset($available['username']) || !isset($available['password'])) {
+                  $required['username'] = true;
+                  $required['password'] = true;
+              }
+              if (!empty($required)) {
+                  http_response_code(409);
+                  echo json_encode([
+                      'ok' => false,
+                      'error' => 'required_columns_missing',
+                      'columns' => array_keys($required),
+                  ]);
+                  exit;
+              }
+
+              $insert = 'INSERT INTO `person` (' . implode(',', $insertFields) .
+                  ') VALUES (' . implode(',', $insertValues) . ')';
               if (!$con->query($insert)) {
                   http_response_code(500);
-                  echo json_encode(['ok' => false, 'error' => 'insert_failed']);
+                  echo json_encode([
+                      'ok' => false,
+                      'error' => 'insert_failed',
+                      'mysql_errno' => (int)$con->errno,
+                  ]);
                   exit;
               }
               $id = (int)$con->insert_id;
