@@ -8,8 +8,9 @@ El hosting debe quedarse en PHP 7.3 (decisión del usuario). Todo `core/` y `CF-
 **Cómo validar:** `phpcs` + PHPCompatibility con `testVersion 7.3` (instalados vía composer en /tmp; regenerar si hace falta). El lint local `php -l` es 8.2 y rechaza libs legacy (PHPExcel) que sí funcionan en 7.3 — ignorarlas. `CF-SYSTEMS/report/sellsbycat-xlsx.php` ya venía con error de sintaxis en el repo original.
 
 ## Sesión guest (catálogo público)
-- La app usa una cuenta cliente `casarivas.guest` (persona id 4 en la BD de Casa Rivas) para mostrar el catálogo sin login. Credenciales embebidas en el bundle por diseño (no secretas).
+- La app usa una cuenta cliente `casarivas.guest` en la BD remota de Casa Rivas para mostrar el catálogo sin login. La fila puede desaparecer aunque el código siga configurado; las credenciales están embebidas en el bundle por diseño (no secretas).
 - **Solo lectura**: el login marca claim `guest=1` y `ApiAuth::require` rechaza métodos != GET con 403. La app solo hace guest-retry en GETs.
+- La BD remota puede tener un esquema `person` distinto al respaldo local. Para restaurar el guest, inspeccionar por username exacto, detenerse si hay más de una fila y crear una fila mínima solo con columnas existentes si no hay ninguna; verificar token y `GET /cars` después.
 - Las env vars `EXPO_PUBLIC_GUEST_USERNAME/PASSWORD` (shared) pisan los defaults del código en el bundle — si el guest falla con invalid_credentials, revisar esas env vars primero.
 - Lo mismo aplica a los builds EAS: las envs `preview`/`production` en los servidores de Expo tenían `8090000000` en ambas (scope SHARED) y rompían el guest en el APK ("Token requerido o inválido"). Corregido a `casarivas.guest`/`crguest2026` scope PROJECT y borradas las SHARED. Si reaparece el error de token en un build, verificar con `eas env:list --environment X --include-sensitive`.
 - Metro cachea agresivo: tras cambiar código o env vars, borrar `/tmp/metro-*`, `mobile/.expo`, `mobile/node_modules/.cache` y reiniciar el workflow; verificar con grep sobre el bundle servido.
