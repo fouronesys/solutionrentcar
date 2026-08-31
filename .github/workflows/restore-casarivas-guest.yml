@@ -1,0 +1,217 @@
+name: Restore Casa Rivas guest account (temporary)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
+      - name: Inspect, restore and verify guest account
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.RENTCAR_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.RENTCAR_FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          set +x
+
+          REMOTE_SCRIPT="/RENTCAR/CASARIVAS-RENTCAR/guest-repair.php"
+          REPAIR_URL="https://assanpos.com/RENTCAR/CASARIVAS-RENTCAR/guest-repair.php"
+          API_BASE="https://assanpos.com/RENTCAR/CASARIVAS-RENTCAR/CF-SYSTEMS/api/v1"
+          GUEST_USERNAME="casarivas.guest"
+          GUEST_PASSWORD="crguest2026"
+          REPAIR_KEY="$(openssl rand -hex 32)"
+
+          cat > /tmp/guest-repair.php <<'PHP'
+          <?php
+          ini_set('display_errors', '0');
+          error_reporting(0);
+          header('Content-Type: application/json; charset=utf-8');
+
+          $expectedKey = 'REPAIR_KEY_PLACEHOLDER';
+          $expectedPassword = 'GUEST_PASSWORD_PLACEHOLDER';
+          $providedKey = (string)($_SERVER['HTTP_X_REPAIR_KEY'] ?? '');
+          if ($providedKey === '' || !hash_equals($expectedKey, $providedKey)) {
+              http_response_code(403);
+              echo json_encode(['ok' => false, 'error' => 'forbidden']);
+              exit;
+          }
+
+          $mode = strtolower(trim((string)($_GET['mode'] ?? '')));
+          if (!in_array($mode, ['inspect', 'restore'], true)) {
+              http_response_code(400);
+              echo json_encode(['ok' => false, 'error' => 'invalid_mode']);
+              exit;
+          }
+
+          require_once __DIR__ . '/core/controller/Database.php';
+          $con = Database::getCon();
+          if (!$con) {
+              http_response_code(500);
+              echo json_encode(['ok' => false, 'error' => 'db_unavailable']);
+              exit;
+          }
+
+          $username = 'casarivas.guest';
+          $stmt = $con->prepare(
+              'SELECT id, username, stock_id, is_rental, estado, password
+               FROM person WHERE username = ? LIMIT 2'
+          );
+          if (!$stmt || !$stmt->bind_param('s', $username) || !$stmt->execute()) {
+              http_response_code(500);
+              echo json_encode(['ok' => false, 'error' => 'lookup_failed']);
+              exit;
+          }
+
+          $result = $stmt->get_result();
+          $rows = [];
+          while ($row = $result->fetch_assoc()) {
+              $rows[] = [
+                  'id' => (int)$row['id'],
+                  'username' => (string)$row['username'],
+                  'stock_id' => (int)($row['stock_id'] ?? 0),
+                  'is_rental' => (int)($row['is_rental'] ?? 0),
+                  'estado' => (string)($row['estado'] ?? ''),
+                  'has_password' => (string)($row['password'] ?? '') !== '',
+                  'password_matches' => hash_equals(
+                      $expectedPassword,
+                      (string)($row['password'] ?? '')
+                  ),
+              ];
+          }
+
+          if ($mode === 'inspect') {
+              echo json_encode(['ok' => true, 'count' => count($rows), 'rows' => $rows]);
+              exit;
+          }
+
+          if (count($rows) !== 1) {
+              http_response_code(409);
+              echo json_encode([
+                  'ok' => false,
+                  'error' => 'expected_one_guest_row',
+                  'count' => count($rows),
+              ]);
+              exit;
+          }
+
+          $id = (int)$rows[0]['id'];
+          $stmt = $con->prepare(
+              'UPDATE person SET password = ? WHERE id = ? AND username = ? LIMIT 1'
+          );
+          if (!$stmt || !$stmt->bind_param('sis', $expectedPassword, $id, $username) ||
+              !$stmt->execute()) {
+              http_response_code(500);
+              echo json_encode(['ok' => false, 'error' => 'update_failed']);
+              exit;
+          }
+
+          $verify = $con->prepare('SELECT password FROM person WHERE id = ? LIMIT 1');
+          if (!$verify || !$verify->bind_param('i', $id) || !$verify->execute()) {
+              http_response_code(500);
+              echo json_encode(['ok' => false, 'error' => 'verify_failed']);
+              exit;
+          }
+          $verifiedRow = $verify->get_result()->fetch_assoc();
+          $matches = is_array($verifiedRow) &&
+              hash_equals($expectedPassword, (string)($verifiedRow['password'] ?? ''));
+
+          echo json_encode([
+              'ok' => $matches,
+              'updated_rows' => (int)$stmt->affected_rows,
+              'id' => $id,
+              'username' => $username,
+              'password_matches' => $matches,
+              'read_only_marker' => true,
+          ]);
+          PHP
+
+          sed -i \
+            -e "s/REPAIR_KEY_PLACEHOLDER/${REPAIR_KEY}/" \
+            -e "s/GUEST_PASSWORD_PLACEHOLDER/${GUEST_PASSWORD}/" \
+            /tmp/guest-repair.php
+
+          export LFTP_PASSWORD="$FTP_PASSWORD"
+          lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "
+            set ssl:verify-certificate no;
+            set ftp:ssl-allow no;
+            set net:max-retries 3;
+            set net:timeout 30;
+            put /tmp/guest-repair.php -o ${REMOTE_SCRIPT};
+            bye
+          "
+          cleanup() {
+            lftp -u "$FTP_USER" --env-password "$FTP_HOST" -e "
+              set ssl:verify-certificate no;
+              set ftp:ssl-allow no;
+              set net:max-retries 2;
+              set net:timeout 30;
+              rm ${REMOTE_SCRIPT};
+              bye
+            " >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          inspect_status="$(curl -sS -o /tmp/guest-inspect.json -w '%{http_code}' \
+            -H "X-Repair-Key: ${REPAIR_KEY}" \
+            "${REPAIR_URL}?mode=inspect")"
+          echo "Remote inspection: HTTP ${inspect_status}"
+          jq -c '{ok, count, rows: [.rows[] | {id, username, stock_id, is_rental, estado, has_password, password_matches}]}' \
+            /tmp/guest-inspect.json
+
+          if [ "${inspect_status}" != "200" ] ||
+             [ "$(jq -r '.ok // false' /tmp/guest-inspect.json)" != "true" ] ||
+             [ "$(jq -r '.count // 0' /tmp/guest-inspect.json)" != "1" ]; then
+            echo "Safety stop: no se actualizó ninguna fila."
+            exit 1
+          fi
+
+          restore_status="$(curl -sS -o /tmp/guest-restore.json -w '%{http_code}' \
+            -H "X-Repair-Key: ${REPAIR_KEY}" \
+            "${REPAIR_URL}?mode=restore")"
+          echo "Remote restore: HTTP ${restore_status}"
+          jq -c '{ok, updated_rows, id, username, password_matches, read_only_marker, error}' \
+            /tmp/guest-restore.json
+          if [ "${restore_status}" != "200" ] ||
+             [ "$(jq -r '.ok // false' /tmp/guest-restore.json)" != "true" ] ||
+             [ "$(jq -r '.password_matches // false' /tmp/guest-restore.json)" != "true" ]; then
+            echo "Restore verification failed."
+            exit 1
+          fi
+
+          login_status="$(curl -sS -o /tmp/guest-login.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            --data "{\"username\":\"${GUEST_USERNAME}\",\"password\":\"${GUEST_PASSWORD}\",\"role\":\"client\"}" \
+            "${API_BASE}/auth/login")"
+          login_ok="$(jq -r '.ok // false' /tmp/guest-login.json)"
+          access_token="$(jq -r '.data.tokens.access_token // empty' /tmp/guest-login.json)"
+          if [ "${login_status}" != "200" ] || [ "${login_ok}" != "true" ] ||
+             [ -z "${access_token}" ]; then
+            echo "API login verification failed: HTTP ${login_status}"
+            jq -c '{ok, error}' /tmp/guest-login.json
+            exit 1
+          fi
+
+          cars_status="$(curl -sS -o /tmp/guest-cars.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${access_token}" \
+            "${API_BASE}/cars?limit=1")"
+          cars_ok="$(jq -r '.ok // false' /tmp/guest-cars.json)"
+          cars_count="$(jq -r '.data.count // 0' /tmp/guest-cars.json)"
+          if [ "${cars_status}" != "200" ] || [ "${cars_ok}" != "true" ]; then
+            echo "API cars verification failed: HTTP ${cars_status}"
+            jq -c '{ok, error}' /tmp/guest-cars.json
+            exit 1
+          fi
+
+          client_id="$(jq -r '.data.user.id // "unknown"' /tmp/guest-login.json)"
+          echo "Verification OK: login HTTP ${login_status}, client_id=${client_id}, cars HTTP ${cars_status}, sample_count=${cars_count}"
