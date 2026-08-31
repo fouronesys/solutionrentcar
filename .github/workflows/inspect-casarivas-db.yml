@@ -174,4 +174,4 @@ jobs:
             echo "Read-only database check failed."
             exit 1
           fi
-          jq -c '{ok, connection, cars}' /tmp/casarivas-db-check.json
+          jq -c '{ok, connection, cars, cars_databases_visible}' /tmp/casarivas-db-check.json
