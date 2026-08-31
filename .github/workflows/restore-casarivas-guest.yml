@@ -95,7 +95,7 @@ jobs:
               exit;
           }
 
-          if (count($rows) !== 1) {
+          if (count($rows) > 1) {
               http_response_code(409);
               echo json_encode([
                   'ok' => false,
@@ -105,15 +105,45 @@ jobs:
               exit;
           }
 
-          $id = (int)$rows[0]['id'];
-          $stmt = $con->prepare(
-              'UPDATE person SET password = ? WHERE id = ? AND username = ? LIMIT 1'
-          );
-          if (!$stmt || !$stmt->bind_param('sis', $expectedPassword, $id, $username) ||
-              !$stmt->execute()) {
-              http_response_code(500);
-              echo json_encode(['ok' => false, 'error' => 'update_failed']);
-              exit;
+          $created = false;
+          $changedRows = 0;
+          if (count($rows) === 0) {
+              $safeUsername = $con->real_escape_string($username);
+              $safePassword = $con->real_escape_string($expectedPassword);
+              $insert = "INSERT INTO person
+                  (reference,no,rnc,passport,issuedlicense,invoice_file,passport_file,license_file,home_file,
+                   invoice_date,passport_date,license_date,home_date,
+                   name,address,address2,email,phone,phone2,license,license2,expirelicense,nationality,
+                   username,password,user_id,is_rental,stock_id,location,latitud,longitud,language,created_at,estado)
+                  VALUES
+                  ('GUEST','','','','','','','','',
+                   '0000-00-00','0000-00-00','0000-00-00','0000-00-00',
+                   'Casa Rivas Rent Car','','','','casarivas.guest','','','','',
+                   '$safeUsername','$safePassword',0,1,0,2,'','','ES',NOW(),'Soltero')";
+              if (!$con->query($insert)) {
+                  http_response_code(500);
+                  echo json_encode(['ok' => false, 'error' => 'insert_failed']);
+                  exit;
+              }
+              $id = (int)$con->insert_id;
+              $created = $id > 0;
+              if (!$created) {
+                  http_response_code(500);
+                  echo json_encode(['ok' => false, 'error' => 'insert_without_id']);
+                  exit;
+              }
+          } else {
+              $id = (int)$rows[0]['id'];
+              $stmt = $con->prepare(
+                  'UPDATE person SET password = ? WHERE id = ? AND username = ? LIMIT 1'
+              );
+              if (!$stmt || !$stmt->bind_param('sis', $expectedPassword, $id, $username) ||
+                  !$stmt->execute()) {
+                  http_response_code(500);
+                  echo json_encode(['ok' => false, 'error' => 'update_failed']);
+                  exit;
+              }
+              $changedRows = (int)$stmt->affected_rows;
           }
 
           $verify = $con->prepare('SELECT password FROM person WHERE id = ? LIMIT 1');
@@ -128,10 +158,13 @@ jobs:
 
           echo json_encode([
               'ok' => $matches,
-              'updated_rows' => (int)$stmt->affected_rows,
+              'created' => $created,
+              'updated_rows' => $changedRows,
               'id' => $id,
               'username' => $username,
               'password_matches' => $matches,
+              'stock_id' => 0,
+              'is_rental' => 1,
               'read_only_marker' => true,
           ]);
           PHP
@@ -171,8 +204,8 @@ jobs:
 
           if [ "${inspect_status}" != "200" ] ||
              [ "$(jq -r '.ok // false' /tmp/guest-inspect.json)" != "true" ] ||
-             [ "$(jq -r '.count // 0' /tmp/guest-inspect.json)" != "1" ]; then
-            echo "Safety stop: no se actualizó ninguna fila."
+             [ "$(jq -r '.count // 0' /tmp/guest-inspect.json)" -gt 1 ]; then
+            echo "Safety stop: se encontraron múltiples filas o la inspección falló."
             exit 1
           fi
 
@@ -180,7 +213,7 @@ jobs:
             -H "X-Repair-Key: ${REPAIR_KEY}" \
             "${REPAIR_URL}?mode=restore")"
           echo "Remote restore: HTTP ${restore_status}"
-          jq -c '{ok, updated_rows, id, username, password_matches, read_only_marker, error}' \
+          jq -c '{ok, created, updated_rows, id, username, password_matches, stock_id, is_rental, read_only_marker, error}' \
             /tmp/guest-restore.json
           if [ "${restore_status}" != "200" ] ||
              [ "$(jq -r '.ok // false' /tmp/guest-restore.json)" != "true" ] ||
