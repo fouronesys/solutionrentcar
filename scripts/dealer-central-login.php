@@ -1,158 +1,130 @@
 <?php
-/**
- * Login central para las instalaciones Dealer.
- *
- * Este archivo se publica como /DEALER/login.php en el document root
- * de dealership.assanpos.com.
- */
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-function dealer_login_error($message)
-{
+$identifier = strtolower(trim((string)(isset($_POST['username']) ? $_POST['username'] : '')));
+$password = (string)(isset($_POST['password']) ? $_POST['password'] : '');
+
+if ($identifier === '' || $password === '') {
     echo json_encode(array(
         'success' => false,
-        'message' => $message
+        'message' => 'Por favor complete todos los campos.'
     ));
     exit;
 }
 
-$username_raw = isset($_POST['username']) ? (string)$_POST['username'] : '';
-$password_raw = isset($_POST['password']) ? (string)$_POST['password'] : '';
+$password_hash = sha1(md5($password));
+$folders = glob(__DIR__ . '/*', GLOB_ONLYDIR);
+$ordered_folders = array();
+$priority_folders = array('JER-IMPORT2R', 'SEVENFAUTOS');
 
-if (trim($username_raw) === '' || $password_raw === '') {
-    dealer_login_error('Por favor complete todos los campos.');
+foreach ($priority_folders as $priority_folder) {
+    foreach ($folders ?: array() as $folder) {
+        if (basename($folder) === $priority_folder) {
+            $ordered_folders[] = $folder;
+            break;
+        }
+    }
 }
 
-$identifier = strtolower(trim($username_raw));
-$password_hash = sha1(md5($password_raw));
-$base_path = __DIR__ . '/';
-
-function dealer_read_database_config($folder)
-{
-    $config_path = $folder . '/core/controller/Database.php';
-    if (!is_file($config_path)) {
-        return null;
+foreach ($folders ?: array() as $folder) {
+    if (!in_array($folder, $ordered_folders, true)) {
+        $ordered_folders[] = $folder;
     }
-
-    $contents = file_get_contents($config_path);
-    $matches = array();
-
-    preg_match('/\$this->host\s*=\s*"(.*?)"/', $contents, $matches['host']);
-    preg_match('/\$this->user\s*=\s*"(.*?)"/', $contents, $matches['user']);
-    preg_match('/\$this->pass\s*=\s*"(.*?)"/', $contents, $matches['pass']);
-    preg_match('/\$this->ddbb\s*=\s*"(.*?)"/', $contents, $matches['database']);
-
-    if (
-        !isset($matches['host'][1]) ||
-        !isset($matches['user'][1]) ||
-        !isset($matches['pass'][1]) ||
-        !isset($matches['database'][1])
-    ) {
-        return null;
-    }
-
-    return array(
-        'folder' => basename($folder),
-        'host' => $matches['host'][1],
-        'user' => $matches['user'][1],
-        'password' => $matches['pass'][1],
-        'database' => $matches['database'][1]
-    );
 }
 
-function dealer_find_user($config, $identifier, $password_hash)
-{
-    $dsn = 'mysql:host=' . $config['host'] .
-        ';dbname=' . $config['database'] .
-        ';charset=utf8';
-
-    $pdo = new PDO(
-        $dsn,
-        $config['user'],
-        $config['password'],
-        array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        )
-    );
-
-    $email_statement = $pdo->prepare(
-        'SELECT id, stock_id
-         FROM `user`
-         WHERE LOWER(TRIM(email)) = :email
-           AND password = :password
-           AND status = 1
-         LIMIT 1'
-    );
-    $email_statement->execute(array(
-        'email' => $identifier,
-        'password' => $password_hash
-    ));
-
-    $user = $email_statement->fetch();
-    if ($user) {
-        return $user;
-    }
-
-    // Algunas instalaciones antiguas guardan el identificador en username.
-    $columns = $pdo->query('SHOW COLUMNS FROM `user`')->fetchAll(PDO::FETCH_COLUMN);
-    if (!in_array('username', $columns, true)) {
-        return null;
-    }
-
-    $username_statement = $pdo->prepare(
-        'SELECT id, stock_id
-         FROM `user`
-         WHERE LOWER(TRIM(username)) = :username
-           AND password = :password
-           AND status = 1
-         LIMIT 1'
-    );
-    $username_statement->execute(array(
-        'username' => $identifier,
-        'password' => $password_hash
-    ));
-
-    return $username_statement->fetch() ?: null;
-}
-
-$folders = glob($base_path . '*', GLOB_ONLYDIR);
-if ($folders === false) {
-    dealer_login_error('No se pudo verificar en este momento. Intente nuevamente en unos segundos.');
-}
-
-foreach ($folders as $folder) {
-    if (basename($folder) === 'CF-SYSTEMS') {
+foreach ($ordered_folders as $folder) {
+    $folder_name = basename($folder);
+    if ($folder_name === 'CF-SYSTEMS') {
         continue;
     }
 
-    $config = dealer_read_database_config($folder);
-    if ($config === null) {
+    $config_file = $folder . '/core/controller/Database.php';
+    if (!is_file($config_file)) {
+        continue;
+    }
+
+    $config_source = file_get_contents($config_file);
+    $host = array();
+    $db_user = array();
+    $db_password = array();
+    $database = array();
+
+    preg_match('/\$this->host\s*=\s*"(.*?)"/', $config_source, $host);
+    preg_match('/\$this->user\s*=\s*"(.*?)"/', $config_source, $db_user);
+    preg_match('/\$this->pass\s*=\s*"(.*?)"/', $config_source, $db_password);
+    preg_match('/\$this->ddbb\s*=\s*"(.*?)"/', $config_source, $database);
+
+    if (!isset($host[1], $db_user[1], $db_password[1], $database[1])) {
         continue;
     }
 
     try {
-        $user = dealer_find_user($config, $identifier, $password_hash);
-    } catch (Throwable $exception) {
-        // Una instalación caída no debe bloquear la autenticación de las demás.
-        continue;
-    }
+        $pdo = new PDO(
+            'mysql:host=' . $host[1] . ';dbname=' . $database[1] . ';charset=utf8',
+            $db_user[1],
+            $db_password[1],
+            array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_TIMEOUT => 2
+            )
+        );
 
-    if ($user) {
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = (int)$user['id'];
-        $_SESSION['stock_id'] = (int)$user['stock_id'];
-        $_SESSION['login_type'] = 'user';
-        unset($_SESSION['client_id']);
-
-        echo json_encode(array(
-            'success' => true,
-            'redirect' => $config['folder'] . '/?view=home'
+        $statement = $pdo->prepare(
+            'SELECT id, stock_id
+             FROM `user`
+             WHERE LOWER(TRIM(email)) = :email
+               AND password = :password
+               AND status = 1
+             LIMIT 1'
+        );
+        $statement->execute(array(
+            'email' => $identifier,
+            'password' => $password_hash
         ));
-        exit;
+        $matched_user = $statement->fetch();
+
+        if (!$matched_user) {
+            $columns = $pdo->query('SHOW COLUMNS FROM `user`')->fetchAll(PDO::FETCH_COLUMN);
+            if (in_array('username', $columns, true)) {
+                $statement = $pdo->prepare(
+                    'SELECT id, stock_id
+                     FROM `user`
+                     WHERE LOWER(TRIM(username)) = :username
+                       AND password = :password
+                       AND status = 1
+                     LIMIT 1'
+                );
+                $statement->execute(array(
+                    'username' => $identifier,
+                    'password' => $password_hash
+                ));
+                $matched_user = $statement->fetch();
+            }
+        }
+
+        if (is_array($matched_user) && isset($matched_user['id'])) {
+            $_SESSION['user_id'] = (int)$matched_user['id'];
+            $_SESSION['stock_id'] = isset($matched_user['stock_id'])
+                ? (int)$matched_user['stock_id']
+                : 0;
+            $_SESSION['login_type'] = 'user';
+            unset($_SESSION['client_id']);
+
+            echo json_encode(array(
+                'success' => true,
+                'redirect' => $folder_name . '/?view=home'
+            ));
+            exit;
+        }
+    } catch (Throwable $exception) {
+        continue;
     }
 }
 
-dealer_login_error('Por favor verifique su nombre de usuario y contraseña.');
+echo json_encode(array(
+    'success' => false,
+    'message' => 'Por favor verifique su nombre de usuario y contraseña.'
+));
