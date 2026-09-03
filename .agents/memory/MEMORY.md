@@ -10,3 +10,4 @@
 - [Validación de acceso GRUAS](gruas-access-validation.md) — el rollout requiere credenciales propias de GRUAS; no sustituirlas por la cuenta de otro sistema ni avanzar ante 401/503.
 - [Límite de envío a App Store](appstore-submission-boundary.md) — EAS puede subir el IPA, pero seleccionar el build y reenviar una revisión requieren acceso separado a App Store Connect.
 - [Caché de Gradle Android](android-gradle-caching.md) — el wrapper aparece tras Expo prebuild; configura el caché después y limita ABI/CMake para AAB.
+- [Login central de Dealer](dealer-central-login.md) — `/DEALER` es el document root del portal; el handler debe aceptar cuentas por username además de email.
